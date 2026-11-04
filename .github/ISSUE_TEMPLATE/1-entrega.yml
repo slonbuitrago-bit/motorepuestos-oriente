@@ -1,0 +1,38 @@
+name: 📦 Entregar mi parte
+description: Sube tu trabajo (texto, imágenes, resultados de pruebas, diapositivas) sin tocar el código.
+title: "Entrega · "
+labels: ["entrega"]
+body:
+  - type: dropdown
+    id: rol
+    attributes:
+      label: ¿Cuál es tu rol?
+      options:
+        - 2 · Ventas y facturación
+        - 3 · Despachos y notificaciones
+        - 4 · Inventario y abastecimiento
+        - 5 · Requisitos
+        - 6 · Arquitectura y base de datos
+        - 7 · Calidad y normas
+    validations:
+      required: true
+  - type: input
+    id: tarea
+    attributes:
+      label: ¿Qué tarea entregas?
+      description: Copia el nombre de la tarea de EQUIPO.md
+      placeholder: "Ej.: Exportar el diagrama de casos de uso a imagen"
+    validations:
+      required: true
+  - type: textarea
+    id: contenido
+    attributes:
+      label: Tu entrega
+      description: Escribe aquí el texto. Para adjuntar imágenes, capturas, PDF o PowerPoint, arrástralos a este cuadro.
+    validations:
+      required: true
+  - type: textarea
+    id: notas
+    attributes:
+      label: Comentarios (opcional)
+      description: Dudas, cosas que no pudiste hacer o sugerencias.

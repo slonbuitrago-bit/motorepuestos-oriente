@@ -1,0 +1,29 @@
+name: 🐞 Reportar un error o proponer una idea
+description: Algo no funciona en la app, un texto está mal, o se te ocurrió una mejora.
+title: "Error/idea · "
+labels: ["error-o-idea"]
+body:
+  - type: dropdown
+    id: tipo
+    attributes:
+      label: ¿Qué es?
+      options:
+        - Algo no funciona
+        - Un texto o dato está mal
+        - Idea de mejora
+    validations:
+      required: true
+  - type: input
+    id: donde
+    attributes:
+      label: ¿En qué pantalla?
+      placeholder: "Ej.: Despachos, al registrar la entrega"
+    validations:
+      required: true
+  - type: textarea
+    id: detalle
+    attributes:
+      label: Cuéntalo
+      description: Qué hiciste, qué pasó y qué esperabas. Si puedes, arrastra una captura de pantalla aquí.
+    validations:
+      required: true

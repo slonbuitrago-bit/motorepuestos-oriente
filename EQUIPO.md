@@ -71,7 +71,19 @@ Marca `[x]` cuando termines (puedes editar este archivo con un *pull request*).
 
 ---
 
-## 3. Cómo hacer un cambio sin instalar nada (desde la página de GitHub)
+## 3. Cómo entregar tu parte
+
+### Opción fácil (recomendada para todos): formulario de entrega
+1. Entra al repositorio → pestaña **Issues** → botón **New issue**.
+2. Elige **📦 Entregar mi parte**.
+3. Escoge tu rol, escribe qué tarea entregas y pega tu texto. Las imágenes, capturas, PDF o diapositivas se **arrastran al cuadro**.
+4. Toca **Create**. Listo: el equipo la ve y se integra al proyecto.
+
+Para avisar de un error de la app o proponer una idea, usa **🐞 Reportar un error o proponer una idea** de la misma forma.
+
+¿No te funciona GitHub? Envía tu parte por WhatsApp y se sube por ti. Lo importante es que llegue.
+
+### Opción avanzada (opcional): editar tú mismo desde la página de GitHub
 
 1. Entra al repositorio y abre el archivo que te corresponde.
 2. Toca el **lápiz** ✏️ (*Edit this file*).
@@ -90,7 +102,7 @@ Quien sepa usar Git en su computador puede seguir `CONTRIBUTING.md`.
 2. **Un *pull request* = un cambio**, con un título que diga qué hace.
 3. **Solo tus archivos.** Si necesitas tocar los de otro, avísale primero.
 4. **Prueba antes de pedir revisión:** abre la app y revisa que lo tuyo funcione con al menos dos roles.
-5. **Errores y dudas se registran como *issue*** en la pestaña *Issues* (así no se pierden en el chat). WhatsApp solo para avisos.
+5. **Entregas, errores e ideas van por la pestaña *Issues*** con sus formularios, así no se pierden en el chat.
 
 ## 5. Configuración que hace el líder (una sola vez)
 
