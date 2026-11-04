@@ -2,6 +2,8 @@
 
 Prototipo funcional para la asignatura **Ingeniería de Software III**. Resuelve los problemas levantados en la entrevista con Motorepuestos del Oriente (Rionegro, Antioquia): facturas manuales sin control, fraudes en cantidades despachadas, malas indicaciones de envío, necesidad de certificados de garantía y facturación electrónica alineada con ISO 9000.
 
+> **¿Eres del equipo?** Empieza por [`EQUIPO.md`](EQUIPO.md): ahí está tu rol, tus tareas y cómo hacer cambios desde la página de GitHub.
+
 ## Cómo abrirlo
 
 No necesita instalar nada. Abre **`index.html`** con doble clic en cualquier navegador (Chrome, Edge, Firefox, Safari), en computador o celular.
