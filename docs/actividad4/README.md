@@ -8,7 +8,7 @@
 | 3 · Tablero en Trello | [`5-guia-trello.md`](5-guia-trello.md) (copiar y pegar) | ⏳ Crear en Trello |
 | 4 · Validación con el cliente (Sprint 0 Review) | [`6-guion-sprint-review.md`](6-guion-sprint-review.md) | ✅ |
 | Documento de justificación | [`4-justificacion-metodologia.md`](4-justificacion-metodologia.md) | ✅ |
-| **Documento de entrega en Word** | [`Actividad4-Del-requisito-al-backlog.docx`](Actividad4-Del-requisito-al-backlog.docx) | ✅ |
+| **Documento de entrega (PDF para subir · Word editable)** | [`PDF`](Actividad4-Del-requisito-al-backlog.pdf) · [`Word`](Actividad4-Del-requisito-al-backlog.docx) | ✅ |
 
 ## Entregables finales
 1. **Diagrama orientado a objetos:** `diagrama-clases.png`

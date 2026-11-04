@@ -7,15 +7,14 @@ Trello crea **varias tarjetas de una vez** si pegas varias líneas en "Añadir u
 2. Nombre: `Motorepuestos del Oriente · Scrum`. Visibilidad: **Público** o **Espacio de trabajo** (para poder compartir el enlace).
 
 ## Paso 2 · Crear las listas (columnas)
-Crea estas 6 listas, en este orden:
+Crea estas 5 listas, **con estos nombres exactos** (son los que pide la guía para Scrum):
 
 ```
 Product Backlog
-Sprint 1 · Por hacer
-En progreso
-En revisión
-Terminado
-Sprints futuros (2, 3 y 4)
+Sprint Backlog
+En Desarrollo
+En Pruebas (QA)
+Completado (Done)
 ```
 
 ## Paso 3 · Crear las etiquetas
@@ -32,7 +31,7 @@ En una tarjeta cualquiera → **Etiquetas** → crea:
 | Celeste | Pruebas |
 
 ## Paso 4 · Historias del Sprint 1
-En la lista **Sprint 1 · Por hacer** → **Añadir una tarjeta** → pega todo este bloque → Trello pregunta si crear 10 tarjetas → **sí**.
+En la lista **Sprint Backlog** → **Añadir una tarjeta** → pega todo este bloque → Trello pregunta si crear 10 tarjetas → **sí**.
 
 ```
 HU-01 · Iniciar sesión según mi rol (3 pts)
@@ -57,50 +56,61 @@ Abre cada tarjeta → **Checklist** → nombre `Tareas` → en el primer element
 [BD] Tablas usuario, rol, permiso y rol_permiso con datos iniciales · Rol 6
 [Backend] POST /api/auth/login con bcrypt y token JWT · Rol 6
 [Backend] Middleware que verifica permisos en cada endpoint · Rol 6
-[Frontend] Conectar pantalla de ingreso a la API · Rol 1
+[Frontend] Conectar pantalla de ingreso a la API (responsive) · Rol 1
+[Pruebas] Ingreso con clave correcta, incorrecta y usuario desactivado · Rol 7
 ```
 **HU-02**
 ```
 [Backend] Endpoints GET/POST/PATCH /api/usuarios y PUT /api/roles/:id/permisos · Rol 4
 [Frontend] Conectar Administración → Usuarios y matriz de permisos · Rol 4
+[Pruebas] Un rol sin permiso no ve ni ejecuta la función · Rol 7
 ```
 **HU-03**
 ```
 [BD] Tablas pais, departamento y ciudad con municipios DANE · Rol 3
 [Backend] POST /api/ciudades (validar código único) · Rol 3
+[Frontend] Formulario de ciudades en Administración (responsive) · Rol 3
+[Pruebas] Rechazar código DANE repetido · Rol 7
 ```
 **HU-04**
 ```
 [Backend] GET /api/paises/:id/departamentos y GET /api/departamentos/:id/ciudades · Rol 3
 [Frontend] Listas en cascada en el formulario de factura · Rol 3
+[Pruebas] Al cambiar de país solo aparecen sus departamentos · Rol 7
 ```
 **HU-05**
 ```
 [BD] Tablas cliente, producto, factura y factura_detalle · Rol 6
 [Backend] POST /api/facturas (origen MANUAL, consecutivo, IVA, en transacción) · Rol 2
-[Frontend] Formulario de factura manual conectado a la API · Rol 2
+[Frontend] Formulario de factura manual conectado a la API (responsive) · Rol 2
+[Pruebas] Factura queda Pendiente y sin asiento contable · Rol 7
 ```
 **HU-06**
 ```
 [BD] Vista v_cupo_cliente (facturas + pedidos comprometidos) · Rol 6
 [Backend] Validar cupo y existencias antes de guardar · Rol 2
 [Frontend] Mostrar cupo disponible y error de cupo insuficiente · Rol 2
+[Pruebas] Factura que supera el cupo no se guarda · Rol 7
 ```
 **HU-07**
 ```
 [Backend] GET /api/facturas?estado=Pendiente&origen=Manual · Rol 2
 [Frontend] Pantalla de Autorizaciones con datos de la API · Rol 2
+[Pruebas] Solo aparecen facturas manuales pendientes · Rol 7
 ```
 **HU-08**
 ```
 [Backend] POST /api/facturas/:id/autorizar (solo Gerente, distinto de quien registró) · Rol 2
 [Backend] Generar asiento contable y descontar inventario · Rol 2
 [BD] Trigger que impide contabilizar factura manual no autorizada · Rol 6
+[Frontend] Botón Autorizar deshabilitado para quien registró la factura · Rol 2
+[Pruebas] Asiento cuadrado e inventario descontado; prueba de concurrencia (2 gerentes autorizando a la vez) · Rol 7
 ```
 **HU-09**
 ```
 [Backend] POST /api/facturas/:id/rechazar con motivo obligatorio · Rol 2
 [Frontend] Ventana de rechazo con validación del motivo · Rol 2
+[Pruebas] Motivo de menos de 10 caracteres es rechazado · Rol 7
 ```
 **HU-10**
 ```
@@ -109,7 +119,7 @@ Abre cada tarjeta → **Checklist** → nombre `Tareas` → en el primer element
 [Pruebas] Prueba con lector de pantalla NVDA · Rol 7
 ```
 
-Además, crea en **Sprint 1 · Por hacer** estas tarjetas de base técnica (etiquetas Backend / BD / Frontend / Pruebas):
+Además, crea en **Sprint Backlog** estas tarjetas de base técnica (etiquetas Backend / BD / Frontend / Pruebas):
 ```
 Base · Crear proyecto Node.js + Express por capas
 Base · Instalar PostgreSQL y ejecutar modelo-datos.sql
@@ -120,7 +130,7 @@ Calidad · Preparar demostración del Sprint Review con el cliente
 ```
 
 ## Paso 6 · Resto del backlog
-En **Sprints futuros (2, 3 y 4)** → Añadir una tarjeta → pega:
+En **Product Backlog** → Añadir una tarjeta → pega:
 
 ```
 HU-11 · Registrar pedido de venta (3 pts · Sprint 2)
@@ -142,7 +152,7 @@ HU-26 · Auditoría formal de accesibilidad (3 pts · Sprint 4)
 ```
 
 ## Paso 7 · Definición de Terminado
-En **Terminado** → crea una tarjeta llamada `📌 Definición de Terminado`, ábrela y pega en la descripción:
+En **Completado (Done)** → crea una tarjeta llamada `📌 Definición de Terminado`, ábrela y pega en la descripción:
 
 ```
 Una historia está terminada solo si:
@@ -158,5 +168,5 @@ Una historia está terminada solo si:
 - **Miembros:** botón **Compartir** → invita a los 6 compañeros y asigna cada tarea según su rol.
 - **Fechas:** pon la fecha de vencimiento del Sprint 1 (2 semanas) en las historias.
 - **Descripción de cada historia (opcional):** copia el texto "Como… quiero… para…" y sus criterios de aceptación desde `2-product-backlog.md`.
-- **Mueve 2 o 3 tarjetas** a *En progreso* para que el tablero se vea en uso en la presentación.
+- **Mueve 2 o 3 tarjetas** a *En Desarrollo* y 1 a *En Pruebas (QA)* para que el tablero se vea en uso en la presentación.
 - **Enlace para entregar:** botón **Compartir** → **Crear enlace** (o copia la URL del tablero si es público).
