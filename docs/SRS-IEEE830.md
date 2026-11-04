@@ -17,7 +17,7 @@
 Este documento especifica los requisitos del sistema que reemplaza las facturas manuales y el control informal de envíos de Motorepuestos del Oriente. Lo usan el cliente (para validar que el sistema responde a sus necesidades), el equipo de desarrollo (para construirlo) y el equipo de pruebas (para verificarlo).
 
 ### 1.2 Alcance
-El sistema cubre: facturación manual con autorización, validación de cupo, contabilización automática, remisiones y despachos con control antifraude, inventario por sucursal, importaciones desde Panamá, certificados de garantía, trazabilidad inalterable, estadísticas y administración de usuarios y catálogos.
+El sistema cubre: pedidos de venta con facturación y contabilización automática, facturación manual (sin pedido) con autorización de gerentes, notificaciones por correo al cliente, validación de cupo, contabilización automática, remisiones y despachos con control antifraude, inventario por sucursal, importaciones desde Panamá, certificados de garantía, trazabilidad inalterable, estadísticas y administración de usuarios y catálogos.
 
 Queda fuera de este alcance la transmisión real de la factura electrónica a la DIAN, que se hace mediante un proveedor tecnológico autorizado. El prototipo genera la estructura y el CUFE en ambiente de pruebas.
 
@@ -44,6 +44,9 @@ Queda fuera de este alcance la transmisión real de la factura electrónica a la
 - Ley 1581 de 2012 (protección de datos personales).
 - DIAN, Resolución 000165 de 2023 (factura electrónica de venta).
 - Levantamiento de información: entrevista a Motorepuestos del Oriente (documento del curso).
+- Actividad 2, consultoría cruzada: tarjetas confidenciales A y B (`actividad2-consultoria.md`).
+- Ley 1618 de 2013, Ley 1346 de 2009 y Resolución MinTIC 1519 de 2020 (accesibilidad).
+- Manual de procedimientos de desarrollo MP-DS-01 (`manual-procedimientos.md`).
 
 ### 1.5 Visión general
 La sección 2 describe el contexto del producto y sus usuarios. La sección 3 detalla los requisitos funcionales, no funcionales y de interfaz.
@@ -66,7 +69,9 @@ Motorepuestos del Oriente es un mayorista de repuestos de motos con sede en Rion
 Ver el diagrama de casos de uso entregado y su ampliación:
 
 ```
-Logística ──── Registrar factura manual ──<<include>>── Seleccionar país, estado y ciudad
+Logística ──── Registrar pedido de venta ──<<include>>── Seleccionar país, estado y ciudad · Validar cupo
+          ├─── Facturar pedido ──<<include>>── Contabilizar factura (sin autorización)
+          └─── Registrar factura manual (sin pedido) ──<<include>>── Seleccionar país, estado y ciudad
                                         └─<<include>>── Validar cupo del cliente
 Gerente ────── Consultar facturas pendientes
           └─── Autorizar factura manual ──<<include>>── Contabilizar factura autorizada
@@ -76,7 +81,8 @@ Despachos ──── Registrar despacho ──<<include>>── Registrar inst
 Bodega ─────── (nuevo) Gestionar inventario · Gestionar importaciones
 Administrador ─ Gestionar ciudades y municipios · Gestionar usuarios y permisos
 Auditor ────── (nuevo) Consultar trazabilidad · Verificar integridad
-Cliente ext. ── (nuevo) Verificar certificado de garantía
+Cliente ext. ── (nuevo) Verificar certificado de garantía · recibe correos
+Sistema ────── Enviar notificación por correo (incluida en pedido, factura, despacho y pago)
 ```
 
 ### 2.3 Características de los usuarios
@@ -110,8 +116,9 @@ Algunos usuarios pueden tener discapacidad visual, motriz o cognitiva; el sistem
 
 | ID | Nombre | Descripción | Prioridad | Actor |
 |---|---|---|---|---|
-| RF-01 | Registrar factura manual | Registrar cliente, sucursal, destino y líneas de repuestos. El sistema asigna el consecutivo de la resolución DIAN y calcula subtotal, IVA 19 % y total. | Alta | Logística |
-| RF-02 | Seleccionar país, estado y ciudad | Selección en cascada desde los catálogos; al elegir el cliente se precarga su municipio. | Alta | Logística |
+| RF-00 | Registrar y facturar pedido de venta | Registrar el pedido del cliente (valida cupo y existencias). Al facturarlo, la factura queda contabilizada sin autorización de Gerencia. | Alta | Logística |
+| RF-01 | Registrar factura manual (sin pedido) | Registrar cliente, sucursal, destino y líneas de repuestos; queda pendiente de autorización y no se contabiliza hasta que un gerente la autorice. El sistema asigna el consecutivo de la resolución DIAN y calcula subtotal, IVA 19 % y total. | Alta | Logística |
+| RF-02 | Seleccionar país, estado y ciudad | Listas de preselección: solo se muestran los estados del país elegido y solo las ciudades registradas en Administración. No se admite texto libre. Al elegir el cliente se precarga su municipio. | Alta | Logística |
 | RF-03 | Validar cupo del cliente | Bloquear el registro si el total supera el cupo disponible (cupo − facturas pendientes y autorizadas sin pago). Se valida otra vez al autorizar. | Alta | Sistema |
 | RF-04 | Consultar facturas pendientes | Listar facturas por autorizar con cupo, existencias y quién las registró. | Alta | Gerente |
 | RF-05 | Autorizar factura | Generar CUFE, descontar inventario, emitir certificados y contabilizar. Quien registró no puede autorizar. | Alta | Gerente |
@@ -131,12 +138,16 @@ Algunos usuarios pueden tener discapacidad visual, motriz o cognitiva; el sistem
 | RF-19 | Trazabilidad | Bitácora de todas las acciones con usuario, rol y hora; rastreo por documento; verificación de integridad. | Alta | Auditor, Gerente |
 | RF-20 | Estadísticas | Ventas por mes y municipio, referencias más vendidas, entregas conformes, stock bajo, pendientes por rol. | Media | Todos |
 | RF-21 | Registrar pagos | Marcar factura pagada y liberar cupo. | Media | Gerente |
+| RF-22 | Notificar por correo | Enviar correo al cliente al registrar pedido de venta, despachar, emitir factura y registrar pago, con bandeja de salida consultable. | Alta | Sistema |
+| RF-23 | Anular pedido | Anular un pedido no facturado con motivo obligatorio; libera el cupo. | Media | Logística |
 
 ### 3.2 Requisitos no funcionales (clasificados por ISO/IEC 25010)
 
 | ID | Característica | Requisito | Criterio de aceptación |
 |---|---|---|---|
 | RNF-01 | Eficiencia de desempeño | Cada pantalla responde rápido con la carga esperada. | < 1 s con 10.000 facturas en producción; < 100 ms en el prototipo. |
+| RNF-01b | Rendimiento – capacidad | Operar con hasta 100.000 usuarios en sesiones concurrentes. | Prueba k6: p95 < 2 s y errores < 1 % sostenidos 30 min con 100.000 usuarios virtuales. |
+| RNF-01c | Fiabilidad – disponibilidad | El tiempo en falla no supera el 0,5 % del tiempo de operación. | Disponibilidad mensual ≥ 99,5 % (≤ 3,6 h fuera de servicio al mes). |
 | RNF-02 | Seguridad – confidencialidad | Acceso por usuario y contraseña; permisos por rol. | Un rol no ve ni ejecuta acciones fuera de su matriz. |
 | RNF-03 | Seguridad – integridad | Bitácora encadenada con SHA-256; documentos autorizados inmutables. | Alterar un registro hace fallar la verificación. |
 | RNF-04 | Seguridad – no repudio | Toda acción guarda usuario, rol y fecha. | 100 % de las acciones de negocio aparecen en la bitácora. |
@@ -149,6 +160,8 @@ Algunos usuarios pueden tener discapacidad visual, motriz o cognitiva; el sistem
 | RNF-11 | Mantenibilidad – modularidad | Separación de datos, reglas de negocio, vistas y acciones. | Cambiar una regla (ej. IVA) toca una sola constante. |
 | RNF-12 | Compatibilidad | Exportar datos en JSON; modelo SQL estándar. | El respaldo se importa en otra instalación. |
 | RNF-13 | Cumplimiento legal | Ley 1581 de 2012: autorización de tratamiento de datos. | No se registra un cliente sin autorización. |
+| RNF-14 | Restricción legal – discapacidad | Ley 1618 de 2013 y Resolución MinTIC 1519 de 2020: acceso en igualdad de condiciones. | Auditoría WCAG 2.1 AA aprobada (axe sin errores críticos, prueba con NVDA y teclado). |
+| RNF-15 | Restricción de proceso | Desarrollo según manual de procedimientos conforme con ISO 9000. | Auditoría interna con la lista de chequeo de MP-DS-01 aprobada. |
 
 ### 3.3 Interfaces externas
 - **Usuario:** aplicación web adaptable, tema claro y oscuro, panel de accesibilidad.
@@ -166,3 +179,5 @@ Algunos usuarios pueden tener discapacidad visual, motriz o cognitiva; el sistem
 | RN-05 | El inventario se descuenta al autorizar la factura, nunca puede quedar negativo. |
 | RN-06 | El costo de las importaciones recibidas actualiza el costo promedio ponderado. |
 | RN-07 | Los usuarios y documentos no se eliminan; se desactivan o cambian de estado. |
+| RN-08 | Una factura generada desde un pedido se contabiliza al emitirse; una factura manual solo se contabiliza después de la autorización de un gerente distinto de quien la registró. |
+| RN-09 | Los pedidos registrados y no facturados también comprometen el cupo del cliente. |

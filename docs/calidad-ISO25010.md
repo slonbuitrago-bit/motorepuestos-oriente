@@ -50,6 +50,12 @@ La familia ISO/IEC 25000 (SQuaRE) organiza la calidad del producto de software e
 | CP-11 | Certificado falso | Verificar un código inventado | "Código no encontrado" | Aprobado |
 | CP-12 | Permisos | Auditor intenta abrir Administración | La sección no aparece ni es accesible | Aprobado |
 | CP-13 | Adaptabilidad | Ancho 390 px | Sin desplazamiento horizontal | Aprobado |
+| CP-15 | Pedido de venta | Registrar pedido y facturarlo | Factura origen Pedido, contabilizada sin autorización; correos de pedido y de factura | Aprobado |
+| CP-16 | Factura manual sin pedido | Registrar factura manual | Queda Pendiente y sin asiento contable hasta que un gerente la autorice | Aprobado |
+| CP-17 | Notificaciones | Despachar y registrar pago | Correo de despacho y de pago en la bandeja de salida | Aprobado |
+| CP-18 | Listas en cascada | Agregar un departamento y cambiar de país en la factura | Solo aparecen estados del país y ciudades registradas | Aprobado |
+| CP-19 | Carga de 100.000 usuarios | Script k6 de `actividad2-consultoria.md` | p95 < 2 s, errores < 1 % | Pendiente (requiere servidor de producción) |
+| CP-20 | Disponibilidad ≥ 99,5 % | Monitoreo externo 30 días | Tiempo en falla ≤ 0,5 % | Pendiente (requiere servidor de producción) |
 | CP-14 | Accesibilidad por teclado | Recorrer el flujo de factura solo con Tab/Enter | Todo alcanzable con foco visible | Pendiente (prueba manual del grupo) |
 
 Los casos CP-01 a CP-13 se ejecutaron con una prueba automatizada en navegador (Playwright) sobre el prototipo.

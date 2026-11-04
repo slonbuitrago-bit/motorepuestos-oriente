@@ -10,7 +10,7 @@ Usuarios de demostración (contraseña `demo2026` para todos):
 
 | Usuario | Rol | Qué puede hacer |
 |---|---|---|
-| Camila Ospina | Logística | Registrar facturas manuales y clientes |
+| Camila Ospina | Logística | Registrar pedidos de venta y facturarlos, facturas manuales sin pedido, clientes |
 | Andrés Restrepo | Gerente | Autorizar o rechazar, registrar pagos, cerrar novedades, cupos |
 | Julián Zuluaga | Despachos | Remisiones, conteo ciego, salida y entrega |
 | Diana Marín | Bodega | Inventario, traslados, ajustes, importaciones |
@@ -18,11 +18,12 @@ Usuarios de demostración (contraseña `demo2026` para todos):
 | Laura Gómez | Administrador | Todo, incluidos usuarios, permisos y catálogos |
 
 **Recorrido sugerido para la presentación:**
-1. Camila registra una factura (prueba también a superar el cupo: el sistema la bloquea).
-2. Andrés la autoriza: se genera el CUFE, el asiento contable y los certificados de garantía.
-3. Julián crea la remisión con instrucciones de envío, hace el conteo ciego (equivócate a propósito para ver la novedad), despacha y registra la entrega.
-4. Mateo o Laura abren **Trazabilidad**, rastrean la factura y verifican la integridad de la bitácora. Laura puede **simular una alteración** para mostrar que se detecta.
-5. Cualquiera verifica un certificado en **Certificados** (también funciona sin iniciar sesión).
+1. Camila registra un **pedido de venta** y lo factura: queda contabilizado de inmediato y se envía correo al cliente.
+2. Camila registra una **factura manual** (sin pedido). Prueba también a superar el cupo: el sistema la bloquea.
+3. Andrés autoriza la factura manual: recién ahí se contabiliza, se genera el CUFE y los certificados de garantía.
+4. Julián crea la remisión con instrucciones de envío, hace el conteo ciego (equivócate a propósito para ver la novedad), despacha y registra la entrega.
+5. Mateo o Laura abren **Notificaciones** para ver los correos enviados y **Trazabilidad**, rastrean la factura y verifican la integridad de la bitácora. Laura puede **simular una alteración** para mostrar que se detecta.
+6. Cualquiera verifica un certificado en **Certificados** (también funciona sin iniciar sesión).
 
 Los datos se guardan en el navegador de cada persona. En **Administración → Datos y respaldo** se puede copiar un respaldo JSON para pasárselo a otra persona o restablecer los datos de ejemplo.
 
@@ -31,13 +32,15 @@ Los datos se guardan en el navegador de cada persona. En **Administración → D
 | Módulo | Caso de uso / requisito |
 |---|---|
 | Tablero | Estadísticas: ventas por mes y municipio, top de referencias, entregas conformes, pendientes por rol |
-| Facturas → Registrar factura | Registrar factura manual · Seleccionar país, estado y ciudad · Validar cupo |
+| Pedidos de venta | Registrar pedido · Facturar pedido (contabilización automática) · Anular |
+| Facturas → Registrar factura manual | Factura sin pedido · Seleccionar país, estado y ciudad · Validar cupo |
 | Autorizaciones | Consultar pendientes · Autorizar (incluye Contabilizar) · Rechazar (extiende Autorizar) |
 | Despachos | Registrar despacho · Registrar instrucciones de envío · Conteo ciego · Entrega · Novedades |
 | Inventario | Existencias por sucursal, kárdex, ajustes, traslados, alertas de mínimo |
 | Importaciones | Órdenes al proveedor de Panamá, estados aduaneros, costo nacionalizado |
 | Clientes y cupos | NIT, municipio, cupo y uso del cupo, autorización Ley 1581 |
 | Trazabilidad | Bitácora encadenada SHA-256, rastreo de documentos, verificación de integridad |
+| Notificaciones | Correos al cliente en pedido, factura, despacho y pago (bandeja de salida) |
 | Certificados | Garantías verificables por código |
 | Administración | Usuarios, matriz de permisos por rol, ciudades y municipios (DANE), sucursales, respaldo |
 | Calidad y normas | Matriz de requisitos, ISO/IEC 25010, WCAG, marco normativo |
@@ -52,6 +55,8 @@ motorepuestos-oriente/
 ├── docs/
 │   ├── SRS-IEEE830.md       ← especificación de requisitos (IEEE 830)
 │   ├── calidad-ISO25010.md  ← plan de calidad, métricas y casos de prueba
+│   ├── actividad2-consultoria.md ← requisitos de las tarjetas A y B, su tipo, casos de uso y plan de pruebas
+│   ├── manual-procedimientos.md  ← procedimiento de desarrollo conforme con ISO 9000
 │   └── modelo-datos.sql     ← base de datos PostgreSQL con integridad y auditoría
 ├── CONTRIBUTING.md          ← cómo trabajamos en grupo
 └── README.md

@@ -281,6 +281,7 @@ const store = {
 /* ---------- Seguridad: roles y permisos (RBAC) ---------- */
 const PERMISOS = {
   "tablero":              "Ver tablero y estadísticas",
+  "pedidos.gestionar":    "Registrar y facturar pedidos de venta",
   "facturas.ver":         "Consultar facturas",
   "facturas.crear":       "Registrar factura manual",
   "facturas.autorizar":   "Autorizar o rechazar facturas",
@@ -296,8 +297,8 @@ const PERMISOS = {
 };
 const ROLES_BASE = {
   "Administrador": Object.keys(PERMISOS),
-  "Gerente":    ["tablero","facturas.ver","facturas.autorizar","cartera.pagos","inventario.ver","clientes.gestionar","auditoria.ver","despachos.gestionar"],
-  "Logística":  ["tablero","facturas.ver","facturas.crear","inventario.ver","clientes.gestionar"],
+  "Gerente":    ["tablero","pedidos.gestionar","facturas.ver","facturas.autorizar","cartera.pagos","inventario.ver","clientes.gestionar","auditoria.ver","despachos.gestionar"],
+  "Logística":  ["tablero","pedidos.gestionar","facturas.ver","facturas.crear","inventario.ver","clientes.gestionar"],
   "Despachos":  ["tablero","facturas.ver","despachos.gestionar","inventario.ver"],
   "Bodega":     ["tablero","inventario.ver","inventario.gestionar","importaciones.gestionar","facturas.ver"],
   "Auditor":    ["tablero","facturas.ver","inventario.ver","auditoria.ver"]
@@ -338,7 +339,7 @@ function seed(){
   const pick = a => a[Math.floor(R() * a.length)];
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
   const db = {
-    version: 1, creado: now.toISOString(), seq:{}, audit:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
+    version: 2, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
     empresa:{ nombre:"Motorepuestos del Oriente S.A.S.", nit:"901.482.315-7", ciudad:"Rionegro, Antioquia", resolucion:"Resolución DIAN 18764000001234 (simulada) · Prefijo MRO · Rango 1 a 50.000 · Vigencia 2026-2027" },
     roles: JSON.parse(JSON.stringify(ROLES_BASE)),
     usuarios:[
@@ -386,15 +387,15 @@ function seed(){
   ];
   db.productos = prods.map((p, i) => ({ id:"PR" + (i+1), sku:p[0], nombre:p[1], compat:p[2], categoria:p[3], costo:p[4], precio:p[5], minimo:p[6], stock:{ S1:p[7][0], S2:p[7][1], S3:p[7][2] }, origen:p[8], garantiaMeses:p[9], activo:true }));
   const clis = [
-    ["Motorepuestos El Santuario S.A.S.","901.234.567-1","05697","Calle 50 # 48-31","Óscar Giraldo","604 546 1120",12000000],
-    ["Taller y Repuestos Guarne","900.456.123-8","05318","Cra. 51 # 49-08","Luz Mery Arango","604 551 2087",8000000],
-    ["Moto Partes La Ceja","901.555.010-3","05376","Calle 20 # 22-40","Hernán Cardona","604 553 9012",15000000],
-    ["Motocentro Marinilla S.A.S.","900.889.432-5","05440","Cra. 30 # 31-15","Paula Duque","604 548 3376",20000000],
-    ["Repuestos El Carmen","901.300.777-0","05148","Calle 31 # 30-22","Wilson Ocampo","604 543 0091",6000000],
-    ["Distrimotos Sonsón","900.121.900-2","05756","Cra. 8 # 7-41","Gloria Valencia","604 869 2240",10000000],
-    ["Moto Servicio Medellín Centro","901.678.234-9","05001","Calle 44 # 52-17, Barrio Triste","Felipe Correa","604 512 7788",25000000]
+    ["Motorepuestos El Santuario S.A.S.","901.234.567-1","05697","Calle 50 # 48-31","Óscar Giraldo","604 546 1120",12000000,"compras@mrsantuario.example"],
+    ["Taller y Repuestos Guarne","900.456.123-8","05318","Cra. 51 # 49-08","Luz Mery Arango","604 551 2087",8000000,"pedidos@tallerguarne.example"],
+    ["Moto Partes La Ceja","901.555.010-3","05376","Calle 20 # 22-40","Hernán Cardona","604 553 9012",15000000,"hcardona@motopartesceja.example"],
+    ["Motocentro Marinilla S.A.S.","900.889.432-5","05440","Cra. 30 # 31-15","Paula Duque","604 548 3376",20000000,"compras@motocentromarinilla.example"],
+    ["Repuestos El Carmen","901.300.777-0","05148","Calle 31 # 30-22","Wilson Ocampo","604 543 0091",6000000,"repuestoselcarmen@correo.example"],
+    ["Distrimotos Sonsón","900.121.900-2","05756","Cra. 8 # 7-41","Gloria Valencia","604 869 2240",10000000,"gvalencia@distrimotos.example"],
+    ["Moto Servicio Medellín Centro","901.678.234-9","05001","Calle 44 # 52-17, Barrio Triste","Felipe Correa","604 512 7788",25000000,"facturacion@motoserviciomed.example"]
   ];
-  db.clientes = clis.map((c, i) => ({ id:"C" + (i+1), nombre:c[0], nit:c[1], ciudadId:c[2], direccion:c[3], contacto:c[4], telefono:c[5], cupo:c[6], activo:true, autorizaDatos:true }));
+  db.clientes = clis.map((c, i) => ({ id:"C" + (i+1), nombre:c[0], nit:c[1], ciudadId:c[2], direccion:c[3], contacto:c[4], telefono:c[5], cupo:c[6], email:c[7], activo:true, autorizaDatos:true }));
 
   const U = id => db.usuarios.find(u => u.id === id);
   const events = []; // [ts, accion, entidad, ref, detalle, user]
@@ -441,25 +442,39 @@ function seed(){
       const nItems = ri(1, 4); const used = new Set(); const items = [];
       for (let j = 0; j < nItems; j++){ const p = pick(db.productos); if (used.has(p.id)) continue; used.add(p.id); items.push({ productoId:p.id, cantidad: p.precio > 100000 ? ri(1, 4) : ri(4, 24), precio:p.precio }); }
       const creador = suc === "S3" ? "U7" : "U3";
-      const f = buildFactura(db, cli.id, suc, cli.ciudadId, items, d.toISOString(), creador);
-      ev(d, "Registrar factura manual", "Factura", f.numero, cli.nombre + " · " + money(f.total), creador);
-      ev(new Date(+d + 2000), "Validar cupo del cliente", "Factura", f.numero, "Cupo suficiente", creador);
       const ageDays = (now - d) / DAY;
+      const desdePedido = ageDays >= 1.2 && R() < .6;
+      let ped = null;
+      if (desdePedido){
+        const dp = new Date(+d - ri(1, 3) * 36e5);
+        ped = buildPedido(db, cli.id, suc, cli.ciudadId, items.map(x => ({ ...x })), dp.toISOString(), creador);
+        ev(dp, "Registrar pedido de venta", "Pedido", ped.numero, cli.nombre + " · " + money(ped.total), creador);
+        correo(db, "Pedido de venta", ped, dp.toISOString());
+      }
+      const f = buildFactura(db, cli.id, suc, cli.ciudadId, items, d.toISOString(), creador, ped);
+      ev(d, desdePedido ? "Facturar pedido de venta" : "Registrar factura manual", "Factura", f.numero, (ped ? "Pedido " + ped.numero + " · " : cli.nombre + " · ") + money(f.total), creador);
+      ev(new Date(+d + 2000), "Validar cupo del cliente", "Factura", f.numero, "Cupo suficiente", creador);
       let fate;
       if (ageDays < 1.2) fate = "Pendiente";
       else if (ageDays < 3) fate = R() < .5 ? "Autorizada" : "Alistamiento";
       else if (ageDays < 6) fate = R() < .6 ? "En tránsito" : "Entregada";
-      else fate = R() < .04 ? "Rechazada" : (R() < .08 ? "Con novedad" : "Entregada");
+      else fate = R() < .04 && !desdePedido ? "Rechazada" : (R() < .08 ? "Con novedad" : "Entregada");
       if (fate === "Pendiente") continue;
-      const ta = new Date(+d + ri(1, 6) * 36e5);
+      const ta = desdePedido ? new Date(+d + 60000) : new Date(+d + ri(1, 6) * 36e5);
       if (fate === "Rechazada"){
-        f.estado = "Rechazada"; f.motivoRechazo = "Cantidades no coinciden con el pedido firmado por el cliente."; f.revisadoPor = "U2"; f.revisadoEn = ta.toISOString();
+        f.estado = "Rechazada"; f.motivoRechazo = "Cantidades no coinciden con lo que el cliente pidió por teléfono."; f.revisadoPor = "U2"; f.revisadoEn = ta.toISOString();
         ev(ta, "Rechazar factura manual", "Factura", f.numero, f.motivoRechazo, "U2"); continue;
       }
-      autorizarFactura(db, f, "U2", ta.toISOString());
-      ev(ta, "Autorizar factura manual", "Factura", f.numero, "CUFE " + f.cufe.slice(0,16) + "…", "U2");
-      ev(new Date(+ta + 1000), "Contabilizar factura autorizada", "Factura", f.numero, "Asiento " + f.asiento.numero, "U2");
-      if (ageDays > 40){ f.pagada = true; f.pagoEn = new Date(+d + ri(15, 35) * DAY).toISOString(); }
+      if (desdePedido){
+        autorizarFactura(db, f, "SYS", ta.toISOString());
+        ev(ta, "Contabilizar factura (automática, origen pedido)", "Factura", f.numero, "Asiento " + f.asiento.numero + " · CUFE " + f.cufe.slice(0,16) + "…", null);
+      } else {
+        autorizarFactura(db, f, "U2", ta.toISOString());
+        ev(ta, "Autorizar factura manual", "Factura", f.numero, "CUFE " + f.cufe.slice(0,16) + "…", "U2");
+        ev(new Date(+ta + 1000), "Contabilizar factura autorizada", "Factura", f.numero, "Asiento " + f.asiento.numero, "U2");
+      }
+      correo(db, "Factura emitida", f, new Date(+ta + 2000).toISOString());
+      if (ageDays > 40){ f.pagada = true; f.pagoEn = new Date(+d + ri(15, 35) * DAY).toISOString(); ev(new Date(f.pagoEn), "Registrar pago de factura", "Factura", f.numero, money(f.total), "U2"); correo(db, "Pago registrado", f, f.pagoEn); }
       if (fate === "Autorizada") continue;
       const tr = new Date(+ta + ri(2, 8) * 36e5);
       const rem = buildRemision(db, f, tr.toISOString(), {
@@ -476,6 +491,7 @@ function seed(){
       const tt = new Date(+tv + 36e5);
       rem.estado = "En tránsito"; rem.salidaEn = tt.toISOString();
       ev(tt, "Despachar remisión", "Remisión", rem.numero, "Salida de bodega", "U4");
+      correo(db, "Despacho", rem, tt.toISOString());
       if (fate === "En tránsito") continue;
       const te = new Date(+tt + ri(5, 30) * 36e5);
       rem.entregadaEn = te.toISOString(); rem.recibidoPor = cli.contacto;
@@ -501,12 +517,22 @@ function seed(){
   };
   mk("C4", "S1", [["PR4",4],["PR3",10],["PR1",24]], 3, "U3");
   mk("C3", "S3", [["PR6",12],["PR12",20]], 1.5, "U7");
+  // Pedidos de venta registrados, listos para facturar
+  const mkPed = (cid, its, hoursAgo) => {
+    const d = new Date(+now - hoursAgo * 36e5); const c = db.clientes.find(x => x.id === cid);
+    const pd = buildPedido(db, cid, "S1", c.ciudadId, its.map(([pid, q]) => ({ productoId:pid, cantidad:q, precio:db.productos.find(p => p.id === pid).precio })), d.toISOString(), "U3");
+    ev(d, "Registrar pedido de venta", "Pedido", pd.numero, c.nombre + " · " + money(pd.total), "U3");
+    correo(db, "Pedido de venta", pd, d.toISOString());
+  };
+  mkPed("C1", [["PR2",10],["PR11",20]], 5);
+  mkPed("C6", [["PR5",6],["PR8",15]], 2);
   // Las existencias de la tabla representan el saldo actual después del histórico
   prods.forEach((p, i) => { db.productos[i].stock = { S1:p[7][0], S2:p[7][1], S3:p[7][2] }; });
   events.sort((a, b) => a[0] < b[0] ? -1 : 1);
   const saveDB = DB; DB = db;
   ev(now, "Inicializar datos de demostración", "Sistema", "", "Base de datos de ejemplo creada", "U1");
-  events.forEach(e => audit(e[1], e[2], e[3], e[4], { at:e[0], user:e[5] }));
+  events.forEach(e => audit(e[1], e[2], e[3], e[4], { at:e[0], user:e[5] || { nombre:"Sistema", rol:"Sistema" } }));
+  db.correos.sort((a, b) => a.ts.localeCompare(b.ts));
   DB = saveDB;
   return db;
 }
@@ -515,11 +541,29 @@ function difDetalle(db, items, campo){
   return items.filter(it => it[campo] !== it.cantidad).map(it => { const p = byId(db.productos, it.productoId); return p.sku + ": facturado " + it.cantidad + ", " + (campo === "recibido" ? "recibido " : "contado ") + it[campo]; }).join("; ");
 }
 function calcTotales(items){ const subtotal = sum(items, it => it.cantidad * it.precio); const iva = Math.round(subtotal * IVA); return { subtotal, iva, total: subtotal + iva }; }
-function buildFactura(db, clienteId, sucursalId, ciudadId, items, fecha, creadorId){
+function buildFactura(db, clienteId, sucursalId, ciudadId, items, fecha, creadorId, ped){
   const n = nextNumDb(db, "FAC");
   const t = calcTotales(items);
-  const f = { id:"F" + n, numero:"MRO-" + String(1000 + n).padStart(6, "0"), fecha, clienteId, sucursalId, ciudadDestinoId:ciudadId, items, ...t, estado:"Pendiente", creadoPor:creadorId, pagada:false };
+  const f = { id:"F" + n, numero:"MRO-" + String(1000 + n).padStart(6, "0"), fecha, clienteId, sucursalId, ciudadDestinoId:ciudadId, items, ...t, estado:"Pendiente", origen: ped ? "Pedido" : "Manual", creadoPor:creadorId, pagada:false };
+  if (ped){ f.pedidoId = ped.id; ped.estado = "Facturado"; ped.facturaId = f.id; }
   db.facturas.push(f); return f;
+}
+function buildPedido(db, clienteId, sucursalId, ciudadId, items, fecha, creadorId){
+  const n = nextNumDb(db, "PED");
+  const p = { id:"PD" + n, numero:"PED-" + String(n).padStart(5, "0"), fecha, clienteId, sucursalId, ciudadDestinoId:ciudadId, items, ...calcTotales(items), estado:"Registrado", creadoPor:creadorId };
+  db.pedidos.push(p); return p;
+}
+/* Notificaciones por correo electrónico (tarjeta A): pedido, factura, despacho y pago */
+function correo(db, tipo, obj, ts){
+  const F = id => db.facturas.find(x => x.id === id);
+  const f = tipo === "Despacho" ? F(obj.facturaId) : obj;
+  const c = db.clientes.find(x => x.id === f.clienteId);
+  let ref = obj.numero, asunto = "", cuerpo = "";
+  if (tipo === "Pedido de venta"){ asunto = `Recibimos su pedido ${obj.numero}`; cuerpo = `Registramos su pedido ${obj.numero} por ${money(obj.total)} (IVA incluido) con ${obj.items.length} ${obj.items.length === 1 ? "referencia" : "referencias"}.\nLe avisaremos cuando la factura sea emitida y cuando la mercancía salga de bodega.`; }
+  if (tipo === "Factura emitida"){ asunto = `Factura electrónica ${obj.numero}`; cuerpo = `Emitimos la factura electrónica ${obj.numero} por ${money(obj.total)}${obj.pedidoId ? " correspondiente a su pedido " + db.pedidos.find(x => x.id === obj.pedidoId).numero : ""}.\nCUFE: ${obj.cufe}\nLos certificados de garantía de los repuestos se verifican en nuestra página con su código.`; }
+  if (tipo === "Despacho"){ const I = obj.instrucciones; asunto = `Su mercancía va en camino · ${obj.numero}`; cuerpo = `La remisión ${obj.numero} (factura ${f.numero}) salió de bodega.\nTransportadora: ${I.transportadora}${I.guia ? " · guía " + I.guia : ""}\nEntrega en: ${I.direccion} · franja ${I.franja}\nRecibe: ${I.contacto}\nAl recibir, cuente los repuestos frente al conductor y anote cualquier diferencia en la remisión.`; }
+  if (tipo === "Pago registrado"){ asunto = `Confirmación de pago · factura ${obj.numero}`; cuerpo = `Registramos el pago de la factura ${obj.numero} por ${money(obj.total)}. Gracias.\nEl valor quedó liberado en su cupo de crédito.`; }
+  db.correos.push({ id:"M" + nextNumDb(db, "MAIL"), ts, tipo, para:c.email || "(sin correo registrado)", contacto:c.contacto, clienteId:c.id, ref, asunto, cuerpo:`Hola, ${c.contacto}.\n\n${cuerpo}\n\nMotorepuestos del Oriente S.A.S. · Rionegro, Antioquia\nMensaje automático, por favor no responda a este correo.`, estado: c.email ? "Enviado" : "Sin destinatario" });
 }
 function autorizarFactura(db, f, userId, ts){
   f.estado = "Autorizada"; f.revisadoPor = userId; f.revisadoEn = ts;
@@ -536,7 +580,7 @@ function autorizarFactura(db, f, userId, ts){
   f.items.forEach((it, i) => {
     const p = byId(db.productos, it.productoId);
     p.stock[f.sucursalId] = Math.max(0, (p.stock[f.sucursalId] || 0) - it.cantidad);
-    db.kardex.push({ fecha:ts, productoId:it.productoId, sucursalId:f.sucursalId, tipo:"Salida por factura", cantidad:-it.cantidad, ref:f.numero, usuario:u ? u.nombre : "" });
+    db.kardex.push({ fecha:ts, productoId:it.productoId, sucursalId:f.sucursalId, tipo:"Salida por factura", cantidad:-it.cantidad, ref:f.numero, usuario:u ? u.nombre : "Sistema" });
     if (p.garantiaMeses > 0){
       const vence = new Date(ts); vence.setMonth(vence.getMonth() + p.garantiaMeses);
       db.certificados.push({ codigo:certCode(f, it, i), facturaId:f.id, productoId:p.id, clienteId:f.clienteId, cantidad:it.cantidad, emitido:ts, vence:vence.toISOString() });
@@ -554,7 +598,7 @@ cufe = function(f, db){ const prev = DB; if (db) DB = db; const r = _cufe(f); DB
 
 function load(){
   const raw = store.get(STORE_KEY);
-  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 1) return; } catch(e){} }
+  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 2) return; } catch(e){} }
   DB = seed(); save();
 }
 function save(){ store.set(STORE_KEY, JSON.stringify(DB)); }
@@ -569,8 +613,11 @@ const usr = id => byId(DB.usuarios, id);
 const rem = id => byId(DB.remisiones, id);
 const stockTotal = p => sum(Object.values(p.stock), x => x);
 function cupoComprometido(clienteId, excluirId){
-  return sum(DB.facturas.filter(f => f.clienteId === clienteId && f.id !== excluirId && !f.pagada && (f.estado === "Pendiente" || f.estado === "Autorizada")), f => f.total);
+  return sum(DB.facturas.filter(f => f.clienteId === clienteId && f.id !== excluirId && !f.pagada && (f.estado === "Pendiente" || f.estado === "Autorizada")), f => f.total)
+       + sum(DB.pedidos.filter(p => p.clienteId === clienteId && p.id !== excluirId && p.estado === "Registrado"), p => p.total);
 }
+const nombreUsr = id => id === "SYS" ? "Sistema (factura de pedido)" : (usr(id)?.nombre || "—");
+const origenTxt = f => f.origen === "Pedido" ? "Pedido " + (byId(DB.pedidos, f.pedidoId)?.numero || "") : "Manual";
 const cupoDisponible = (c, excl) => c.cupo - cupoComprometido(c.id, excl);
 function estadoLogistico(f){
   if (f.estado === "Pendiente") return ["Por autorizar","warn"];
@@ -600,6 +647,8 @@ function setPref(k, v){ PREFS[k] = v; if (k === "tema") PREFS.temaTocado = true;
 const IC = {
   inicio:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   facturas:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/>',
+  pedidos:'<path d="M9 4h6v3H9z"/><path d="M9 5.5H6v15h12v-15h-3M9 12l2 2 4-4"/>',
+  notificaciones:'<path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/>',
   autorizaciones:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
   despachos:'<path d="M2 7h11v9H2zM13 10h4l4 4v2h-8"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
   inventario:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/>',
@@ -620,6 +669,7 @@ const icon = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true">${IC[n] || ""}<
 /* ---------- Navegación ---------- */
 const RUTAS = [
   { id:"inicio", label:"Tablero", perm:"tablero", grp:"Operación" },
+  { id:"pedidos", label:"Pedidos de venta", perm:"pedidos.gestionar", grp:"Operación", count:() => DB.pedidos.filter(p => p.estado === "Registrado").length },
   { id:"facturas", label:"Facturas", perm:"facturas.ver", grp:"Operación" },
   { id:"autorizaciones", label:"Autorizaciones", perm:"facturas.autorizar", grp:"Operación", count:() => DB.facturas.filter(f => f.estado === "Pendiente").length },
   { id:"despachos", label:"Despachos", perm:"despachos.gestionar", grp:"Operación", count:() => DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length + DB.remisiones.filter(r => r.estado === "Alistamiento").length },
@@ -627,11 +677,12 @@ const RUTAS = [
   { id:"importaciones", label:"Importaciones", perm:"importaciones.gestionar", grp:"Abastecimiento" },
   { id:"clientes", label:"Clientes y cupos", perm:"facturas.ver", grp:"Abastecimiento" },
   { id:"trazabilidad", label:"Trazabilidad", perm:"auditoria.ver", grp:"Control" },
+  { id:"notificaciones", label:"Notificaciones", perm:"auditoria.ver", grp:"Control" },
   { id:"certificados", label:"Certificados", perm:null, grp:"Control" },
   { id:"administracion", label:"Administración", perm:"admin.catalogos", alt:"admin.usuarios", grp:"Control" },
   { id:"calidad", label:"Calidad y normas", perm:null, grp:"Control" }
 ];
-const EXTRA = { "factura-nueva":{ label:"Registrar factura", perm:"facturas.crear" } };
+const EXTRA = { "factura-nueva":{ label:"Registrar factura manual", perm:"facturas.crear" }, "pedido-nuevo":{ label:"Registrar pedido de venta", perm:"pedidos.gestionar" } };
 function puedeVer(id){ const r = RUTAS.find(x => x.id === id) || EXTRA[id]; if (!r) return false; return !r.perm || P(r.perm) || (r.alt && P(r.alt)); }
 function ruta(){ const h = (location.hash || "").replace("#", ""); return h || "inicio"; }
 function ir(id){ if (location.hash === "#" + id) render(); else location.hash = id; }
@@ -648,7 +699,7 @@ function render(){
     let g = "";
     if (x.grp !== grp){ grp = x.grp; g = `<div class="grp" aria-hidden="true">${esc(grp)}</div>`; }
     const c = x.count ? x.count() : 0;
-    return g + `<a href="#${x.id}" ${x.id === r || (r === "factura-nueva" && x.id === "facturas") ? 'aria-current="page"' : ""}>${icon(x.id)}<span>${esc(x.label)}</span>${c ? `<span class="count" aria-label="${c} pendientes">${c}</span>` : ""}</a>`;
+    return g + `<a href="#${x.id}" ${x.id === r || (r === "factura-nueva" && x.id === "facturas") || (r === "pedido-nuevo" && x.id === "pedidos") ? 'aria-current="page"' : ""}>${icon(x.id)}<span>${esc(x.label)}</span>${c ? `<span class="count" aria-label="${c} pendientes">${c}</span>` : ""}</a>`;
   }).join("");
   const sucNom = suc(ME.sucursalId)?.nombre || "";
   app.innerHTML = `
@@ -754,6 +805,7 @@ function vInicio(){
   const tareas = [];
   if (P("facturas.autorizar")) tareas.push([pend, "facturas esperan tu autorización", "Revisa cantidades, cupo y destino antes de autorizar.", "autorizaciones"]);
   if (P("despachos.gestionar")){ tareas.push([DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length, "facturas autorizadas sin remisión", "Crea la remisión con las instrucciones de envío.", "despachos"]); tareas.push([DB.remisiones.filter(r => r.estado === "Alistamiento").length, "remisiones en alistamiento", "Haz el conteo ciego antes de despachar.", "despachos"]); }
+  if (P("pedidos.gestionar")) tareas.push([DB.pedidos.filter(p => p.estado === "Registrado").length, "pedidos de venta por facturar", "Al facturarlos quedan contabilizados y se avisa al cliente por correo.", "pedidos"]);
   if (P("facturas.crear")) tareas.push([DB.facturas.filter(f => f.estado === "Rechazada" && f.creadoPor === ME.id).length, "facturas tuyas fueron rechazadas", "Lee el motivo y registra una nueva factura corregida.", "facturas"]);
   if (P("inventario.gestionar")) tareas.push([bajo.length, "referencias bajo el stock mínimo", "Programa traslado o pedido de importación.", "inventario"]);
   if (P("importaciones.gestionar")) tareas.push([DB.importaciones.filter(i => i.estado !== "Recibida").length, "importaciones en curso", "Actualiza el estado y recibe la mercancía al llegar.", "importaciones"]);
@@ -807,6 +859,45 @@ function barChart(data){
 function niceStep(x){ const p = Math.pow(10, Math.floor(Math.log10(x || 1))); const n = x / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; }
 function short(v){ return v >= 1e6 ? "$" + (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(".", ",") + " M" : v >= 1e3 ? "$" + Math.round(v / 1e3) + " mil" : "$" + v; }
 
+/* --- Pedidos de venta --- */
+function vPedidos(){
+  const fe = UI.filtros.pe || "";
+  const list = DB.pedidos.filter(p => !fe || p.estado === fe).slice().sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const shown = list.slice(0, UI.filtros.plim || 40);
+  const reg = DB.pedidos.filter(p => p.estado === "Registrado");
+  return `<div class="page-head"><div><p class="eyebrow">Ventas</p><h1>Pedidos de venta</h1><p>Los pedidos confirmados por el cliente se facturan con un clic y quedan contabilizados sin pasar por Gerencia. Solo las facturas manuales, sin pedido, necesitan autorización. Cada pedido, factura, despacho y pago se avisa al cliente por correo.</p></div>
+    ${P("pedidos.gestionar") ? `<a class="btn primary" href="#pedido-nuevo">${icon("plus")} Registrar pedido</a>` : ""}</div>
+  <section class="kpis" aria-label="Resumen de pedidos" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+    <div class="kpi"><span class="l">Por facturar</span><span class="v">${reg.length}</span><span class="d muted">${money(sum(reg, p => p.total))} comprometidos en cupo</span></div>
+    <div class="kpi"><span class="l">Facturados</span><span class="v">${DB.pedidos.filter(p => p.estado === "Facturado").length}</span><span class="d muted">últimos 6 meses</span></div>
+    <div class="kpi"><span class="l">Facturas desde pedido</span><span class="v">${DB.facturas.length ? Math.round(DB.facturas.filter(f => f.origen === "Pedido").length / DB.facturas.length * 100) : 0} %</span><span class="d muted">el resto son manuales</span></div>
+  </section>
+  <div class="field" style="max-width:260px"><label for="pe">Estado</label><select id="pe" data-ch="pe"><option value="">Todos</option>${["Registrado","Facturado","Anulado"].map(x => `<option ${fe === x ? "selected" : ""}>${x}</option>`).join("")}</select></div>
+  <div class="tw"><table><caption class="sr">Pedidos de venta</caption><thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Destino</th><th class="r">Total</th><th>Estado</th><th>Factura</th><th></th></tr></thead><tbody>
+  ${shown.map(p => { const f = p.facturaId ? byId(DB.facturas, p.facturaId) : null; return `<tr><td class="mono">${p.numero}</td><td>${fdt(p.fecha)}</td><td>${esc(cli(p.clienteId).nombre)}</td><td>${esc(ciudad(p.ciudadDestinoId)?.nombre)}</td><td class="r">${money(p.total)}</td>
+    <td>${pill(p.estado, { Registrado:"warn", Facturado:"ok", Anulado:"" }[p.estado])}${p.motivoAnulacion ? `<br><span class="muted" style="font-size:.8rem">${esc(p.motivoAnulacion)}</span>` : ""}</td>
+    <td>${f ? `<button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button>` : "—"}</td>
+    <td>${p.estado === "Registrado" && P("pedidos.gestionar") ? `<div class="row" style="flex-wrap:nowrap"><button class="btn sm primary" data-act="facturarPedido" data-id="${p.id}">Facturar</button><button class="btn sm" data-act="anularPedidoDlg" data-id="${p.id}">Anular</button></div>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="8" class="empty">No hay pedidos con ese estado.</td></tr>`}
+  </tbody></table></div>
+  <div class="row between"><span class="muted">${shown.length} de ${list.length} pedidos</span>${list.length > shown.length ? `<button class="btn" data-act="masPedidos">Mostrar más</button>` : ""}</div>`;
+}
+
+/* --- Notificaciones por correo --- */
+function vNotificaciones(){
+  const tipos = ["Pedido de venta","Factura emitida","Despacho","Pago registrado"];
+  const ft = UI.filtros.nt || "";
+  const list = DB.correos.filter(m => !ft || m.tipo === ft).slice().sort((a, b) => b.ts.localeCompare(a.ts));
+  const shown = list.slice(0, UI.filtros.nlim || 50);
+  return `<div class="page-head"><div><p class="eyebrow">Requisito funcional · notificaciones</p><h1>Notificaciones por correo</h1><p>El sistema escribe al cliente cuando se registra un pedido de venta, se emite su factura, sale el despacho y se registra un pago. Esta es la bandeja de salida.</p></div></div>
+  <div class="note">En el prototipo los correos se generan y quedan aquí, pero no salen a internet. En producción se entregan con un servicio SMTP a través de una cola con reintentos, para no frenar la operación si el servidor de correo falla.</div>
+  <section class="kpis" aria-label="Correos por tipo" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${tipos.map(t => `<div class="kpi"><span class="l">${t}</span><span class="v">${DB.correos.filter(m => m.tipo === t).length}</span></div>`).join("")}</section>
+  <div class="field" style="max-width:260px"><label for="nt">Tipo de transacción</label><select id="nt" data-ch="nt"><option value="">Todas</option>${tipos.map(t => `<option ${ft === t ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+  <div class="tw"><table><caption class="sr">Bandeja de salida</caption><thead><tr><th>Fecha</th><th>Transacción</th><th>Para</th><th>Asunto</th><th>Documento</th><th>Estado</th><th></th></tr></thead><tbody>
+  ${shown.map(m => `<tr><td>${fdt(m.ts)}</td><td>${esc(m.tipo)}</td><td>${esc(m.contacto)}<br><span class="muted" style="font-size:.8rem">${esc(m.para)}</span></td><td class="wrap">${esc(m.asunto)}</td><td class="mono">${esc(m.ref)}</td><td>${pill(m.estado, m.estado === "Enviado" ? "ok" : "warn")}</td><td><button class="btn sm" data-act="verCorreo" data-id="${m.id}">Ver</button></td></tr>`).join("") || `<tr><td colspan="7" class="empty">Sin correos.</td></tr>`}
+  </tbody></table></div>
+  <div class="row between"><span class="muted">${shown.length} de ${list.length} correos</span>${list.length > shown.length ? `<button class="btn" data-act="masCorreos">Mostrar más</button>` : ""}</div>`;
+}
+
 /* --- Facturas --- */
 function vFacturas(){
   const q = (UI.filtros.fq || "").toLowerCase(), fe = UI.filtros.fe || "", fsu = UI.filtros.fsu || "";
@@ -818,23 +909,26 @@ function vFacturas(){
   }).sort((a, b) => b.fecha.localeCompare(a.fecha));
   const shown = list.slice(0, UI.filtros.flim || 40);
   return `
-  <div class="page-head"><div><h1>Facturas</h1><p>Facturas manuales registradas por Logística. Ninguna sale a despacho sin autorización de Gerencia.</p></div>
-    ${P("facturas.crear") ? `<a class="btn primary" href="#factura-nueva">${icon("plus")} Registrar factura</a>` : ""}</div>
+  <div class="page-head"><div><h1>Facturas</h1><p>Las facturas que salen de un pedido de venta quedan contabilizadas de inmediato. Las facturas manuales, sin pedido, requieren autorización de un gerente antes de contabilizarse y despacharse.</p></div>
+    ${P("facturas.crear") ? `<a class="btn primary" href="#factura-nueva">${icon("plus")} Registrar factura manual</a>` : ""}</div>
   <form class="grid g3" data-form="noop" role="search" aria-label="Filtrar facturas">
     <div class="field"><label for="fq">Buscar</label><input id="fq" type="search" placeholder="Número, cliente o NIT" value="${esc(UI.filtros.fq || "")}" data-in="fq"></div>
     <div class="field"><label for="fe">Estado</label><select id="fe" data-ch="fe"><option value="">Todos</option>${["Pendiente","Autorizada","Rechazada","Sin remisión","Alistamiento","En tránsito","Entregada","Con novedad"].map(s => `<option ${fe === s ? "selected" : ""}>${s}</option>`).join("")}</select></div>
     <div class="field"><label for="fsu">Sucursal</label><select id="fsu" data-ch="fsu"><option value="">Todas</option>${DB.sucursales.map(s => `<option value="${s.id}" ${fsu === s.id ? "selected" : ""}>${esc(s.nombre)}</option>`).join("")}</select></div>
   </form>
-  <div class="tw"><table><caption class="sr">Listado de facturas</caption><thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Destino</th><th class="r">Total</th><th>Autorización</th><th>Logística</th><th>Cartera</th></tr></thead><tbody>
+  <div class="tw"><table><caption class="sr">Listado de facturas</caption><thead><tr><th>Número</th><th>Origen</th><th>Fecha</th><th>Cliente</th><th>Destino</th><th class="r">Total</th><th>Autorización</th><th>Logística</th><th>Cartera</th></tr></thead><tbody>
   ${shown.map(f => { const c = cli(f.clienteId); const el = estadoLogistico(f); return `<tr>
-    <td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${fdate(f.fecha)}</td><td>${esc(c.nombre)}</td><td>${esc(ciudad(f.ciudadDestinoId)?.nombre)}</td><td class="r">${money(f.total)}</td><td>${pillFactura(f)}</td><td>${f.estado === "Autorizada" ? pill(el[0], el[1]) : "—"}</td><td>${f.estado !== "Autorizada" ? "—" : f.pagada ? pill("Pagada","ok") : pill("Por cobrar","")}</td></tr>`; }).join("") || `<tr><td colspan="8" class="empty">No hay facturas con esos filtros.</td></tr>`}
+    <td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${f.origen === "Pedido" ? `<span class="mono">${esc(origenTxt(f))}</span>` : pill("Manual", "")}</td><td>${fdate(f.fecha)}</td><td>${esc(c.nombre)}</td><td>${esc(ciudad(f.ciudadDestinoId)?.nombre)}</td><td class="r">${money(f.total)}</td><td>${pillFactura(f)}</td><td>${f.estado === "Autorizada" ? pill(el[0], el[1]) : "—"}</td><td>${f.estado !== "Autorizada" ? "—" : f.pagada ? pill("Pagada","ok") : pill("Por cobrar","")}</td></tr>`; }).join("") || `<tr><td colspan="9" class="empty">No hay facturas con esos filtros.</td></tr>`}
   </tbody></table></div>
   <div class="row between"><span class="muted">${shown.length} de ${list.length} facturas</span>${list.length > shown.length ? `<button class="btn" data-act="masFacturas">Mostrar más</button>` : ""}</div>`;
 }
 
-function nuevoDraft(){ return { clienteId:"", sucursalId: ME.sucursalId || "S1", paisId:"CO", estadoId:"ANT", ciudadId:"", items:[{ productoId:"", cantidad:1 }], obs:"", errores:{} }; }
+function nuevoDraft(modo){ return { modo, clienteId:"", sucursalId: ME.sucursalId || "S1", paisId:"CO", estadoId:"ANT", ciudadId:"", items:[{ productoId:"", cantidad:1 }], obs:"", errores:{} }; }
 function vFacturaNueva(){
-  const d = UI.draft || (UI.draft = nuevoDraft());
+  const modo = ruta() === "pedido-nuevo" ? "pedido" : "manual";
+  if (UI.draft && UI.draft.modo !== modo) UI.draft = null;
+  const d = UI.draft || (UI.draft = nuevoDraft(modo));
+  const esPed = modo === "pedido", volver = esPed ? "#pedidos" : "#facturas";
   const c = d.clienteId ? cli(d.clienteId) : null;
   const items = d.items.filter(it => it.productoId).map(it => ({ ...it, precio: prod(it.productoId).precio, cantidad: Math.max(0, parseInt(it.cantidad) || 0) }));
   const t = calcTotales(items);
@@ -842,8 +936,8 @@ function vFacturaNueva(){
   const cupoOk = !c || t.total <= disp;
   const E = d.errores || {};
   return `
-  <div class="page-head"><div><p class="eyebrow">Caso de uso · Registrar factura manual</p><h1>Registrar factura</h1><p>Al guardar, el sistema valida el cupo del cliente y la existencia en la sucursal, asigna el consecutivo de la resolución DIAN y envía la factura a Gerencia para su autorización.</p></div>
-    <a class="btn" href="#facturas" data-act="cancelDraft">Cancelar</a></div>
+  <div class="page-head"><div><p class="eyebrow">Caso de uso · ${esPed ? "Registrar pedido de venta" : "Registrar factura manual (sin pedido)"}</p><h1>${esPed ? "Registrar pedido de venta" : "Registrar factura manual"}</h1><p>${esPed ? "Al guardar, el sistema valida el cupo y la existencia, asigna el número de pedido y envía un correo de confirmación al cliente. Luego se factura con un clic, sin pasar por Gerencia." : "Para ventas que no vienen de un pedido. Al guardar, el sistema valida el cupo y la existencia, asigna el consecutivo de la resolución DIAN y envía la factura a un gerente: no se contabiliza hasta que la autorice."}</p></div>
+    <a class="btn" href="${volver}" data-act="cancelDraft">Cancelar</a></div>
   ${E._general ? `<div class="note bad" role="alert">${esc(E._general)}</div>` : ""}
   <form data-form="factura" class="grid" novalidate>
     <section class="panel" aria-labelledby="s-cli"><header><h2 id="s-cli">1. Cliente y origen</h2></header>
@@ -862,7 +956,7 @@ function vFacturaNueva(){
         <div class="field"><label for="d-pais">País</label><select id="d-pais" data-draft="paisId">${DB.paises.map(p => `<option value="${p.id}" ${d.paisId === p.id ? "selected" : ""}>${esc(p.nombre)}</option>`).join("")}</select></div>
         <div class="field"><label for="d-est">Departamento / estado</label><select id="d-est" data-draft="estadoId">${DB.estados.filter(e => e.paisId === d.paisId).map(e => `<option value="${e.id}" ${d.estadoId === e.id ? "selected" : ""}>${esc(e.nombre)}</option>`).join("")}</select></div>
         <div class="field"><label for="d-ciu">Ciudad o municipio <span aria-hidden="true">*</span></label><select id="d-ciu" data-draft="ciudadId" aria-invalid="${!!E.ciudadId}" aria-describedby="d-ciu-h"><option value="">Selecciona</option>${DB.ciudades.filter(x => x.estadoId === d.estadoId).map(x => `<option value="${x.id}" ${d.ciudadId === x.id ? "selected" : ""}>${esc(x.nombre)} · ${esc(x.id)}</option>`).join("")}</select>
-          <span class="hint" id="d-ciu-h">${E.ciudadId ? `<span style="color:var(--bad)">${esc(E.ciudadId)}</span>` : "Código DANE del municipio al lado del nombre."}</span></div>
+          <span class="hint" id="d-ciu-h">${E.ciudadId ? `<span style="color:var(--bad)">${esc(E.ciudadId)}</span>` : "Código DANE al lado del nombre. ¿No aparece? El Administrador lo registra en Administración, Ciudades y municipios."}</span></div>
       </div>
     </section>
     <section class="panel" aria-labelledby="s-it"><header><h2 id="s-it">3. Repuestos</h2><button type="button" class="btn sm" data-act="addItem">${icon("plus")} Agregar línea</button></header>
@@ -879,7 +973,7 @@ function vFacturaNueva(){
       ${c && !cupoOk ? `<div class="note bad" role="alert"><b>Cupo insuficiente.</b> El total supera el cupo disponible en ${money(t.total - disp)}. Reduce cantidades o pide a Gerencia ampliar el cupo antes de registrar.</div>` : ""}
     </section>
     <section class="panel"><div class="field"><label for="d-obs">Observaciones para Gerencia y Despachos</label><textarea id="d-obs" data-draft="obs" maxlength="400" placeholder="Ej.: pedido tomado por teléfono con el señor Óscar; confirmar referencia del kit antes de alistar.">${esc(d.obs)}</textarea></div>
-      <div class="row" style="justify-content:flex-end"><a class="btn" href="#facturas" data-act="cancelDraft">Cancelar</a><button class="btn primary" type="submit">Validar y enviar a autorización</button></div></section>
+      <div class="row" style="justify-content:flex-end"><a class="btn" href="${volver}" data-act="cancelDraft">Cancelar</a><button class="btn primary" type="submit">${esPed ? "Registrar pedido y avisar al cliente" : "Validar y enviar a autorización"}</button></div></section>
   </form>`;
 }
 
@@ -897,7 +991,7 @@ function vDocFactura(f){
   </article>`;
 }
 function timelineFactura(f){
-  const refs = [f.numero]; if (f.remisionId) refs.push(rem(f.remisionId).numero);
+  const refs = [f.numero]; if (f.remisionId) refs.push(rem(f.remisionId).numero); if (f.pedidoId) refs.push(byId(DB.pedidos, f.pedidoId).numero);
   const ev = DB.audit.filter(e => refs.includes(e.ref));
   return `<ul class="tl">${ev.map(e => `<li><div><b>${esc(e.accion)}</b> <span class="mono">${esc(e.ref)}</span><br><span class="when">${fdt(e.ts)} · ${esc(e.usuario)} (${esc(e.rol)})</span>${e.detalle ? `<br><span style="font-size:.88rem">${esc(e.detalle)}</span>` : ""}</div></li>`).join("") || "<li><div>Sin eventos</div></li>"}</ul>`;
 }
@@ -914,7 +1008,7 @@ function dlgFactura(id){
     <div class="row">${pillFactura(f)} ${f.estado === "Autorizada" ? pill(...estadoLogistico(f)) : ""} ${f.pagada ? pill("Pagada","ok") : ""}</div>
     ${f.estado === "Rechazada" ? `<div class="note bad"><b>Motivo del rechazo:</b> ${esc(f.motivoRechazo)}<br><span class="muted">${esc(usr(f.revisadoPor)?.nombre)} · ${fdt(f.revisadoEn)}</span></div>` : ""}
     <div class="tabs" role="tablist">${[["doc","Documento"],["traza","Trazabilidad"],["cont","Contabilidad"],["cert","Garantías (" + certs.length + ")"]].map(([k, l]) => `<button role="tab" aria-selected="${tabs === k}" data-act="tab" data-g="fac" data-v="${k}" data-ref="${f.id}">${l}</button>`).join("")}</div>
-    ${tabs === "doc" ? vDocFactura(f) + `<dl class="kv"><dt>Registró</dt><dd>${esc(usr(f.creadoPor)?.nombre)} (${esc(usr(f.creadoPor)?.rol)})</dd>${f.revisadoPor ? `<dt>${f.estado === "Rechazada" ? "Rechazó" : "Autorizó"}</dt><dd>${esc(usr(f.revisadoPor)?.nombre)} · ${fdt(f.revisadoEn)}</dd>` : ""}${r ? `<dt>Remisión</dt><dd class="mono">${r.numero} · ${esc(r.estado)}</dd>` : ""}</dl>` : ""}
+    ${tabs === "doc" ? vDocFactura(f) + `<dl class="kv"><dt>Registró</dt><dd>${esc(usr(f.creadoPor)?.nombre)} (${esc(usr(f.creadoPor)?.rol)})</dd><dt>Origen</dt><dd>${f.origen === "Pedido" ? esc(origenTxt(f)) + " · contabilizada automáticamente" : "Factura manual sin pedido · requiere autorización de gerente"}</dd>${f.revisadoPor ? `<dt>${f.estado === "Rechazada" ? "Rechazó" : f.origen === "Pedido" ? "Contabilizó" : "Autorizó"}</dt><dd>${esc(nombreUsr(f.revisadoPor))} · ${fdt(f.revisadoEn)}</dd>` : ""}${r ? `<dt>Remisión</dt><dd class="mono">${r.numero} · ${esc(r.estado)}</dd>` : ""}</dl>` : ""}
     ${tabs === "traza" ? timelineFactura(f) + (f.cufe ? `<div class="row"><button class="btn" data-act="verifCufe" data-id="${f.id}">Verificar integridad del documento</button><span id="cufe-res" aria-live="polite"></span></div>` : "") : ""}
     ${tabs === "cont" ? (f.asiento ? `<p><b>Asiento ${f.asiento.numero}</b> · ${fdt(f.asiento.fecha)} · contabilización automática al autorizar</p><div class="tw"><table><thead><tr><th>Cuenta PUC</th><th>Nombre</th><th class="r">Débito</th><th class="r">Crédito</th></tr></thead><tbody>${f.asiento.lineas.map(l => `<tr><td class="mono">${l.cuenta}</td><td>${esc(l.nombre)}</td><td class="r">${l.debito ? money(l.debito) : ""}</td><td class="r">${l.credito ? money(l.credito) : ""}</td></tr>`).join("")}<tr><th colspan="2">Sumas iguales</th><th class="r">${money(sum(f.asiento.lineas, l => l.debito))}</th><th class="r">${money(sum(f.asiento.lineas, l => l.credito))}</th></tr></tbody></table></div>` : `<p class="muted">La factura se contabiliza automáticamente cuando Gerencia la autoriza.</p>`) : ""}
     ${tabs === "cert" ? (certs.length ? `<div class="tw"><table><thead><tr><th>Código</th><th>Referencia</th><th class="r">Cant.</th><th>Vence</th></tr></thead><tbody>${certs.map(x => `<tr><td class="mono">${x.codigo}</td><td>${esc(prod(x.productoId).nombre)}</td><td class="r">${x.cantidad}</td><td>${fdate(x.vence)}</td></tr>`).join("")}</tbody></table></div><p class="muted" style="font-size:.85rem">El cliente verifica cada código en la sección Certificados, sin necesidad de usuario.</p>` : `<p class="muted">Los certificados de garantía se emiten al autorizar la factura (solo referencias con garantía).</p>`) : ""}
@@ -924,7 +1018,7 @@ function dlgFactura(id){
 /* --- Autorizaciones --- */
 function vAutorizaciones(){
   const pend = DB.facturas.filter(f => f.estado === "Pendiente").sort((a, b) => a.fecha.localeCompare(b.fecha));
-  return `<div class="page-head"><div><p class="eyebrow">Caso de uso · Autorizar factura manual</p><h1>Autorizaciones</h1><p>Al autorizar se descuenta el inventario, se genera el CUFE, se emiten los certificados de garantía y se contabiliza el asiento. Quien registra una factura no puede autorizarla.</p></div></div>
+  return `<div class="page-head"><div><p class="eyebrow">Caso de uso · Autorizar factura manual</p><h1>Autorizaciones</h1><p>Solo llegan aquí las facturas manuales, las que no vienen de un pedido de venta. Al autorizar se contabiliza el asiento, se descuenta el inventario, se genera el CUFE, se emiten los certificados de garantía y se envía la factura al cliente por correo. Quien registra una factura no puede autorizarla.</p></div></div>
   ${pend.length ? `<div class="cards">${pend.map(f => { const c = cli(f.clienteId); const disp = cupoDisponible(c, f.id); const ok = f.total <= disp; const own = f.creadoPor === ME.id;
     const sinStock = f.items.filter(it => (prod(it.productoId).stock[f.sucursalId] || 0) < it.cantidad);
     return `<article class="panel" aria-labelledby="a-${f.id}"><header><h3 id="a-${f.id}" class="mono">${f.numero}</h3>${pillFactura(f)}</header>
@@ -933,7 +1027,7 @@ function vAutorizaciones(){
       <div class="row"><button class="btn sm" data-act="verFactura" data-id="${f.id}">Ver detalle</button><span style="flex:1"></span><button class="btn sm danger" data-act="rechazarDlg" data-id="${f.id}" ${own ? "disabled" : ""}>Rechazar</button><button class="btn sm primary" data-act="autorizar" data-id="${f.id}" ${own || !ok || sinStock.length ? "disabled" : ""}>Autorizar</button></div>
     </article>`; }).join("")}</div>` : `<div class="panel empty"><h2>No hay facturas por autorizar</h2><p>Cuando Logística registre una factura manual aparecerá aquí.</p></div>`}
   <section class="panel"><header><h2>Últimas decisiones</h2></header><div class="tw"><table><thead><tr><th>Factura</th><th>Decisión</th><th>Por</th><th>Fecha</th><th>Motivo</th></tr></thead><tbody>
-  ${DB.facturas.filter(f => f.revisadoEn).sort((a, b) => b.revisadoEn.localeCompare(a.revisadoEn)).slice(0, 8).map(f => `<tr><td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${pillFactura(f)}</td><td>${esc(usr(f.revisadoPor)?.nombre)}</td><td>${fdt(f.revisadoEn)}</td><td class="wrap">${esc(f.motivoRechazo || "")}</td></tr>`).join("")}
+  ${DB.facturas.filter(f => f.revisadoEn && f.origen !== "Pedido").sort((a, b) => b.revisadoEn.localeCompare(a.revisadoEn)).slice(0, 8).map(f => `<tr><td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${pillFactura(f)}</td><td>${esc(nombreUsr(f.revisadoPor))}</td><td>${fdt(f.revisadoEn)}</td><td class="wrap">${esc(f.motivoRechazo || "")}</td></tr>`).join("")}
   </tbody></table></div></section>`;
 }
 
@@ -1096,7 +1190,7 @@ function vClientes(){
   return `<div class="page-head"><div><h1>Clientes y cupos</h1><p>Almacenes y talleres de los municipios atendidos. El cupo comprometido suma facturas pendientes y autorizadas sin pago. Los datos personales se tratan según la Ley 1581 de 2012.</p></div>
     ${P("clientes.gestionar") ? `<button class="btn primary" data-act="clienteDlg">${icon("plus")} Nuevo cliente</button>` : ""}</div>
   <div class="tw"><table><thead><tr><th>Cliente</th><th>NIT</th><th>Municipio</th><th>Contacto</th><th class="r">Cupo</th><th class="r">Comprometido</th><th style="min-width:140px">Uso</th><th class="r">Disponible</th>${P("clientes.gestionar") ? "<th></th>" : ""}</tr></thead><tbody>
-  ${DB.clientes.map(c => { const u = cupoComprometido(c.id), pct = u / c.cupo * 100; return `<tr><td>${esc(c.nombre)}</td><td class="mono">${esc(c.nit)}</td><td>${esc(ciudad(c.ciudadId)?.nombre)}</td><td>${esc(c.contacto)}<br><span class="muted" style="font-size:.8rem">${esc(c.telefono)}</span></td><td class="r">${money(c.cupo)}</td><td class="r">${money(u)}</td><td><div class="meter ${pct > 100 ? "bad" : pct > 80 ? "warn" : ""}" role="meter" aria-label="Uso del cupo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><span style="width:${Math.min(100, pct)}%"></span></div><span class="muted" style="font-size:.78rem">${pct.toFixed(0)} %</span></td><td class="r"><b>${money(c.cupo - u)}</b></td>${P("clientes.gestionar") ? `<td><button class="btn sm" data-act="clienteDlg" data-id="${c.id}">Editar</button></td>` : ""}</tr>`; }).join("")}
+  ${DB.clientes.map(c => { const u = cupoComprometido(c.id), pct = u / c.cupo * 100; return `<tr><td>${esc(c.nombre)}</td><td class="mono">${esc(c.nit)}</td><td>${esc(ciudad(c.ciudadId)?.nombre)}</td><td>${esc(c.contacto)}<br><span class="muted" style="font-size:.8rem">${esc(c.telefono)} · ${esc(c.email || "sin correo")}</span></td><td class="r">${money(c.cupo)}</td><td class="r">${money(u)}</td><td><div class="meter ${pct > 100 ? "bad" : pct > 80 ? "warn" : ""}" role="meter" aria-label="Uso del cupo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><span style="width:${Math.min(100, pct)}%"></span></div><span class="muted" style="font-size:.78rem">${pct.toFixed(0)} %</span></td><td class="r"><b>${money(c.cupo - u)}</b></td>${P("clientes.gestionar") ? `<td><button class="btn sm" data-act="clienteDlg" data-id="${c.id}">Editar</button></td>` : ""}</tr>`; }).join("")}
   </tbody></table></div>`;
 }
 function dlgCliente(id){
@@ -1109,6 +1203,7 @@ function dlgCliente(id){
     <div class="field"><label for="cl-d">Dirección *</label><input id="cl-d" name="direccion" required value="${esc(c.direccion)}"></div>
     <div class="field"><label for="cl-co">Contacto *</label><input id="cl-co" name="contacto" required value="${esc(c.contacto)}"></div>
     <div class="field"><label for="cl-t">Teléfono *</label><input id="cl-t" name="telefono" required inputmode="tel" value="${esc(c.telefono)}"></div>
+    <div class="field"><label for="cl-em">Correo para notificaciones *</label><input id="cl-em" name="email" type="email" required autocomplete="off" value="${esc(c.email || "")}" aria-describedby="cl-em-h"><span class="hint" id="cl-em-h">Recibe avisos de pedido, factura, despacho y pago.</span></div>
     <div class="field"><label for="cl-cu">Cupo de crédito (COP)</label><input id="cl-cu" name="cupo" type="number" min="0" step="100000" value="${c.cupo}" ${cupoOnlyGer && id ? "disabled" : ""} aria-describedby="cl-cu-h"><span class="hint" id="cl-cu-h">${cupoOnlyGer ? "Solo Gerencia puede modificar el cupo de un cliente existente." : "Cambios de cupo quedan auditados."}</span></div>
     <label class="chk" for="cl-hd" style="align-self:end"><input type="checkbox" id="cl-hd" name="hd" ${c.autorizaDatos ? "checked" : ""} required><span>El cliente autorizó el tratamiento de sus datos (Ley 1581 de 2012) *</span></label>
     <div id="cl-err" role="alert"></div></form>`, `<button class="btn" data-act="cerrarDlg">Cancelar</button><button class="btn primary" type="submit" form="frm-cl">Guardar</button>`);
@@ -1125,7 +1220,7 @@ function vTrazabilidad(){
     <div class="row"><button class="btn primary" data-act="verifCadena">Verificar integridad</button>${P("admin.usuarios") ? `<button class="btn" data-act="simularFraude">Simular alteración</button>` : ""}</div></div>
   ${v ? (v.ok ? `<div class="note ok" role="status"><b>Cadena íntegra.</b> ${v.n} registros verificados, ninguno fue alterado.</div>` : `<div class="note bad" role="alert"><b>Cadena rota en el registro #${v.seq}.</b> Ese registro o uno anterior fue modificado fuera del sistema. ${P("admin.usuarios") ? `<button class="btn sm" data-act="restaurarFraude">Deshacer simulación</button>` : ""}</div>`) : ""}
   <section class="panel"><header><h2>Rastrear un documento</h2></header>
-    <form data-form="rastreo" class="row"><label for="rs" class="sr">Número de documento</label><input id="rs" name="doc" placeholder="MRO-001012, REM-00005 o IMP-2026-001" style="max-width:340px" required><button class="btn" type="submit">Rastrear</button></form>
+    <form data-form="rastreo" class="row"><label for="rs" class="sr">Número de documento</label><input id="rs" name="doc" placeholder="PED-00003, MRO-001012, REM-00005 o IMP-2026-001" style="max-width:340px" required><button class="btn" type="submit">Rastrear</button></form>
     <div id="rastreo-res">${UI.rastreo || ""}</div></section>
   <div class="grid g2"><div class="field"><label for="aq">Buscar en la bitácora</label><input id="aq" type="search" value="${esc(UI.filtros.aq || "")}" data-in="aq" placeholder="Documento, usuario o acción"></div>
   <div class="field"><label for="aent">Entidad</label><select id="aent" data-ch="aent"><option value="">Todas</option>${[...new Set(DB.audit.map(e => e.entidad))].map(x => `<option ${ent === x ? "selected" : ""}>${esc(x)}</option>`).join("")}</select></div></div>
@@ -1175,6 +1270,9 @@ function vAdministracion(){
   if (tab === "geo") body = `<p class="muted">Caso de uso · Gestionar ciudades y municipios. Estos catálogos alimentan la selección de país, departamento y ciudad al facturar.</p>
     <form data-form="ciudad" class="grid g4" style="align-items:end"><div class="field"><label for="g-e">Departamento / estado</label><select id="g-e" name="estadoId">${DB.estados.map(e => `<option value="${e.id}">${esc(e.nombre)} (${esc(byId(DB.paises, e.paisId).nombre)})</option>`).join("")}</select></div>
       <div class="field"><label for="g-n">Ciudad o municipio</label><input id="g-n" name="nombre" required></div><div class="field"><label for="g-c">Código DANE</label><input id="g-c" name="codigo" required pattern="[0-9A-Z-]{3,8}" placeholder="05021"></div><button class="btn primary" type="submit">Agregar</button></form>
+    <form data-form="estado" class="grid g4" style="align-items:end"><div class="field"><label for="ge-p">País</label><select id="ge-p" name="paisId">${DB.paises.map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join("")}</select></div>
+      <div class="field"><label for="ge-n">Nuevo departamento o estado</label><input id="ge-n" name="nombre" required></div><div class="field"><label for="ge-c">Código</label><input id="ge-c" name="codigo" required pattern="[A-Za-z]{2,5}" placeholder="BOY"></div><button class="btn" type="submit">Agregar departamento</button></form>
+    <p class="muted" style="font-size:.85rem">Al facturar, la lista de departamentos muestra solo los del país elegido y la de municipios solo los registrados aquí para ese departamento.</p>
     <div class="tw"><table><thead><tr><th>Código</th><th>Ciudad o municipio</th><th>Departamento / estado</th><th>País</th><th class="r">Clientes</th></tr></thead><tbody>${DB.ciudades.map(c => { const e = byId(DB.estados, c.estadoId); return `<tr><td class="mono">${esc(c.id)}</td><td>${esc(c.nombre)}</td><td>${esc(e.nombre)}</td><td>${esc(byId(DB.paises, e.paisId).nombre)}</td><td class="r">${DB.clientes.filter(x => x.ciudadId === c.id).length}</td></tr>`; }).join("")}</tbody></table></div>`;
   if (tab === "suc") body = `<div class="tw"><table><thead><tr><th>Código</th><th>Sucursal</th><th>Dirección</th><th>Municipio</th><th class="r">Usuarios</th><th class="r">Unidades</th></tr></thead><tbody>${DB.sucursales.map(s => `<tr><td class="mono">${s.id}</td><td>${esc(s.nombre)}</td><td>${esc(s.direccion)}</td><td>${esc(ciudad(s.ciudadId).nombre)}</td><td class="r">${DB.usuarios.filter(u => u.sucursalId === s.id).length}</td><td class="r">${NUM.format(sum(DB.productos, p => p.stock[s.id] || 0))}</td></tr>`).join("")}</tbody></table></div>`;
   if (tab === "datos") body = `<div class="note">Este prototipo guarda los datos en el navegador de cada persona. Para compartir un estado concreto con el grupo, copia el respaldo y que la otra persona lo pegue en "Restaurar". En producción los datos irían a la base de datos PostgreSQL descrita en <span class="mono">docs/modelo-datos.sql</span>.</div>
@@ -1196,11 +1294,12 @@ function dlgUsuario(){
 /* --- Calidad y normas --- */
 function vCalidad(){
   const RF = [
-    ["RF-01","Registrar factura manual con consecutivo de resolución DIAN","Facturas → Registrar factura","Logística"],
+    ["RF-00","Registrar y facturar pedidos de venta (contabilización automática)","Pedidos de venta","Logística"],
+    ["RF-01","Registrar factura manual sin pedido, con consecutivo de resolución DIAN","Facturas → Registrar factura manual","Logística"],
     ["RF-02","Seleccionar país, departamento y ciudad de destino (catálogo DANE)","Registrar factura, paso 2","Logística"],
     ["RF-03","Validar cupo del cliente antes de registrar y de autorizar","Registrar factura / Autorizaciones","Logística, Gerente"],
-    ["RF-04","Consultar facturas pendientes de autorización","Autorizaciones","Gerente"],
-    ["RF-05","Autorizar factura manual (genera CUFE, descuenta inventario)","Autorizaciones","Gerente"],
+    ["RF-04","Consultar facturas manuales pendientes de autorización","Autorizaciones","Gerente"],
+    ["RF-05","Autorizar factura manual antes de contabilizarla (CUFE, inventario, asiento)","Autorizaciones","Gerente"],
     ["RF-06","Rechazar factura con motivo obligatorio (extiende RF-05)","Autorizaciones","Gerente"],
     ["RF-07","Contabilizar automáticamente la factura autorizada (PUC)","Detalle de factura → Contabilidad","Sistema"],
     ["RF-08","Registrar despacho (remisión) desde factura autorizada","Despachos","Despachos"],
@@ -1213,14 +1312,15 @@ function vCalidad(){
     ["RF-15","Gestionar ciudades y municipios","Administración","Administrador"],
     ["RF-16","Gestionar usuarios y permisos por rol","Administración","Administrador"],
     ["RF-17","Registrar bitácora inalterable y rastrear documentos","Trazabilidad","Auditor, Gerente"],
-    ["RF-18","Estadísticas de ventas, entregas y stock","Tablero","Todos"]
+    ["RF-18","Estadísticas de ventas, entregas y stock","Tablero","Todos"],
+    ["RF-19","Enviar correo al cliente en pedido, factura, despacho y pago","Notificaciones","Sistema"]
   ];
   const ISO = [
     ["Adecuación funcional","Completitud, corrección, pertinencia","Los requisitos funcionales cubren todos los casos de uso del diagrama; cálculos de IVA, cupo y costo nacionalizado verificables."],
-    ["Eficiencia de desempeño","Tiempo de respuesta, uso de recursos","Aplicación de un solo archivo, sin dependencias de JavaScript; cada pantalla se dibuja en menos de 100 ms con los datos de ejemplo."],
+    ["Eficiencia de desempeño","Tiempo de respuesta, uso de recursos, capacidad","Prototipo sin dependencias: cada pantalla en menos de 100 ms. Producción: 100.000 sesiones concurrentes con interfaz en CDN, API sin estado detrás de balanceador con autoescalado, sesiones en Redis y PostgreSQL con réplicas de lectura."],
     ["Compatibilidad","Coexistencia, interoperabilidad","Respaldo en JSON; modelo relacional en SQL estándar listo para PostgreSQL; CUFE con la estructura de la factura electrónica."],
     ["Usabilidad","Aprendizaje, operabilidad, protección contra errores, accesibilidad","Validación en línea, mensajes que explican cómo corregir, botones deshabilitados con causa visible, WCAG 2.1 AA."],
-    ["Fiabilidad","Madurez, disponibilidad, tolerancia a fallos, recuperación","Funciona sin conexión una vez cargada; respaldo y restauración; si el almacenamiento falla, la sesión sigue en memoria."],
+    ["Fiabilidad","Madurez, disponibilidad, tolerancia a fallos, recuperación","Meta: tiempo en falla ≤ 0,5 % de la operación (disponibilidad ≥ 99,5 %, máximo 3,6 horas al mes). Réplicas en dos zonas, verificación de salud cada minuto, respaldos diarios. En el prototipo: respaldo y restauración, y sigue en memoria si el almacenamiento falla."],
     ["Seguridad","Confidencialidad, integridad, no repudio, responsabilidad, autenticidad","Permisos por rol, segregación de funciones, bitácora encadenada SHA-256, CUFE verificable, certificados con código único."],
     ["Mantenibilidad","Modularidad, reusabilidad, analizabilidad, modificabilidad, capacidad de prueba","Vistas, acciones y reglas de negocio separadas; reglas como funciones puras (calcTotales, cupoDisponible, costeo)."],
     ["Portabilidad","Adaptabilidad, instalabilidad","Diseño adaptable desde 360 px hasta escritorio; se publica copiando un archivo a cualquier hosting estático."]
@@ -1236,6 +1336,19 @@ function vCalidad(){
     <tr><td class="wrap">Facturación electrónica</td><td class="wrap">Estructura de factura electrónica con CUFE y resolución (simulada; la transmisión real a la DIAN se hace con un proveedor tecnológico autorizado).</td></tr>
     <tr><td class="wrap">Envío de facturas según ISO 9000</td><td class="wrap">Flujo documentado y trazable: Logística → Gerencia → Despachos → Cliente, con evidencia de cada paso (ISO 9001:2015, 8.5.2).</td></tr>
     </tbody></table></div></section>
+  <section class="panel" aria-labelledby="cc-t"><header><h2 id="cc-t">Actividad 2 · Consultoría cruzada: requerimientos y su tipo</h2><span class="muted">Tarjetas confidenciales A y B</span></header>
+    <div class="tw"><table><thead><tr><th>#</th><th>Requerimiento</th><th>Tipo</th><th>Cómo lo cumple el sistema</th><th>Cómo se prueba</th></tr></thead><tbody>
+    ${[
+      ["A1","Enviar correo al registrar pedido de venta, despacho, emisión de factura y pago","Funcional (notificación)","Pantalla Notificaciones: 4 eventos con correo al cliente","Ejecutar cada transacción y verificar el correo en la bandeja (destinatario, asunto, documento)"],
+      ["A2","Operar con hasta 100.000 usuarios en sesiones concurrentes","No funcional de rendimiento (capacidad y escalabilidad)","Arquitectura escalable horizontalmente (ver docs/actividad2-consultoria.md)","Prueba de carga con k6 en rampa hasta 100.000 usuarios virtuales; p95 < 2 s y errores < 1 %"],
+      ["A3","Diseño responsive para computador, tableta y celular","No funcional de usabilidad y portabilidad (adaptabilidad)","Diseño adaptable de 360 px a escritorio; menú lateral que se pliega","Matriz de dispositivos: 360, 768, 1024 y 1440 px, sin desplazamiento horizontal"],
+      ["A4","El tiempo en falla no supera el 0,5 % del tiempo total de operación","No funcional de fiabilidad (disponibilidad ≥ 99,5 %)","Réplicas, verificación de salud y respaldos; máximo 3,6 horas fuera de servicio al mes","Monitoreo externo cada minuto durante 30 días; disponibilidad = tiempo arriba / tiempo total"],
+      ["B1","Procedimiento de desarrollo documentado en manuales y conforme con ISO 9000","Restricción de proceso (organizacional, estándar de calidad)","docs/manual-procedimientos.md con fases, registros, revisiones y control de cambios","Auditoría interna con lista de chequeo ISO 9001:2015 (7.5, 8.1, 8.3, 10.2)"],
+      ["B2","Facturas manuales sin pedido que requieren autorización de gerentes antes de contabilizarse","Funcional (regla de negocio)","Pedidos se contabilizan solos; las manuales esperan en Autorizaciones","Intentar despachar o contabilizar una manual sin autorizar: el sistema no lo permite"],
+      ["B3","Estado y ciudad en listas de preselección filtradas por el país; la ciudad debe estar registrada","Funcional de interfaz, con restricción de integridad de datos","Listas en cascada; municipios solo del catálogo de Administración","Cambiar de país y verificar que los estados se filtran; no hay forma de escribir una ciudad libre"],
+      ["B4","Páginas que cumplan la ley de igualdad para personas con discapacidad","Restricción legal (exige requisitos no funcionales de accesibilidad)","Ley 1618 de 2013, Resolución MinTIC 1519 de 2020, WCAG 2.1 AA: panel de accesibilidad, teclado, lector de pantalla","Auditoría automática (axe, Lighthouse) y manual con lector de pantalla NVDA y solo teclado"]
+    ].map(r => `<tr><td class="mono">${r[0]}</td><td class="wrap">${esc(r[1])}</td><td class="wrap"><b>${esc(r[2])}</b></td><td class="wrap">${esc(r[3])}</td><td class="wrap">${esc(r[4])}</td></tr>`).join("")}
+    </tbody></table></div></section>
   <section class="panel"><header><h2>Matriz de requisitos funcionales</h2><span class="muted">Trazada al diagrama de casos de uso</span></header>
     <div class="tw"><table><thead><tr><th>ID</th><th>Requisito</th><th>Dónde se cumple</th><th>Actor</th></tr></thead><tbody>${RF.map(r => `<tr><td class="mono">${r[0]}</td><td class="wrap">${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join("")}</tbody></table></div></section>
   <section class="panel"><header><h2>Modelo de calidad ISO/IEC 25010</h2><span class="muted">Familia ISO/IEC 25000 (SQuaRE)</span></header>
@@ -1243,11 +1356,11 @@ function vCalidad(){
   <div class="grid g2">
     <section class="panel"><header><h2>Accesibilidad (WCAG 2.1 AA · NTC 5854)</h2></header><ul style="margin:0;padding-left:1.2em;display:grid;gap:4px">${A11Y.map(x => `<li>${esc(x)}</li>`).join("")}</ul></section>
     <section class="panel"><header><h2>Marco normativo</h2></header><dl class="kv">
-      <dt>ISO/IEC 25010</dt><dd>Modelo de calidad del producto de software</dd><dt>ISO 9001:2015</dt><dd>Gestión de calidad, trazabilidad (8.5.2) e información documentada (7.5)</dd><dt>IEEE 830</dt><dd>Especificación de requisitos (docs/SRS-IEEE830.md)</dd><dt>DIAN</dt><dd>Resolución 000165 de 2023, factura electrónica de venta</dd><dt>Ley 1581 de 2012</dt><dd>Protección de datos personales (habeas data)</dd><dt>WCAG 2.1 / NTC 5854</dt><dd>Accesibilidad web</dd><dt>PUC</dt><dd>Decreto 2650 de 1993, cuentas del asiento automático</dd></dl></section>
+      <dt>ISO/IEC 25010</dt><dd>Modelo de calidad del producto de software</dd><dt>ISO 9001:2015</dt><dd>Gestión de calidad: diseño y desarrollo (8.3), trazabilidad (8.5.2), información documentada (7.5); ver docs/manual-procedimientos.md</dd><dt>IEEE 830</dt><dd>Especificación de requisitos (docs/SRS-IEEE830.md)</dd><dt>DIAN</dt><dd>Resolución 000165 de 2023, factura electrónica de venta</dd><dt>Ley 1581 de 2012</dt><dd>Protección de datos personales (habeas data)</dd><dt>Ley 1618 de 2013</dt><dd>Derechos de las personas con discapacidad; acceso a la información en igualdad de condiciones</dd><dt>Ley 1346 de 2009</dt><dd>Aprueba la Convención de la ONU sobre los derechos de las personas con discapacidad</dd><dt>Res. MinTIC 1519 de 2020</dt><dd>Estándares de accesibilidad web (anexo 1, WCAG 2.1 AA)</dd><dt>WCAG 2.1 / NTC 5854</dt><dd>Accesibilidad web</dd><dt>PUC</dt><dd>Decreto 2650 de 1993, cuentas del asiento automático</dd></dl></section>
   </div>`;
 }
 
-const VIEWS = { inicio:vInicio, facturas:vFacturas, "factura-nueva":vFacturaNueva, autorizaciones:vAutorizaciones, despachos:vDespachos, inventario:vInventario, importaciones:vImportaciones, clientes:vClientes, trazabilidad:vTrazabilidad, certificados:vCertificados, administracion:vAdministracion, calidad:vCalidad };
+const VIEWS = { inicio:vInicio, pedidos:vPedidos, "pedido-nuevo":vFacturaNueva, notificaciones:vNotificaciones, facturas:vFacturas, "factura-nueva":vFacturaNueva, autorizaciones:vAutorizaciones, despachos:vDespachos, inventario:vInventario, importaciones:vImportaciones, clientes:vClientes, trazabilidad:vTrazabilidad, certificados:vCertificados, administracion:vAdministracion, calidad:vCalidad };
 const AFTER = {};
 
 /* ---------- Diálogos y avisos ---------- */
@@ -1283,6 +1396,8 @@ const ACT = {
   cerrarDlg(){ closeDlg(); },
   verFactura(d){ UI.tab.fac = "doc"; dlgFactura(d.id); },
   masFacturas(){ UI.filtros.flim = (UI.filtros.flim || 40) + 40; render(); },
+  masPedidos(){ UI.filtros.plim = (UI.filtros.plim || 40) + 40; render(); },
+  masCorreos(){ UI.filtros.nlim = (UI.filtros.nlim || 50) + 100; render(); },
   masAudit(){ UI.filtros.alim = (UI.filtros.alim || 60) + 100; render(); },
   addItem(){ UI.draft.items.push({ productoId:"", cantidad:1 }); render(); $(`#it-p-${UI.draft.items.length - 1}`)?.focus(); },
   delItem(d){ UI.draft.items.splice(+d.i, 1); render(); },
@@ -1298,7 +1413,8 @@ const ACT = {
     autorizarFactura(DB, f, ME.id, new Date().toISOString());
     audit("Autorizar factura manual", "Factura", f.numero, "CUFE " + f.cufe.slice(0, 16) + "…");
     audit("Contabilizar factura autorizada", "Factura", f.numero, "Asiento " + f.asiento.numero + " · " + money(f.total));
-    closeDlg(); commit(); toast(`Factura ${f.numero} autorizada y contabilizada. Ya puede pasar a Despachos.`);
+    correo(DB, "Factura emitida", f, new Date().toISOString());
+    closeDlg(); commit(); toast(`Factura ${f.numero} autorizada, contabilizada y enviada al cliente. Ya puede pasar a Despachos.`);
   },
   rechazarDlg(d){
     const f = byId(DB.facturas, d.id);
@@ -1307,7 +1423,7 @@ const ACT = {
       <div class="field"><label for="rz-m">Motivo del rechazo *</label><textarea id="rz-m" name="motivo" required minlength="10" placeholder="Ej.: el cliente pidió 10 kits de arrastre, no 16. Verificar con el pedido firmado."></textarea></div><div id="rz-err" role="alert"></div></form>`,
       `<button class="btn" data-act="cerrarDlg">Cancelar</button><button class="btn danger" type="submit" form="frm-rz">Rechazar factura</button>`);
   },
-  pagar(d){ const f = byId(DB.facturas, d.id); f.pagada = true; f.pagoEn = new Date().toISOString(); audit("Registrar pago de factura", "Factura", f.numero, money(f.total) + " · libera cupo de " + cli(f.clienteId).nombre); save(); dlgFactura(f.id); render(); toast("Pago registrado. El cupo del cliente quedó liberado."); },
+  pagar(d){ const f = byId(DB.facturas, d.id); f.pagada = true; f.pagoEn = new Date().toISOString(); audit("Registrar pago de factura", "Factura", f.numero, money(f.total) + " · libera cupo de " + cli(f.clienteId).nombre); correo(DB, "Pago registrado", f, f.pagoEn); save(); dlgFactura(f.id); render(); toast("Pago registrado. El cupo del cliente quedó liberado."); },
   verifCufe(d){
     const f = byId(DB.facturas, d.id); const ok = cufe(f) === f.cufe;
     const el = $("#cufe-res"); if (el) el.innerHTML = ok ? pill("Íntegro: el CUFE coincide con los valores del documento", "ok") : pill("Alterado: los valores no coinciden con el CUFE", "bad");
@@ -1315,7 +1431,24 @@ const ACT = {
   },
   nuevaRemision(d){ dlgNuevaRemision(d.id); },
   verRemision(d){ dlgRemision(d.id); },
-  despachar(d){ const r = rem(d.id); r.estado = "En tránsito"; r.salidaEn = new Date().toISOString(); audit("Despachar remisión", "Remisión", r.numero, "Salida de bodega · " + r.instrucciones.transportadora); closeDlg(); commit(); toast(`Remisión ${r.numero} en tránsito.`); },
+  despachar(d){ const r = rem(d.id); r.estado = "En tránsito"; r.salidaEn = new Date().toISOString(); audit("Despachar remisión", "Remisión", r.numero, "Salida de bodega · " + r.instrucciones.transportadora); correo(DB, "Despacho", r, r.salidaEn); closeDlg(); commit(); toast(`Remisión ${r.numero} en tránsito. Se avisó al cliente por correo.`); },
+  facturarPedido(d){
+    const p = byId(DB.pedidos, d.id); if (!P("pedidos.gestionar") || p.estado !== "Registrado") return;
+    const c = cli(p.clienteId);
+    if (p.total > cupoDisponible(c, p.id)){ toast(`Cupo insuficiente: ${c.nombre} tiene ${money(cupoDisponible(c, p.id))} disponibles.`, true); return; }
+    const falt = p.items.find(it => (prod(it.productoId).stock[p.sucursalId] || 0) < it.cantidad);
+    if (falt){ toast("No hay existencia suficiente de " + prod(falt.productoId).sku + " en la sucursal.", true); return; }
+    const ts = new Date().toISOString();
+    const f = buildFactura(DB, p.clienteId, p.sucursalId, p.ciudadDestinoId, p.items.map(x => ({ ...x })), ts, ME.id, p);
+    if (p.obs) f.obs = p.obs;
+    audit("Facturar pedido de venta", "Factura", f.numero, "Pedido " + p.numero + " · " + money(f.total));
+    autorizarFactura(DB, f, "SYS", ts);
+    audit("Contabilizar factura (automática, origen pedido)", "Factura", f.numero, "Asiento " + f.asiento.numero + " · CUFE " + f.cufe.slice(0, 16) + "…");
+    correo(DB, "Factura emitida", f, ts);
+    commit(); toast(`Pedido ${p.numero} facturado como ${f.numero}, contabilizado y enviado al cliente.`);
+  },
+  anularPedidoDlg(d){ const p = byId(DB.pedidos, d.id); openDlg(`Anular pedido ${p.numero}`, `<form id="frm-an" data-form="anular" data-id="${p.id}" class="grid"><div class="field"><label for="an-m">Motivo de la anulación *</label><textarea id="an-m" name="motivo" required minlength="10" placeholder="Ej.: el cliente canceló por teléfono el 4 de noviembre."></textarea></div></form>`, `<button class="btn" data-act="cerrarDlg">Cancelar</button><button class="btn danger" type="submit" form="frm-an">Anular pedido</button>`); },
+  verCorreo(d){ const m = byId(DB.correos, d.id); openDlg(m.asunto, `<dl class="kv"><dt>De</dt><dd>notificaciones@motorepuestosoriente.example</dd><dt>Para</dt><dd>${esc(m.contacto)} &lt;${esc(m.para)}&gt;</dd><dt>Fecha</dt><dd>${fdt(m.ts)}</dd><dt>Tipo</dt><dd>${esc(m.tipo)} · <span class="mono">${esc(m.ref)}</span></dd><dt>Estado</dt><dd>${pill(m.estado, m.estado === "Enviado" ? "ok" : "warn")}</dd></dl><div class="doc" style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(m.cuerpo)}</div>`, `<button class="btn" data-act="cerrarDlg">Cerrar</button>`); },
   cerrarNovDlg(d){ openDlg("Cerrar novedad", `<form id="frm-nv" data-form="novedad" data-id="${d.id}" class="grid"><div class="field"><label for="nv-r">Resolución *</label><textarea id="nv-r" name="res" required minlength="10" placeholder="Qué se hizo: reposición, nota crédito, reclamación a la transportadora…"></textarea></div></form>`, `<button class="btn" data-act="cerrarDlg">Cancelar</button><button class="btn primary" type="submit" form="frm-nv">Cerrar novedad</button>`); },
   kardex(d){ dlgKardex(d.id); },
   ajusteDlg(d){ dlgAjuste(d.id); },
@@ -1390,7 +1523,16 @@ const FORM = {
     }
     d.errores = E;
     if (Object.keys(E).length){ save(); render(); const first = $('[aria-invalid="true"]') || $('[role="alert"]'); first?.focus?.(); if (first && first.getAttribute("role") === "alert"){ first.setAttribute("tabindex", "-1"); first.focus(); } return; }
-    const f = buildFactura(DB, d.clienteId, d.sucursalId, d.ciudadId, lines, new Date().toISOString(), ME.id);
+    const ts = new Date().toISOString();
+    if (d.modo === "pedido"){
+      const pd = buildPedido(DB, d.clienteId, d.sucursalId, d.ciudadId, lines, ts, ME.id);
+      if (d.obs.trim()) pd.obs = d.obs.trim();
+      audit("Registrar pedido de venta", "Pedido", pd.numero, cli(pd.clienteId).nombre + " · " + money(pd.total));
+      correo(DB, "Pedido de venta", pd, ts);
+      UI.draft = null; save(); location.hash = "pedidos"; toast(`Pedido ${pd.numero} registrado. Se envió la confirmación a ${cli(pd.clienteId).email || "el cliente"}.`);
+      return;
+    }
+    const f = buildFactura(DB, d.clienteId, d.sucursalId, d.ciudadId, lines, ts, ME.id);
     if (d.obs.trim()) f.obs = d.obs.trim();
     audit("Registrar factura manual", "Factura", f.numero, cli(f.clienteId).nombre + " · " + money(f.total));
     UI.draft = null; save(); location.hash = "facturas"; toast(`Factura ${f.numero} registrada y enviada a Gerencia para autorización.`);
@@ -1445,6 +1587,17 @@ const FORM = {
     } else { r.estado = "Entregada"; audit("Registrar entrega conforme", "Remisión", r.numero, "Recibe " + rec); toast(`Remisión ${r.numero} entregada sin novedades.`); }
     closeDlg(); commit();
   },
+  anular(form){
+    const p = byId(DB.pedidos, form.dataset.id); const m = form.motivo.value.trim();
+    if (m.length < 10){ form.motivo.focus(); return; }
+    p.estado = "Anulado"; p.motivoAnulacion = m; audit("Anular pedido de venta", "Pedido", p.numero, m); closeDlg(); commit(); toast(`Pedido ${p.numero} anulado. Se liberó el cupo del cliente.`);
+  },
+  estado(form){
+    const code = form.codigo.value.trim().toUpperCase(), nom = form.nombre.value.trim();
+    if (!nom || !/^[A-Z]{2,5}$/.test(code)){ toast("Escribe el nombre y un código de 2 a 5 letras.", true); return; }
+    if (DB.estados.some(e => e.id === code)){ toast("Ya existe un departamento o estado con ese código.", true); return; }
+    DB.estados.push({ id:code, paisId:form.paisId.value, nombre:nom }); audit("Crear departamento o estado", "Catálogo", code, nom + " · " + byId(DB.paises, form.paisId.value).nombre); commit(); toast(nom + " agregado.");
+  },
   novedad(form){
     const n = byId(DB.novedades, form.dataset.id); const v = form.res.value.trim();
     if (v.length < 10){ form.res.focus(); return; }
@@ -1489,26 +1642,29 @@ const FORM = {
     const err = [];
     if (!v.nombre.trim() || !v.direccion.trim() || !v.contacto.trim() || !v.telefono.trim()) err.push("Completa los campos obligatorios.");
     if (!/^[0-9.]{6,13}-[0-9]$/.test(nit)) err.push("El NIT debe tener el formato 900.123.456-7.");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v.email || "").trim())) err.push("Escribe un correo válido para las notificaciones, por ejemplo compras@almacen.com.");
     if (DB.clientes.some(c => c.nit === nit && c.id !== id)) err.push("Ya existe un cliente con ese NIT.");
     if (!form.hd.checked) err.push("Sin autorización de tratamiento de datos no se puede registrar el cliente.");
     if (err.length){ $("#cl-err").innerHTML = `<div class="note bad">${err.map(esc).join("<br>")}</div>`; return; }
     if (id){
       const c = cli(id); const antes = c.cupo;
-      Object.assign(c, { nombre:v.nombre.trim(), nit, ciudadId:v.ciudadId, direccion:v.direccion.trim(), contacto:v.contacto.trim(), telefono:v.telefono.trim(), autorizaDatos:true });
+      Object.assign(c, { email:v.email.trim(), nombre:v.nombre.trim(), nit, ciudadId:v.ciudadId, direccion:v.direccion.trim(), contacto:v.contacto.trim(), telefono:v.telefono.trim(), autorizaDatos:true });
       if (v.cupo !== undefined && +v.cupo !== antes){ c.cupo = +v.cupo; audit("Modificar cupo de cliente", "Cliente", c.nit, money(antes) + " → " + money(c.cupo)); }
       audit("Actualizar cliente", "Cliente", c.nit, c.nombre);
     } else {
-      const c = { id:"C" + (DB.clientes.length + 1) + "-" + Date.now().toString(36), nombre:v.nombre.trim(), nit, ciudadId:v.ciudadId, direccion:v.direccion.trim(), contacto:v.contacto.trim(), telefono:v.telefono.trim(), cupo:+v.cupo || 0, activo:true, autorizaDatos:true };
+      const c = { id:"C" + (DB.clientes.length + 1) + "-" + Date.now().toString(36), nombre:v.nombre.trim(), nit, ciudadId:v.ciudadId, direccion:v.direccion.trim(), contacto:v.contacto.trim(), telefono:v.telefono.trim(), email:v.email.trim(), cupo:+v.cupo || 0, activo:true, autorizaDatos:true };
       DB.clientes.push(c); audit("Crear cliente", "Cliente", nit, c.nombre + " · cupo " + money(c.cupo));
     }
     closeDlg(); commit(); toast("Cliente guardado.");
   },
   rastreo(form){
-    const q = form.doc.value.trim().toUpperCase(); const ev = DB.audit.filter(e => e.ref.toUpperCase() === q);
-    let extra = [];
-    const f = DB.facturas.find(x => x.numero === q); if (f && f.remisionId) extra = DB.audit.filter(e => e.ref === rem(f.remisionId).numero);
-    const r = DB.remisiones.find(x => x.numero === q); if (r) extra = DB.audit.filter(e => e.ref === byId(DB.facturas, r.facturaId).numero);
-    const all = [...ev, ...extra].sort((a, b) => a.seq - b.seq);
+    const q = form.doc.value.trim().toUpperCase();
+    const refs = new Set([q]);
+    let f = DB.facturas.find(x => x.numero === q);
+    const r0 = DB.remisiones.find(x => x.numero === q); if (r0) f = byId(DB.facturas, r0.facturaId);
+    const p0 = DB.pedidos.find(x => x.numero === q); if (p0){ refs.add(p0.numero); if (p0.facturaId) f = byId(DB.facturas, p0.facturaId); }
+    if (f){ refs.add(f.numero); if (f.remisionId) refs.add(rem(f.remisionId).numero); if (f.pedidoId) refs.add(byId(DB.pedidos, f.pedidoId).numero); }
+    const all = DB.audit.filter(e => refs.has(e.ref.toUpperCase()));
     UI.rastreo = all.length ? `<ul class="tl" style="margin-top:8px">${all.map(e => `<li><div><b>${esc(e.accion)}</b> <span class="mono">${esc(e.ref)}</span> · registro #${e.seq}<br><span class="when">${fdt(e.ts)} · ${esc(e.usuario)} (${esc(e.rol)})</span>${e.detalle ? `<br>${esc(e.detalle)}` : ""}</div></li>`).join("")}</ul>` : `<div class="note warn" style="margin-top:8px">No hay registros para ${esc(q)}. Revisa el número del documento.</div>`;
     render(); $("#rastreo-res")?.setAttribute("tabindex", "-1"); $("#rastreo-res")?.focus();
   },
@@ -1527,7 +1683,7 @@ const FORM = {
     DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast("Usuario creado. Ya aparece en la pantalla de ingreso.");
   },
   restaurar(form){
-    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 1 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
+    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 2 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
     catch(e){ toast("El texto no es un respaldo válido de este sistema.", true); }
   }
 };
@@ -1570,7 +1726,7 @@ document.addEventListener("change", e => {
   }
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape"){ if (UI.a11yOpen){ UI.a11yOpen = false; render(); } else if (UI.menuOpen){ UI.menuOpen = false; render(); } } });
-window.addEventListener("hashchange", () => { UI.menuOpen = false; if (ruta() !== "factura-nueva") UI.draft = null; render(); window.scrollTo(0, 0); $("#main")?.focus({ preventScroll:true }); });
+window.addEventListener("hashchange", () => { UI.menuOpen = false; if (ruta() !== "factura-nueva" && ruta() !== "pedido-nuevo") UI.draft = null; render(); window.scrollTo(0, 0); $("#main")?.focus({ preventScroll:true }); });
 
 /* ---------- Arranque ---------- */
 load(); loadPrefs();

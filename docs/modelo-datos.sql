@@ -77,6 +77,7 @@ CREATE TABLE cliente (
   contacto         VARCHAR(100)  NOT NULL,
   telefono         VARCHAR(20)   NOT NULL,
   cupo             NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (cupo >= 0),
+  email            VARCHAR(120)  NOT NULL CHECK (email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
   autoriza_datos   BOOLEAN       NOT NULL CHECK (autoriza_datos),
   autoriza_datos_en TIMESTAMPTZ  NOT NULL DEFAULT now(),
   activo           BOOLEAN       NOT NULL DEFAULT TRUE
@@ -115,6 +116,28 @@ CREATE TABLE movimiento_inventario (                                   -- kárde
   usuario_id   INT         NOT NULL REFERENCES usuario(id)
 );
 
+-- ---------- Pedidos de venta
+CREATE TABLE pedido (
+  id                 BIGSERIAL     PRIMARY KEY,
+  numero             VARCHAR(10)   NOT NULL UNIQUE,          -- PED-00001
+  fecha              TIMESTAMPTZ   NOT NULL DEFAULT now(),
+  cliente_id         INT           NOT NULL REFERENCES cliente(id),
+  sucursal_id        VARCHAR(4)    NOT NULL REFERENCES sucursal(id),
+  ciudad_destino_id  VARCHAR(8)    NOT NULL REFERENCES ciudad(id),
+  total              NUMERIC(14,2) NOT NULL CHECK (total >= 0),
+  estado             VARCHAR(10)   NOT NULL DEFAULT 'Registrado' CHECK (estado IN ('Registrado','Facturado','Anulado')),
+  motivo_anulacion   VARCHAR(400),
+  creado_por         INT           NOT NULL REFERENCES usuario(id),
+  CHECK (estado <> 'Anulado' OR length(coalesce(motivo_anulacion,'')) >= 10)
+);
+CREATE TABLE pedido_detalle (
+  pedido_id    BIGINT        NOT NULL REFERENCES pedido(id),
+  producto_id  INT           NOT NULL REFERENCES producto(id),
+  cantidad     INT           NOT NULL CHECK (cantidad > 0),
+  precio       NUMERIC(14,2) NOT NULL CHECK (precio > 0),
+  PRIMARY KEY (pedido_id, producto_id)
+);
+
 -- ---------- Facturación (casos de uso: Registrar, Autorizar, Rechazar, Contabilizar)
 CREATE TABLE resolucion_dian (
   id            SERIAL      PRIMARY KEY,
@@ -138,6 +161,8 @@ CREATE TABLE factura (
   iva                NUMERIC(14,2) NOT NULL CHECK (iva >= 0),
   total              NUMERIC(14,2) NOT NULL,
   estado             VARCHAR(12)   NOT NULL DEFAULT 'Pendiente' CHECK (estado IN ('Pendiente','Autorizada','Rechazada')),
+  origen             VARCHAR(7)    NOT NULL CHECK (origen IN ('Pedido','Manual')),
+  pedido_id          BIGINT        UNIQUE REFERENCES pedido(id),
   creado_por         INT           NOT NULL REFERENCES usuario(id),
   revisado_por       INT           REFERENCES usuario(id),
   revisado_en        TIMESTAMPTZ,
@@ -151,8 +176,12 @@ CREATE TABLE factura (
   CHECK (revisado_por IS NULL OR revisado_por <> creado_por),
   -- Rechazo exige motivo
   CHECK (estado <> 'Rechazada' OR length(coalesce(motivo_rechazo,'')) >= 10),
-  -- Autorizada exige CUFE y revisor
-  CHECK (estado <> 'Autorizada' OR (cufe IS NOT NULL AND revisado_por IS NOT NULL))
+  -- Una factura de pedido referencia su pedido; una manual no
+  CHECK ((origen = 'Pedido') = (pedido_id IS NOT NULL)),
+  -- Las facturas de pedido no se rechazan: se contabilizan al emitirse
+  CHECK (origen = 'Manual' OR estado = 'Autorizada'),
+  -- Una factura manual autorizada exige CUFE y un gerente revisor
+  CHECK (estado <> 'Autorizada' OR (cufe IS NOT NULL AND (origen = 'Pedido' OR revisado_por IS NOT NULL)))
 );
 CREATE TABLE factura_detalle (
   factura_id   BIGINT        NOT NULL REFERENCES factura(id),
@@ -185,6 +214,40 @@ CREATE TABLE certificado_garantia (
   vence        TIMESTAMPTZ NOT NULL,
   CHECK (vence > emitido)
 );
+
+-- Regla B2: una factura manual no se contabiliza sin autorización de un gerente
+CREATE OR REPLACE FUNCTION asiento_requiere_autorizacion() RETURNS trigger AS $$
+DECLARE f factura%ROWTYPE; r VARCHAR(40);
+BEGIN
+  SELECT * INTO f FROM factura WHERE id = NEW.factura_id;
+  IF f.estado <> 'Autorizada' THEN
+    RAISE EXCEPTION 'La factura % no está autorizada y no puede contabilizarse', f.numero;
+  END IF;
+  IF f.origen = 'Manual' THEN
+    SELECT ro.nombre INTO r FROM usuario u JOIN rol ro ON ro.id = u.rol_id WHERE u.id = f.revisado_por;
+    IF r IS DISTINCT FROM 'Gerente' THEN
+      RAISE EXCEPTION 'La factura manual % debe ser autorizada por un gerente', f.numero;
+    END IF;
+  END IF;
+  RETURN NEW;
+END $$ LANGUAGE plpgsql;
+CREATE TRIGGER trg_asiento_autorizacion BEFORE INSERT ON asiento_contable FOR EACH ROW EXECUTE FUNCTION asiento_requiere_autorizacion();
+
+-- ---------- Notificaciones por correo (tarjeta A: pedido, despacho, factura, pago)
+CREATE TABLE notificacion (
+  id           BIGSERIAL    PRIMARY KEY,
+  creada_en    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+  tipo         VARCHAR(20)  NOT NULL CHECK (tipo IN ('Pedido de venta','Factura emitida','Despacho','Pago registrado')),
+  cliente_id   INT          NOT NULL REFERENCES cliente(id),
+  para         VARCHAR(120) NOT NULL,
+  asunto       VARCHAR(160) NOT NULL,
+  cuerpo       TEXT         NOT NULL,
+  documento    VARCHAR(30)  NOT NULL,
+  estado       VARCHAR(12)  NOT NULL DEFAULT 'En cola' CHECK (estado IN ('En cola','Enviado','Fallido')),
+  intentos     SMALLINT     NOT NULL DEFAULT 0,
+  enviada_en   TIMESTAMPTZ
+);
+CREATE INDEX ix_notificacion_cola ON notificacion (estado, creada_en) WHERE estado <> 'Enviado';
 
 -- ---------- Despachos (casos de uso: Registrar despacho, Registrar instrucciones de envío)
 CREATE TABLE transportadora ( id SERIAL PRIMARY KEY, nombre VARCHAR(60) NOT NULL UNIQUE, propia BOOLEAN NOT NULL DEFAULT FALSE );
@@ -299,10 +362,15 @@ CREATE TRIGGER trg_factura_inmutable BEFORE UPDATE ON factura FOR EACH ROW EXECU
 
 -- Vista de cupo disponible (caso de uso: Validar cupo del cliente)
 CREATE VIEW v_cupo_cliente AS
+WITH comp AS (
+  SELECT cliente_id, total FROM factura WHERE estado IN ('Pendiente','Autorizada') AND NOT pagada
+  UNION ALL
+  SELECT cliente_id, total FROM pedido WHERE estado = 'Registrado'
+)
 SELECT c.id, c.nit, c.razon_social, c.cupo,
-       coalesce(sum(f.total) FILTER (WHERE f.estado IN ('Pendiente','Autorizada') AND NOT f.pagada), 0) AS comprometido,
-       c.cupo - coalesce(sum(f.total) FILTER (WHERE f.estado IN ('Pendiente','Autorizada') AND NOT f.pagada), 0) AS disponible
-FROM cliente c LEFT JOIN factura f ON f.cliente_id = c.id
+       coalesce(sum(comp.total), 0) AS comprometido,
+       c.cupo - coalesce(sum(comp.total), 0) AS disponible
+FROM cliente c LEFT JOIN comp ON comp.cliente_id = c.id
 GROUP BY c.id;
 
 -- Índices para consultas frecuentes
