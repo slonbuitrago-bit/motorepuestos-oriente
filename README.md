@@ -45,14 +45,22 @@ Los datos se guardan en el navegador de cada persona. En **Administración → D
 | Administración | Usuarios, matriz de permisos por rol, ciudades y municipios (DANE), sucursales, respaldo |
 | Calidad y normas | Matriz de requisitos, ISO/IEC 25010, WCAG, marco normativo |
 
+## Arquitectura
+
+Aplicación web de una sola página con **arquitectura en capas y separación MVC**: 28 módulos JavaScript en 6 capas (núcleo, datos, dominio, presentación, control y arranque), sin frameworks ni dependencias. La metodología fue incremental con prototipado evolutivo. Todo el detalle (patrones, decisiones, diagramas y arquitectura de producción) está en [`docs/arquitectura.md`](docs/arquitectura.md).
+
 ## Estructura del proyecto
 
 ```
 motorepuestos-oriente/
-├── app.html                 ← código fuente que se edita (estilos + lógica)
-├── index.html               ← página completa generada con ./build.sh (la que se abre)
-├── build.sh                 ← genera index.html a partir de app.html
+├── app.html                 ← estructura HTML y orden de carga de los módulos
+├── css/estilos.css          ← estilos, temas y accesibilidad
+├── js/                      ← código por capas: nucleo/, datos/, dominio/, ui/, vistas/, controladores/, app.js
+├── index.html               ← generado por ./build.sh (versión modular, la que publica GitHub Pages)
+├── dist/motorepuestos-oriente.html ← generado: todo en un solo archivo, para WhatsApp o sin internet
+├── build.sh                 ← genera index.html y dist/
 ├── docs/
+│   ├── arquitectura.md      ← arquitectura, módulos, patrones, decisiones y metodología
 │   ├── SRS-IEEE830.md       ← especificación de requisitos (IEEE 830)
 │   ├── calidad-ISO25010.md  ← plan de calidad, métricas y casos de prueba
 │   ├── actividad2-consultoria.md ← requisitos de las tarjetas A y B, su tipo, casos de uso y plan de pruebas
@@ -62,7 +70,7 @@ motorepuestos-oriente/
 └── README.md
 ```
 
-Dentro de `app.html` el código está dividido en secciones comentadas: utilidades, seguridad (roles y permisos), datos de ejemplo, reglas de negocio, vistas, acciones y formularios.
+Cada archivo de `js/` empieza con un comentario que dice a qué capa pertenece y qué hace.
 
 ## Accesibilidad
 
