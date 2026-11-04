@@ -1,0 +1,177 @@
+classDiagram
+direction LR
+
+class Usuario {
+  -id: int
+  -nombre: String
+  -usuario: String
+  -activo: boolean
+  +iniciarSesion(clave) boolean
+  +tienePermiso(codigo) boolean
+}
+class Rol {
+  -nombre: String
+  +otorgar(permiso)
+  +revocar(permiso)
+}
+class Permiso {
+  -codigo: String
+  -descripcion: String
+}
+class Sucursal {
+  -codigo: String
+  -nombre: String
+  -direccion: String
+}
+class Pais {
+  -codigo: String
+  -nombre: String
+  +departamentos() List
+}
+class Departamento {
+  -codigo: String
+  -nombre: String
+  +ciudades() List
+}
+class Ciudad {
+  -codigoDANE: String
+  -nombre: String
+}
+class Cliente {
+  -nit: String
+  -razonSocial: String
+  -email: String
+  -cupo: decimal
+  -autorizaDatos: boolean
+  +cupoDisponible() decimal
+}
+class Producto {
+  -sku: String
+  -nombre: String
+  -precio: decimal
+  -costoPromedio: decimal
+  -stockMinimo: int
+  -garantiaMeses: int
+  +bajoMinimo() boolean
+}
+class Existencia {
+  -cantidad: int
+  +descontar(cant)
+  +aumentar(cant)
+}
+class PedidoVenta {
+  -numero: String
+  -fecha: DateTime
+  -estado: EstadoPedido
+  +registrar()
+  +facturar() Factura
+  +anular(motivo)
+}
+class Factura {
+  -numero: String
+  -fecha: DateTime
+  -origen: OrigenFactura
+  -estado: EstadoFactura
+  -subtotal: decimal
+  -iva: decimal
+  -total: decimal
+  -cufe: String
+  +calcularTotales()
+  +validarCupo() boolean
+  +autorizar(gerente: Usuario)
+  +rechazar(gerente: Usuario, motivo)
+  +contabilizar() AsientoContable
+}
+class LineaDetalle {
+  -cantidad: int
+  -precioUnitario: decimal
+  +subtotal() decimal
+}
+class AsientoContable {
+  -numero: String
+  -fecha: DateTime
+  +estaCuadrado() boolean
+}
+class Pago {
+  -fecha: DateTime
+  -valor: decimal
+}
+class Remision {
+  -numero: String
+  -estado: EstadoRemision
+  -sello: String
+  +verificarConteo(conteo) boolean
+  +despachar()
+  +registrarEntrega(recibido)
+}
+class InstruccionesEnvio {
+  -direccion: String
+  -contacto: String
+  -telefono: String
+  -transportadora: String
+  -guia: String
+  -franja: String
+}
+class Novedad {
+  -tipo: String
+  -detalle: String
+  -estado: String
+  +cerrar(resolucion)
+}
+class Notificacion {
+  -tipo: TipoNotificacion
+  -para: String
+  -asunto: String
+  -estado: String
+  +enviar()
+}
+class RegistroAuditoria {
+  -secuencia: int
+  -accion: String
+  -hashPrevio: String
+  -hash: String
+  +verificarCadena() boolean
+}
+
+class OrigenFactura {
+  <<enumeration>>
+  PEDIDO
+  MANUAL
+}
+class EstadoFactura {
+  <<enumeration>>
+  PENDIENTE
+  AUTORIZADA
+  RECHAZADA
+}
+
+Usuario "*" --> "1" Rol : tiene
+Rol "*" --> "*" Permiso : incluye
+Usuario "*" --> "1" Sucursal : trabaja en
+Pais "1" *-- "*" Departamento : contiene
+Departamento "1" *-- "*" Ciudad : contiene
+Cliente "*" --> "1" Ciudad : ubicado en
+Sucursal "1" --> "*" Existencia
+Producto "1" --> "*" Existencia
+Cliente "1" --> "*" PedidoVenta : hace
+PedidoVenta "1" *-- "1..*" LineaDetalle
+Factura "1" *-- "1..*" LineaDetalle
+LineaDetalle "*" --> "1" Producto
+PedidoVenta "1" --> "0..1" Factura : se factura en
+Cliente "1" --> "*" Factura : recibe
+Factura "*" --> "1" Ciudad : destino
+Factura "*" --> "1" Usuario : registra
+Factura "*" --> "0..1" Usuario : autoriza (Gerente)
+Factura "1" --> "0..1" AsientoContable : genera
+Factura "1" --> "0..1" Pago : se paga con
+Factura "1" --> "0..1" Remision : se despacha con
+Remision "1" *-- "1" InstruccionesEnvio
+Remision "1" --> "*" Novedad : registra
+Notificacion "*" --> "1" Cliente : se envía a
+Factura ..> Notificacion : dispara
+PedidoVenta ..> Notificacion : dispara
+Remision ..> Notificacion : dispara
+Pago ..> Notificacion : dispara
+RegistroAuditoria "*" --> "1" Usuario : hecho por
+Factura --> OrigenFactura
+Factura --> EstadoFactura

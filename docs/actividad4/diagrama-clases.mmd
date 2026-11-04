@@ -1,0 +1,87 @@
+classDiagram
+direction TB
+
+class Usuario {
+  -nombre: String
+  -rol: Rol
+  +tienePermiso(codigo) boolean
+}
+class Rol {
+  -nombre: String
+  -permisos: List~String~
+}
+class Pais {
+  -nombre: String
+}
+class Departamento {
+  -nombre: String
+}
+class Ciudad {
+  -codigoDANE: String
+  -nombre: String
+}
+class Cliente {
+  -nit: String
+  -razonSocial: String
+  -email: String
+  -cupo: decimal
+  +cupoDisponible() decimal
+}
+class Producto {
+  -sku: String
+  -nombre: String
+  -precio: decimal
+  -stock: int
+}
+class PedidoVenta {
+  -numero: String
+  -estado: String
+  +registrar()
+  +facturar() Factura
+}
+class Factura {
+  -numero: String
+  -origen: PEDIDO o MANUAL
+  -estado: String
+  -total: decimal
+  +validarCupo() boolean
+  +autorizar(gerente)
+  +rechazar(motivo)
+  +contabilizar()
+}
+class LineaDetalle {
+  -cantidad: int
+  -precio: decimal
+}
+class AsientoContable {
+  -numero: String
+  +estaCuadrado() boolean
+}
+class Remision {
+  -numero: String
+  -instruccionesEnvio: String
+  +verificarConteo() boolean
+  +despachar()
+}
+class Notificacion {
+  -tipo: String
+  -para: String
+  +enviar()
+}
+
+Usuario "*" --> "1" Rol
+Pais "1" *-- "*" Departamento
+Departamento "1" *-- "*" Ciudad
+Cliente "*" --> "1" Ciudad
+Cliente "1" --> "*" PedidoVenta
+PedidoVenta "1" --> "0..1" Factura : se factura en
+Cliente "1" --> "*" Factura
+Factura "1" *-- "1..*" LineaDetalle
+LineaDetalle "*" --> "1" Producto
+Usuario "1" --> "*" Factura : registra / autoriza
+Factura "1" --> "0..1" AsientoContable : genera
+Factura "1" --> "0..1" Remision : se despacha con
+Factura ..> Notificacion : dispara
+PedidoVenta ..> Notificacion : dispara
+Remision ..> Notificacion : dispara
+Notificacion "*" --> "1" Cliente : se envía a
