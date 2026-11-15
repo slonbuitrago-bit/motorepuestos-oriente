@@ -19,6 +19,12 @@ const PERMISOS = {
   "admin.usuarios":       "Gestionar usuarios y permisos",
   "admin.catalogos":      "Gestionar ciudades, municipios y sucursales"
 };
+/* Configuración del sistema.
+   modoDemo: muestra los accesos rápidos de la pantalla de ingreso, el cambio de usuario y la guía.
+   En producción se pone en false y cada empleado entra con su usuario y contraseña. */
+const CONFIG = { modoDemo: true, claveDemo: "demo2026", intentosMaximos: 3, minutosBloqueo: 5 };
+const hashClave = (usuario, clave) => sha(String(usuario).toLowerCase() + "|" + clave);
+
 const ROL_DESC = {
   "Administrador": "Usuarios, permisos, ciudades y sucursales",
   "Gerente": "Autoriza facturas manuales, registra pagos y cierra novedades",

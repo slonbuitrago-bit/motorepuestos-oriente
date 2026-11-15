@@ -126,13 +126,13 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
   sec("4. Auditoría de QA");
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "4. Auditoría de QA" });
   s.addText("CONTROL DE CALIDAD", { placeholder: "eyebrow" });
-  s.addText("64 pruebas por niveles del Modelo en V", { placeholder: "title" });
+  s.addText("66 pruebas por niveles del Modelo en V", { placeholder: "title" });
   s.addImage({ path: path.join(REPO, "docs/final/img/modelo-v.png"), x: 0.5, y: 1.05, w: 9, h: 1.2, sizing: { type: "contain", w: 9, h: 1.2 }, objectName: "Modelo en V", altText: "Modelo en V: requisitos con pruebas de aceptación, diseño funcional con sistema, diseño técnico con integración y componentes con unitarias" });
-  const q = [["17", "unitarias", "funciones aisladas"], ["10", "integración", "bottom-up"], ["21", "sistema", "extremo a extremo"], ["16", "complementarias", "OWASP, carga, responsive…"]];
+  const q = [["17", "unitarias", "funciones aisladas"], ["10", "integración", "bottom-up"], ["23", "sistema", "extremo a extremo"], ["16", "complementarias", "OWASP, carga, responsive…"]];
   q.forEach((t, i) => { const x = 0.5 + i * 2.3; card(s, x, 2.45, 2.15, 1.3, C.background2, "nivel " + t[1]); txt(s, t[0], { x: x + 0.18, y: 2.55, w: 1.8, h: 0.6, fontSize: 32, bold: true, color: C.accent1, fontFace: "Arial" }); txt(s, t[1], { x: x + 0.18, y: 3.12, w: 1.85, h: 0.28, fontSize: 13, bold: true }); txt(s, t[2], { x: x + 0.18, y: 3.4, w: 1.85, h: 0.28, fontSize: 11, color: C.accent5 }); });
   card(s, 0.5, 3.95, 9, 1.05, C.text1, "OWASP");
   txt(s, "OWASP", { x: 0.75, y: 4.05, w: 1.5, h: 0.85, fontSize: 26, bold: true, color: C.accent2, fontFace: "Arial", valign: "middle" });
-  txt(s, "A01 control de acceso · A03 inyección y XSS · A07 autenticación · A08 integridad de datos: todas pasan. Además: robustez, carga (5.000 facturas en < 1 s), responsive y accesibilidad (0 violaciones). Resultado: 64 de 64.", { x: 2.25, y: 4.08, w: 7.05, h: 0.85, fontSize: 13, color: C.background1, valign: "middle" });
+  txt(s, "A01 control de acceso · A03 inyección y XSS · A07 autenticación · A08 integridad de datos: todas pasan. Además: robustez, carga (5.000 facturas en < 1 s), responsive y accesibilidad (0 violaciones). Resultado: 66 de 66.", { x: 2.25, y: 4.08, w: 7.05, h: 0.85, fontSize: 13, color: C.background1, valign: "middle" });
   s.addNotes("BLOQUE 4 · Auditoría de QA (3 min). Presenta: Rol 7 (Calidad). Explicar verificación (rama izquierda) y validación (rama derecha). Unitarias = funciones aisladas; integración = bottom-up (datos → dominio → contabilidad → correo); OWASP con ejemplos concretos.");
 
   /* 9 · Bugs de las pruebas cruzadas */
@@ -149,7 +149,7 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
   txt(s, "10 de 10 corregidos", { x: 5.37, y: 1.6, w: 3.95, h: 0.3, fontSize: 12, bold: true, color: C.accent2 });
   const propios = ["Cantidad decimal aceptada y truncada · robustez", "Desborde en celulares de 360 px · regresión", "Contraste insuficiente · auditoría WCAG", "Regla de negocio en la capa de vista · revisión estática", "Consecutivos de factura fuera de orden · sistema"];
   propios.forEach((t, k) => { const y = 2.05 + k * 0.56; s.addShape(pres.shapes.OVAL, { x: 5.37, y: y + 0.04, w: 0.26, h: 0.26, fill: { color: C.accent4 }, line: { color: C.accent4 }, objectName: "corregido " + (k + 1) }); txt(s, "✓", { x: 5.37, y: y + 0.04, w: 0.26, h: 0.26, align: "center", valign: "middle", fontSize: 10, bold: true, color: C.background1 }); txt(s, t, { x: 5.75, y, w: 3.6, h: 0.45, fontSize: 12, color: C.background1 }); });
-  s.addNotes("Presenta: Rol 7. Primero los bugs que reportó el grupo auditor en la Actividad 5 (escribirlos en las tres casillas de la izquierda antes de la clase) y qué se hizo con cada uno. Luego los encontrados por nuestras pruebas: el más didáctico es la regresión, porque un botón que agregamos para la demo rompió el diseño en celulares de 360 px y la prueba automática lo detectó. Limitación honesta: la contraseña de demostración se valida en el navegador; en producción, bcrypt + JWT en el servidor.");
+  s.addNotes("Presenta: Rol 7. Primero los bugs que reportó el grupo auditor en la Actividad 5 (escribirlos en las tres casillas de la izquierda antes de la clase) y qué se hizo con cada uno. Luego los encontrados por nuestras pruebas: el más didáctico es la regresión, porque un botón que agregamos para la demo rompió el diseño en celulares de 360 px y la prueba automática lo detectó. Ya hay ingreso con contraseña y bloqueo por intentos; limitación honesta: se valida en el navegador; en producción, bcrypt + JWT en el servidor.");
 
   /* 10 · Conclusiones */
   sec("5. Conclusiones");

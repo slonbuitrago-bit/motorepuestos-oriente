@@ -301,6 +301,12 @@ const PERMISOS = {
   "admin.usuarios":       "Gestionar usuarios y permisos",
   "admin.catalogos":      "Gestionar ciudades, municipios y sucursales"
 };
+/* Configuración del sistema.
+   modoDemo: muestra los accesos rápidos de la pantalla de ingreso, el cambio de usuario y la guía.
+   En producción se pone en false y cada empleado entra con su usuario y contraseña. */
+const CONFIG = { modoDemo: true, claveDemo: "demo2026", intentosMaximos: 3, minutosBloqueo: 5 };
+const hashClave = (usuario, clave) => sha(String(usuario).toLowerCase() + "|" + clave);
+
 const ROL_DESC = {
   "Administrador": "Usuarios, permisos, ciudades y sucursales",
   "Gerente": "Autoriza facturas manuales, registra pagos y cierra novedades",
@@ -363,7 +369,7 @@ function seed(){
   const pick = a => a[Math.floor(R() * a.length)];
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
   const db = {
-    version: 4, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
+    version: 5, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], bloqueos:{}, kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
     empresa:{ nombre:"Motorepuestos del Oriente S.A.S.", nit:"901.482.315-7", ciudad:"Rionegro, Antioquia", resolucion:"Resolución DIAN 18764000001234 (simulada) · Prefijo MRO · Rango 1 a 50.000 · Vigencia 2026-2027" },
     roles: JSON.parse(JSON.stringify(ROLES_BASE)),
     usuarios:[
@@ -430,6 +436,7 @@ function seed(){
   ];
   db.clientes = clis.map((c, i) => ({ id:"C" + (i+1), nombre:c[0], nit:c[1], ciudadId:c[2], direccion:c[3], contacto:c[4], telefono:c[5], cupo:c[6], email:c[7], activo:true, autorizaDatos:true }));
 
+  db.usuarios.forEach(u => { u.claveHash = hashClave(u.usuario, CONFIG.claveDemo); });
   const U = id => db.usuarios.find(u => u.id === id);
   const events = []; // [ts, accion, entidad, ref, detalle, user]
   const ev = (ts, a, en, ref, d, u) => events.push([ts.toISOString(), a, en, ref, d, U(u)]);
@@ -721,7 +728,7 @@ function costeo(im){
 
 function load(){
   const raw = store.get(STORE_KEY);
-  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 4) return; } catch(e){} }
+  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 5) return; } catch(e){} }
   DB = seed(); save();
 }
 function save(){ store.set(STORE_KEY, JSON.stringify(DB)); }
@@ -819,15 +826,15 @@ function render(){
       <div class="brand"><img class="mark" src="data:image/jpeg;base64,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" alt="" width="48" height="48"><div><b>Motorepuestos<br>del Oriente</b><small>Rionegro · Antioquia</small></div></div>
       <nav class="nav" aria-label="Secciones">${nav}</nav>
       <div class="me"><b>${esc(ME.nombre)}</b><span>${esc(ME.rol)} · ${esc(sucNom)}</span>
-        <label for="sw-user" style="margin-top:12px;font-weight:400;font-size:.78rem;color:var(--rail-ink)">Cambiar de usuario (demostración)</label>
-        <select id="sw-user" data-switch-user style="margin-top:4px">${DB.usuarios.filter(u => u.activo).map(u => `<option value="${u.id}" ${u.id === ME.id ? "selected" : ""}>${esc(u.nombre)} · ${esc(u.rol)}</option>`).join("")}</select>
+        ${CONFIG.modoDemo ? `<label for="sw-user" style="margin-top:12px;font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--rail-hi)">Modo demostración · cambiar de usuario</label>
+        <select id="sw-user" data-switch-user style="margin-top:4px">${DB.usuarios.filter(u => u.activo).map(u => `<option value="${u.id}" ${u.id === ME.id ? "selected" : ""}>${esc(u.nombre)} · ${esc(u.rol)}</option>`).join("")}</select>` : ""}
         <div class="row" style="margin-top:10px"><button class="btn sm" data-act="logout">${icon("salir")} Cerrar sesión</button></div></div>
     </aside>
     <div class="main">
       <header class="topbar">
         <button class="btn ghost menu-btn" data-act="menu" aria-expanded="${UI.menuOpen}" aria-controls="rail">${icon("menu")}<span class="sr">Abrir menú</span></button>
         <span class="crumb">${esc(meta.label)}</span><span class="sp"></span>
-        <button class="btn" data-act="guia" title="Recorrido sugerido para la demostración" aria-label="Guía de demostración">${icon("calidad")}<span class="lbl">Guía</span></button>
+        ${CONFIG.modoDemo ? `<button class="btn" data-act="guia" title="Recorrido sugerido para la demostración" aria-label="Guía de demostración">${icon("calidad")}<span class="lbl">Guía</span></button>` : ""}
         <button class="btn ghost" data-act="leer" title="Leer esta pantalla en voz alta">${icon("voz")}<span class="sr">Leer en voz alta</span></button>
         <button class="btn" data-act="a11y" aria-label="Opciones de accesibilidad" aria-expanded="${UI.a11yOpen}" aria-controls="a11y-panel">${icon("a11y")}<span class="lbl">Accesibilidad</span></button>
       </header>
@@ -847,7 +854,6 @@ function render(){
 
 /* ---------- Vistas ---------- */
 function vLogin(){
-  const sel = UI.loginSel || "U3";
   return `
   <div class="login">
     <section class="side" aria-labelledby="lg-t">
@@ -858,16 +864,21 @@ function vLogin(){
       <div class="facts"><div><b>3</b>sucursales en el Oriente antioqueño</div><div><b>12 años</b>de convenio con el proveedor en Panamá</div><div><b>${NUM.format(DB.facturas.length)}</b>facturas de ejemplo cargadas</div></div>
     </section>
     <section class="form" aria-labelledby="lg-f">
-      <div><p class="eyebrow">Ingreso al sistema</p><h2 id="lg-f">Elige un usuario de demostración</h2>
-      <p class="muted" style="margin-top:6px">Cada usuario tiene un rol con permisos distintos. Prueba el flujo completo: Logística registra, Gerencia autoriza, Despachos entrega.</p></div>
-      <div class="users" role="group" aria-label="Usuarios de demostración">
-        ${DB.usuarios.filter(u => u.activo).map(u => `<button class="ucard" data-act="loginSel" data-id="${u.id}" aria-pressed="${u.id === sel}"><b>${esc(u.nombre)}</b><small>${esc(u.rol)} · ${esc(suc(u.sucursalId)?.nombre || "")}</small><small style="margin-top:4px">${esc(ROL_DESC[u.rol] || "")}</small></button>`).join("")}
-      </div>
-      <form data-form="login" class="grid">
-        <div class="field"><label for="lg-pass">Contraseña</label><input id="lg-pass" type="password" autocomplete="current-password" value="demo2026" aria-describedby="lg-h"><span class="hint" id="lg-h">En la demostración la contraseña de todos los usuarios es <span class="mono">demo2026</span>.</span></div>
+      <div><p class="eyebrow">Ingreso al sistema</p><h2 id="lg-f">Inicia sesión</h2>
+      <p class="muted" style="margin-top:6px">Entra con tu usuario y contraseña. Cada usuario tiene un rol con permisos distintos.</p></div>
+      <form data-form="login" class="grid" novalidate>
+        <div class="field"><label for="lg-user">Usuario</label><input id="lg-user" name="usuario" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="Ej.: cospina" aria-describedby="lg-err"></div>
+        <div class="field"><label for="lg-pass">Contraseña</label><input id="lg-pass" name="clave" type="password" autocomplete="current-password" required aria-describedby="lg-err"></div>
+        <div id="lg-err" role="alert"></div>
         <button class="btn primary" type="submit">Ingresar</button>
       </form>
-      <div class="row"><button class="btn sm" data-act="guia">${icon("calidad")} Ver la guía de demostración (8 pasos)</button></div>
+      ${CONFIG.modoDemo ? `<section class="panel" aria-labelledby="lg-demo" style="gap:10px">
+        <header><h3 id="lg-demo">Accesos de demostración</h3>${pill("Modo demostración", "warn")}</header>
+        <p class="muted" style="font-size:.85rem">Solo para la presentación: cada tarjeta llena el formulario con el usuario y su contraseña (<span class="mono">${esc(CONFIG.claveDemo)}</span>). En producción este recuadro no existe.</p>
+        <div class="users" role="group" aria-label="Usuarios de demostración">
+        ${DB.usuarios.filter(u => u.activo).map(u => `<button type="button" class="ucard" data-act="loginSel" data-id="${u.id}"><b>${esc(u.nombre)}</b><small>${esc(u.rol)} · usuario <span class="mono">${esc(u.usuario)}</span></small><small style="margin-top:4px">${esc(ROL_DESC[u.rol] || "")}</small></button>`).join("")}
+        </div></section>` : ""}
+      ${CONFIG.modoDemo ? `<div class="row"><button class="btn sm" data-act="guia">${icon("calidad")} Ver la guía de demostración (8 pasos)</button></div>` : ""}
       <div class="row"><a href="#certificados" class="linklike" data-act="verifPublico">Verificar un certificado de garantía sin iniciar sesión</a></div>
       <div class="row"><button class="btn sm" data-act="a11y">${icon("a11y")} Opciones de accesibilidad</button></div>
       ${UI.a11yOpen ? vA11y(true) : ""}
@@ -1517,10 +1528,11 @@ const ACT = {
     const m = $("#main"); const txt = [...m.querySelectorAll("h1,h2,.page-head p,.kpi,.note,.task")].map(x => x.innerText.replace(/\s+/g, " ")).join(". ");
     const u = new SpeechSynthesisUtterance(txt.slice(0, 3000)); u.lang = "es-CO"; u.rate = 1; speechSynthesis.speak(u); toast("Leyendo la pantalla. Pulsa de nuevo para detener.");
   },
-  loginSel(d){ UI.loginSel = d.id; render(); $(`[data-act="loginSel"][data-id="${d.id}"]`)?.focus(); },
+  loginSel(d){ if (!CONFIG.modoDemo) return; const u = usr(d.id); $("#lg-user").value = u.usuario; $("#lg-pass").value = CONFIG.claveDemo; $("#lg-err").innerHTML = ""; $('form[data-form="login"] button[type=submit]')?.focus(); },
   verifPublico(){ UI.publico = true; UI.certRes = ""; render(); $("#cc")?.focus(); },
   cerrarPublico(){ UI.publico = false; render(); },
   guia(){
+    if (!CONFIG.modoDemo) return;
     const pasos = [
       ["U3","pedidos","Camila · Logística","Facturar el pedido de venta pendiente: queda contabilizado sin pasar por Gerencia y se envía correo al cliente.","Facturación automática y aviso al cliente"],
       ["U3","factura-nueva","Camila · Logística","Registrar una factura manual: cambiar de país para ver cómo se filtran los departamentos; probar con Repuestos San Vicente y una cantidad alta para ver el bloqueo por cupo.","Destinos válidos y control de cupo"],
@@ -1538,6 +1550,7 @@ const ACT = {
       <p class="muted" style="font-size:.85rem">Antes de presentar: Administración → Datos y respaldo → Restablecer datos de ejemplo, para empezar con todos los casos disponibles.</p>`, `<button class="btn" data-act="cerrarDlg">Cerrar</button>`);
   },
   demoPaso(d){
+    if (!CONFIG.modoDemo) return;
     const u = usr(d.u); if (!u || !u.activo) return;
     if (!ME || ME.id !== u.id){ ME = u; store.set(SES_KEY, u.id); audit("Cambiar de usuario (demostración)", "Sesión", u.usuario, u.rol); save(); }
     closeDlg(); UI.publico = false; UI.a11yOpen = false; UI.draft = null;
@@ -1652,9 +1665,23 @@ const ACT = {
 /* ---------- Formularios ---------- */
 const FORM = {
   noop(){},
-  login(){
-    const u = usr(UI.loginSel || "U3"); const pass = $("#lg-pass").value;
-    if (pass !== "demo2026"){ toast("Contraseña incorrecta. En la demostración es demo2026.", true); $("#lg-pass").setAttribute("aria-invalid", "true"); $("#lg-pass").focus(); return; }
+  login(form){
+    const nombre = form.usuario.value.trim().toLowerCase(), clave = form.clave.value;
+    const err = m => { $("#lg-err").innerHTML = `<div class="note bad">${m}</div>`; form.clave.value = ""; form.clave.setAttribute("aria-invalid", "true"); (nombre ? form.clave : form.usuario).focus(); };
+    if (!nombre || !clave) return err("Escribe tu usuario y tu contraseña.");
+    DB.bloqueos = DB.bloqueos || {};
+    const b = DB.bloqueos[nombre] || { fallos:0, hasta:null };
+    if (b.hasta && new Date(b.hasta) > new Date()){ const min = Math.ceil((new Date(b.hasta) - new Date()) / 60000); return err(`Usuario bloqueado por intentos fallidos. Intenta de nuevo en ${min} ${min === 1 ? "minuto" : "minutos"}.`); }
+    const u = DB.usuarios.find(x => x.usuario.toLowerCase() === nombre);
+    if (!u || u.claveHash !== hashClave(u.usuario, clave)){
+      b.fallos = (b.hasta ? 0 : b.fallos) + 1; b.hasta = null;
+      if (b.fallos >= CONFIG.intentosMaximos){ b.hasta = new Date(Date.now() + CONFIG.minutosBloqueo * 60000).toISOString(); b.fallos = 0; }
+      DB.bloqueos[nombre] = b;
+      audit(b.hasta ? "Bloquear usuario por intentos fallidos" : "Intento de ingreso fallido", "Sesión", nombre, b.hasta ? `${CONFIG.intentosMaximos} intentos fallidos · bloqueo de ${CONFIG.minutosBloqueo} min` : "Usuario o contraseña incorrectos", { user:{ nombre:"Sistema", rol:"Sistema" } }); save();
+      return err(b.hasta ? `Demasiados intentos fallidos. El usuario queda bloqueado ${CONFIG.minutosBloqueo} minutos.` : `Usuario o contraseña incorrectos. Te ${CONFIG.intentosMaximos - b.fallos === 1 ? "queda 1 intento" : `quedan ${CONFIG.intentosMaximos - b.fallos} intentos`}.`);
+    }
+    if (!u.activo) return err("Este usuario está desactivado. Habla con el administrador.");
+    delete DB.bloqueos[nombre];
     ME = u; store.set(SES_KEY, u.id); UI.a11yOpen = false; UI.publico = false;
     audit("Iniciar sesión", "Sesión", u.usuario, u.rol); save();
     if (!location.hash || location.hash === "#certificados") location.hash = "inicio";
@@ -1841,11 +1868,11 @@ const FORM = {
     const v = Object.fromEntries(new FormData(form));
     if (!v.nombre.trim() || !/^[a-z0-9.]{3,20}$/.test(v.usuario)){ $("#us-err").innerHTML = `<div class="note bad">Completa el nombre y un usuario válido (minúsculas, 3 a 20).</div>`; return; }
     if (DB.usuarios.some(u => u.usuario === v.usuario)){ $("#us-err").innerHTML = `<div class="note bad">Ese usuario ya existe.</div>`; return; }
-    const u = { id:"U" + (DB.usuarios.length + 1) + "-" + Date.now().toString(36), nombre:v.nombre.trim(), usuario:v.usuario, rol:v.rol, sucursalId:v.suc, activo:true };
-    DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast("Usuario creado. Ya aparece en la pantalla de ingreso.");
+    const u = { id:"U" + (DB.usuarios.length + 1) + "-" + Date.now().toString(36), nombre:v.nombre.trim(), usuario:v.usuario, rol:v.rol, sucursalId:v.suc, activo:true, claveHash:hashClave(v.usuario, CONFIG.claveDemo) };
+    DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast(`Usuario ${u.usuario} creado. Su contraseña inicial es ${CONFIG.claveDemo}.`);
   },
   restaurar(form){
-    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 4 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
+    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 5 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
     catch(e){ toast("El texto no es un respaldo válido de este sistema.", true); }
   }
 };

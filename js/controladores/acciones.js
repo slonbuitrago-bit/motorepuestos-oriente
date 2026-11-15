@@ -14,10 +14,11 @@ const ACT = {
     const m = $("#main"); const txt = [...m.querySelectorAll("h1,h2,.page-head p,.kpi,.note,.task")].map(x => x.innerText.replace(/\s+/g, " ")).join(". ");
     const u = new SpeechSynthesisUtterance(txt.slice(0, 3000)); u.lang = "es-CO"; u.rate = 1; speechSynthesis.speak(u); toast("Leyendo la pantalla. Pulsa de nuevo para detener.");
   },
-  loginSel(d){ UI.loginSel = d.id; render(); $(`[data-act="loginSel"][data-id="${d.id}"]`)?.focus(); },
+  loginSel(d){ if (!CONFIG.modoDemo) return; const u = usr(d.id); $("#lg-user").value = u.usuario; $("#lg-pass").value = CONFIG.claveDemo; $("#lg-err").innerHTML = ""; $('form[data-form="login"] button[type=submit]')?.focus(); },
   verifPublico(){ UI.publico = true; UI.certRes = ""; render(); $("#cc")?.focus(); },
   cerrarPublico(){ UI.publico = false; render(); },
   guia(){
+    if (!CONFIG.modoDemo) return;
     const pasos = [
       ["U3","pedidos","Camila · Logística","Facturar el pedido de venta pendiente: queda contabilizado sin pasar por Gerencia y se envía correo al cliente.","Facturación automática y aviso al cliente"],
       ["U3","factura-nueva","Camila · Logística","Registrar una factura manual: cambiar de país para ver cómo se filtran los departamentos; probar con Repuestos San Vicente y una cantidad alta para ver el bloqueo por cupo.","Destinos válidos y control de cupo"],
@@ -35,6 +36,7 @@ const ACT = {
       <p class="muted" style="font-size:.85rem">Antes de presentar: Administración → Datos y respaldo → Restablecer datos de ejemplo, para empezar con todos los casos disponibles.</p>`, `<button class="btn" data-act="cerrarDlg">Cerrar</button>`);
   },
   demoPaso(d){
+    if (!CONFIG.modoDemo) return;
     const u = usr(d.u); if (!u || !u.activo) return;
     if (!ME || ME.id !== u.id){ ME = u; store.set(SES_KEY, u.id); audit("Cambiar de usuario (demostración)", "Sesión", u.usuario, u.rol); save(); }
     closeDlg(); UI.publico = false; UI.a11yOpen = false; UI.draft = null;

@@ -1,4 +1,4 @@
-Ejecución de pruebas · 2026-11-15 21:11 · npm test
+Ejecución de pruebas · 2026-11-15 21:24 · npm test
 
 ok 1 - CI-01 · Datos + dominio: un pedido facturado queda contabilizado sin autorización (B2)
 ok 2 - CI-02 · Factura manual: queda Pendiente y sin asiento hasta que un gerente la autorice (B2)
@@ -43,13 +43,15 @@ ok 27 - CU-17 · Cupo disponible = cupo − facturas sin pagar − pedidos regis
 ✔ CS-10 Quien registra una factura no puede autorizarla — Botón Autorizar deshabilitado para la autora
 ✔ CS-11 Remisión con transportadora externa exige número de guía — Escribe el número de guía de la transportadora.
 ✔ CS-12 Conteo ciego con diferencia bloquea la salida y abre novedad — Estado: Alistamiento, novedad registrada
-✔ CS-13 Conteo correcto sella la remisión y permite despacharla — Verificada · sello FB6C024C41 → En tránsito
+✔ CS-13 Conteo correcto sella la remisión y permite despacharla — Verificada · sello 4552EF3B23 → En tránsito
 ✔ CS-14 Entrega con faltante queda Con novedad — Estado final: Con novedad
 ✔ CS-15 La verificación detecta una alteración de la bitácora — Cadena rota en el registro #10. Ese registro o uno anterior 
 ✔ CS-16 Rastrear una factura muestra pedido, factura y remisión — 10 eventos encadenados
 ✔ CS-17 Certificado auténtico se valida y uno falso se rechaza, sin iniciar sesión — Auténtico y falso diferenciados
 ✔ CS-18 Recibir una importación aumenta las existencias — 60 → 210
 ✔ CS-19 Traslado con origen igual al destino es rechazado — El origen y el destino deben ser distintos.
+✔ CS-22 Ingreso escribiendo usuario y contraseña; bloqueo tras 3 intentos fallidos — Intentos: «Usuario o contraseña incorrectos. Te que» → «Demasiados intentos fallidos. El usuario qued»; con la clave correcta sigue bloqueado; otro usuario entra escribiendo su usuario
+✔ CS-23 Con el modo demostración apagado desaparecen los accesos rápidos, el cambio de usuario y la guía — Demo: accesos visibles · Producción: accesos ocultos, selector oculto, guía oculta
 ✔ CS-20 Buscador de cliente y referencia: sugiere, completa el destino y pasa al siguiente campo — «llanta» sugiere 2 referencias · texto parcial no elige · al elegir: destino San Vicente Ferrer, el cursor pasa a referencia y luego a cantidad
 ✔ CS-21 Cliente inexistente se rechaza y la lista de clientes se filtra al escribir — Mensaje: «No encontramos ese cliente. Elígelo de la lis…» · «sonsón» deja 1 cliente: Distrimotos Sonsón
 ✔ CC-01 Las 14 pantallas cargan sin errores con los 6 roles — 84 combinaciones rol × pantalla sin errores de JavaScript
@@ -62,10 +64,10 @@ ok 27 - CU-17 · Cupo disponible = cupo − facturas sin pagar − pedidos regis
 ✔ CC-08 Contraseña incorrecta no permite el ingreso — Ver CS-01
 ✔ CC-09 Alteración de registros detectada por la cadena SHA-256 — Ver CS-15 y CU-14
 ✔ CC-10 Auditoría automática axe-core en 8 pantallas — 0 violaciones WCAG 2.1 A/AA
-✔ CC-11 Tiempo de dibujo de cada pantalla < 300 ms — Promedio 10.5 ms · máximo 20.9 ms
-✔ CC-12 Con 5.000 facturas adicionales la lista y el tablero responden < 1 s — Lista 30 ms · tablero 27 ms · datos 5.51 MB
+✔ CC-11 Tiempo de dibujo de cada pantalla < 300 ms — Promedio 10.5 ms · máximo 18.9 ms
+✔ CC-12 Con 5.000 facturas adicionales la lista y el tablero responden < 1 s — Lista 23 ms · tablero 19 ms · datos 5.51 MB
 ✔ CC-13 Excede la capacidad del almacenamiento del navegador (30.000 facturas) — Datos: 31.0 MB · ¿se pudo guardar?: no (límite del navegador alcanzado; la app no se cae y sigue en memoria)
-✔ CC-14 300 cambios de pantalla seguidos sin errores — 5.1 s, 0 errores
+✔ CC-14 300 cambios de pantalla seguidos sin errores — 5.2 s, 0 errores
 ✔ CC-15 Sesión de 15 min: doble clic en Facturar, recarga a mitad de formulario, nombres largos con emoji y ñ — Doble facturación: no ocurre · sesión tras recargar: se conserva · nombre de 170 caracteres sin romper el diseño: true
-✔ CC-16 Toda la suite se ejecutó de nuevo tras la modularización y el movimiento de costeo() al dominio — 36 de 36 pruebas de esta corrida pasan
-37 de 37 pruebas pasan. Evidencias en docs/final/evidencias/
+✔ CC-16 Toda la suite se ejecutó de nuevo tras la modularización y el movimiento de costeo() al dominio — 38 de 38 pruebas de esta corrida pasan
+39 de 39 pruebas pasan. Evidencias en docs/final/evidencias/

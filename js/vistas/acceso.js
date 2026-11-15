@@ -4,7 +4,6 @@
 
 /* ---------- Vistas ---------- */
 function vLogin(){
-  const sel = UI.loginSel || "U3";
   return `
   <div class="login">
     <section class="side" aria-labelledby="lg-t">
@@ -15,16 +14,21 @@ function vLogin(){
       <div class="facts"><div><b>3</b>sucursales en el Oriente antioqueño</div><div><b>12 años</b>de convenio con el proveedor en Panamá</div><div><b>${NUM.format(DB.facturas.length)}</b>facturas de ejemplo cargadas</div></div>
     </section>
     <section class="form" aria-labelledby="lg-f">
-      <div><p class="eyebrow">Ingreso al sistema</p><h2 id="lg-f">Elige un usuario de demostración</h2>
-      <p class="muted" style="margin-top:6px">Cada usuario tiene un rol con permisos distintos. Prueba el flujo completo: Logística registra, Gerencia autoriza, Despachos entrega.</p></div>
-      <div class="users" role="group" aria-label="Usuarios de demostración">
-        ${DB.usuarios.filter(u => u.activo).map(u => `<button class="ucard" data-act="loginSel" data-id="${u.id}" aria-pressed="${u.id === sel}"><b>${esc(u.nombre)}</b><small>${esc(u.rol)} · ${esc(suc(u.sucursalId)?.nombre || "")}</small><small style="margin-top:4px">${esc(ROL_DESC[u.rol] || "")}</small></button>`).join("")}
-      </div>
-      <form data-form="login" class="grid">
-        <div class="field"><label for="lg-pass">Contraseña</label><input id="lg-pass" type="password" autocomplete="current-password" value="demo2026" aria-describedby="lg-h"><span class="hint" id="lg-h">En la demostración la contraseña de todos los usuarios es <span class="mono">demo2026</span>.</span></div>
+      <div><p class="eyebrow">Ingreso al sistema</p><h2 id="lg-f">Inicia sesión</h2>
+      <p class="muted" style="margin-top:6px">Entra con tu usuario y contraseña. Cada usuario tiene un rol con permisos distintos.</p></div>
+      <form data-form="login" class="grid" novalidate>
+        <div class="field"><label for="lg-user">Usuario</label><input id="lg-user" name="usuario" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="Ej.: cospina" aria-describedby="lg-err"></div>
+        <div class="field"><label for="lg-pass">Contraseña</label><input id="lg-pass" name="clave" type="password" autocomplete="current-password" required aria-describedby="lg-err"></div>
+        <div id="lg-err" role="alert"></div>
         <button class="btn primary" type="submit">Ingresar</button>
       </form>
-      <div class="row"><button class="btn sm" data-act="guia">${icon("calidad")} Ver la guía de demostración (8 pasos)</button></div>
+      ${CONFIG.modoDemo ? `<section class="panel" aria-labelledby="lg-demo" style="gap:10px">
+        <header><h3 id="lg-demo">Accesos de demostración</h3>${pill("Modo demostración", "warn")}</header>
+        <p class="muted" style="font-size:.85rem">Solo para la presentación: cada tarjeta llena el formulario con el usuario y su contraseña (<span class="mono">${esc(CONFIG.claveDemo)}</span>). En producción este recuadro no existe.</p>
+        <div class="users" role="group" aria-label="Usuarios de demostración">
+        ${DB.usuarios.filter(u => u.activo).map(u => `<button type="button" class="ucard" data-act="loginSel" data-id="${u.id}"><b>${esc(u.nombre)}</b><small>${esc(u.rol)} · usuario <span class="mono">${esc(u.usuario)}</span></small><small style="margin-top:4px">${esc(ROL_DESC[u.rol] || "")}</small></button>`).join("")}
+        </div></section>` : ""}
+      ${CONFIG.modoDemo ? `<div class="row"><button class="btn sm" data-act="guia">${icon("calidad")} Ver la guía de demostración (8 pasos)</button></div>` : ""}
       <div class="row"><a href="#certificados" class="linklike" data-act="verifPublico">Verificar un certificado de garantía sin iniciar sesión</a></div>
       <div class="row"><button class="btn sm" data-act="a11y">${icon("a11y")} Opciones de accesibilidad</button></div>
       ${UI.a11yOpen ? vA11y(true) : ""}

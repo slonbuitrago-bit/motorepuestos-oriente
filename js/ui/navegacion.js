@@ -43,15 +43,15 @@ function render(){
       <div class="brand"><img class="mark" src="img/logo-160.jpg" alt="" width="48" height="48"><div><b>Motorepuestos<br>del Oriente</b><small>Rionegro · Antioquia</small></div></div>
       <nav class="nav" aria-label="Secciones">${nav}</nav>
       <div class="me"><b>${esc(ME.nombre)}</b><span>${esc(ME.rol)} · ${esc(sucNom)}</span>
-        <label for="sw-user" style="margin-top:12px;font-weight:400;font-size:.78rem;color:var(--rail-ink)">Cambiar de usuario (demostración)</label>
-        <select id="sw-user" data-switch-user style="margin-top:4px">${DB.usuarios.filter(u => u.activo).map(u => `<option value="${u.id}" ${u.id === ME.id ? "selected" : ""}>${esc(u.nombre)} · ${esc(u.rol)}</option>`).join("")}</select>
+        ${CONFIG.modoDemo ? `<label for="sw-user" style="margin-top:12px;font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--rail-hi)">Modo demostración · cambiar de usuario</label>
+        <select id="sw-user" data-switch-user style="margin-top:4px">${DB.usuarios.filter(u => u.activo).map(u => `<option value="${u.id}" ${u.id === ME.id ? "selected" : ""}>${esc(u.nombre)} · ${esc(u.rol)}</option>`).join("")}</select>` : ""}
         <div class="row" style="margin-top:10px"><button class="btn sm" data-act="logout">${icon("salir")} Cerrar sesión</button></div></div>
     </aside>
     <div class="main">
       <header class="topbar">
         <button class="btn ghost menu-btn" data-act="menu" aria-expanded="${UI.menuOpen}" aria-controls="rail">${icon("menu")}<span class="sr">Abrir menú</span></button>
         <span class="crumb">${esc(meta.label)}</span><span class="sp"></span>
-        <button class="btn" data-act="guia" title="Recorrido sugerido para la demostración" aria-label="Guía de demostración">${icon("calidad")}<span class="lbl">Guía</span></button>
+        ${CONFIG.modoDemo ? `<button class="btn" data-act="guia" title="Recorrido sugerido para la demostración" aria-label="Guía de demostración">${icon("calidad")}<span class="lbl">Guía</span></button>` : ""}
         <button class="btn ghost" data-act="leer" title="Leer esta pantalla en voz alta">${icon("voz")}<span class="sr">Leer en voz alta</span></button>
         <button class="btn" data-act="a11y" aria-label="Opciones de accesibilidad" aria-expanded="${UI.a11yOpen}" aria-controls="a11y-panel">${icon("a11y")}<span class="lbl">Accesibilidad</span></button>
       </header>

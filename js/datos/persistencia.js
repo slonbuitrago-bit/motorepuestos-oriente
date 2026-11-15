@@ -4,7 +4,7 @@
 
 function load(){
   const raw = store.get(STORE_KEY);
-  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 4) return; } catch(e){} }
+  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 5) return; } catch(e){} }
   DB = seed(); save();
 }
 function save(){ store.set(STORE_KEY, JSON.stringify(DB)); }

@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-15T21:12:29.397Z",
+ "fecha": "2026-11-15T21:28:15.733Z",
  "resultados": [
   {
    "id": "CS-01",
@@ -115,7 +115,7 @@
    "tipo": "Funcional (antifraude, A1)",
    "nombre": "Conteo correcto sella la remisión y permite despacharla",
    "resultado": "PASA",
-   "detalle": "Verificada · sello FB6C024C41 → En tránsito",
+   "detalle": "Verificada · sello E5BF5BDDDB → En tránsito",
    "evidencia": ""
   },
   {
@@ -170,6 +170,24 @@
    "nombre": "Traslado con origen igual al destino es rechazado",
    "resultado": "PASA",
    "detalle": "El origen y el destino deben ser distintos.",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-22",
+   "nivel": "Sistema",
+   "tipo": "Seguridad OWASP A07 (Autenticación)",
+   "nombre": "Ingreso escribiendo usuario y contraseña; bloqueo tras 3 intentos fallidos",
+   "resultado": "PASA",
+   "detalle": "Intentos: «Usuario o contraseña incorrectos. Te que» → «Demasiados intentos fallidos. El usuario qued»; con la clave correcta sigue bloqueado; otro usuario entra escribiendo su usuario",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-23",
+   "nivel": "Sistema",
+   "tipo": "Configuración (modo demostración)",
+   "nombre": "Con el modo demostración apagado desaparecen los accesos rápidos, el cambio de usuario y la guía",
+   "resultado": "PASA",
+   "detalle": "Demo: accesos visibles · Producción: accesos ocultos, selector oculto, guía oculta",
    "evidencia": ""
   },
   {
@@ -286,7 +304,7 @@
    "tipo": "Rendimiento",
    "nombre": "Tiempo de dibujo de cada pantalla < 300 ms",
    "resultado": "PASA",
-   "detalle": "Promedio 10.5 ms · máximo 20.9 ms",
+   "detalle": "Promedio 10.4 ms · máximo 23.4 ms",
    "evidencia": ""
   },
   {
@@ -295,7 +313,7 @@
    "tipo": "Carga (volumen)",
    "nombre": "Con 5.000 facturas adicionales la lista y el tablero responden < 1 s",
    "resultado": "PASA",
-   "detalle": "Lista 30 ms · tablero 27 ms · datos 5.51 MB",
+   "detalle": "Lista 16 ms · tablero 14 ms · datos 5.51 MB",
    "evidencia": ""
   },
   {
@@ -331,7 +349,7 @@
    "tipo": "Regresión",
    "nombre": "Toda la suite se ejecutó de nuevo tras la modularización y el movimiento de costeo() al dominio",
    "resultado": "PASA",
-   "detalle": "36 de 36 pruebas de esta corrida pasan",
+   "detalle": "38 de 38 pruebas de esta corrida pasan",
    "evidencia": ""
   }
  ]

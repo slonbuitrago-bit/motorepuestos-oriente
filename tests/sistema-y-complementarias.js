@@ -176,6 +176,22 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
   reg("CS-19", "Sistema", "Funcional", "Traslado con origen igual al destino es rechazado", /distintos/.test(errTr), errTr);
   await p.cerrar();
 
+  // Inicio de sesión real, bloqueo por intentos y modo demostración
+  p = await nueva();
+  const intento = async (u, c) => { await p.fill("#lg-user", u); await p.fill("#lg-pass", c); await p.click('form[data-form="login"] button[type=submit]'); await p.waitForTimeout(80); return ev(p, () => document.querySelector("#lg-err")?.innerText || ""); };
+  const m1 = await intento("dmarin", "mala1"), m2 = await intento("dmarin", "mala2"), m3 = await intento("dmarin", "mala3");
+  const m4 = await intento("dmarin", "demo2026");
+  await p.foto("17-bloqueo-intentos");
+  const sigueFuera = await ev(p, () => !ME);
+  await intento("COSPINA", "demo2026");
+  const dentro = await ev(p, () => ME && ME.usuario);
+  reg("CS-22", "Sistema", "Seguridad OWASP A07 (Autenticación)", "Ingreso escribiendo usuario y contraseña; bloqueo tras 3 intentos fallidos", /quedan 2/.test(m1) && /queda 1/.test(m2) && /bloqueado/.test(m3) && /bloqueado/.test(m4) && sigueFuera && dentro === "cospina", `Intentos: «${m1.slice(0, 40)}» → «${m3.slice(0, 45)}»; con la clave correcta sigue bloqueado; otro usuario entra escribiendo su usuario`);
+  await p.click('[data-act="logout"]'); await p.waitForTimeout(80);
+  const demoVisible = await ev(p, () => !!document.querySelector(".ucard"));
+  const prod = await ev(p, () => { CONFIG.modoDemo = false; render(); const r = { tarjetas: !!document.querySelector(".ucard"), guia: !!document.querySelector('[data-act="guia"]') }; ME = DB.usuarios[0]; render(); r.selector = !!document.querySelector("#sw-user"); r.guiaMenu = !!document.querySelector('[data-act="guia"]'); return r; });
+  reg("CS-23", "Sistema", "Configuración (modo demostración)", "Con el modo demostración apagado desaparecen los accesos rápidos, el cambio de usuario y la guía", demoVisible && !prod.tarjetas && !prod.guia && !prod.selector && !prod.guiaMenu, `Demo: accesos visibles · Producción: accesos ${prod.tarjetas ? "visibles" : "ocultos"}, selector ${prod.selector ? "visible" : "oculto"}, guía ${prod.guiaMenu ? "visible" : "oculta"}`);
+  await p.cerrar();
+
   // Buscadores con sugerencias
   p = await nueva(); await p.login("U3"); await p.go("factura-nueva");
   const sugerencias = await ev(p, () => [...document.querySelectorAll("#dl-productos option")].filter(o => o.value.toLowerCase().includes("llanta")).length);

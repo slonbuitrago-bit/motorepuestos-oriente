@@ -11,7 +11,7 @@
 ## 1. Ingreso por roles (30 s)
 | Haz | Di |
 |---|---|
-| Clic en la tarjeta **Camila Ospina · Logística** → **Ingresar** | «Cada usuario tiene un rol; Camila es de Logística y solo ve lo que le corresponde.» |
+| En **Usuario** escribe **cospina**, en **Contraseña** **demo2026** → **Ingresar** | «Cada persona entra con su usuario y contraseña; tras 3 intentos fallidos la cuenta se bloquea 5 minutos. Camila es de Logística y solo ve lo que le corresponde.» |
 | Señala el **Tablero** | «Al entrar ve sus pendientes y los indicadores de la empresa.» |
 
 ## 2. Factura manual con validaciones (75 s)
@@ -27,13 +27,13 @@
 ## 3. El gerente autoriza (45 s)
 | Haz | Di |
 |---|---|
-| Menú lateral, abajo: **Cambiar de usuario** → **Andrés Restrepo · Gerente** | «Ahora soy el gerente.» |
+| Menú lateral, abajo, en **Modo demostración · cambiar de usuario** elige **Andrés Restrepo · Gerente** | «Para no perder tiempo en la demo cambiamos de usuario aquí; en producción este selector no existe y cada quien entra con su clave. Ahora soy el gerente.» |
 | Menú **Autorizaciones** → la tarjeta de **Repuestos San Vicente** (la última) → **Autorizar** | «Al autorizar se genera el código de la factura electrónica, el asiento contable y los certificados de garantía, y se le avisa al cliente por correo. Quien registró una factura no puede autorizarla.» |
 
 ## 4. Despacho con control antifraude (90 s)
 | Haz | Di |
 |---|---|
-| **Cambiar de usuario** → **Julián Zuluaga · Despachos** → menú **Despachos** | «Ahora bodega.» |
+| En **Modo demostración · cambiar de usuario** elige **Julián Zuluaga · Despachos** → menú **Despachos** | «Ahora bodega.» |
 | En la fila de **Repuestos San Vicente** → **Crear remisión** | «Las instrucciones de envío vienen del cliente.» |
 | **Transportadora**: **Coordinadora** · **Número de guía**: **123456** → **Crear remisión** | «La guía es obligatoria si no es flota propia.» |
 | En **Cantidad contada** escribe **3** → **Verificar conteo** | «Conteo ciego: quien alista no ve cuánto se facturó. Si cuenta 3 en lugar de 2, el sistema **bloquea la salida** y registra una novedad. Así se evita que lleguen repuestos de más o de menos.» |
@@ -42,7 +42,7 @@
 ## 5. Trazabilidad y aviso al cliente (45 s)
 | Haz | Di |
 |---|---|
-| **Cambiar de usuario** → **Mateo Ríos · Auditor** → menú **Notificaciones** | «El cliente recibió correo de su factura y de su despacho.» |
+| En **Modo demostración · cambiar de usuario** elige **Mateo Ríos · Auditor** → menú **Notificaciones** | «El cliente recibió correo de su factura y de su despacho.» |
 | Menú **Facturas** → clic en el número de la primera factura (la de San Vicente) → pestaña **Trazabilidad** | «Todo queda registrado: quién la hizo, quién la autorizó, el conteo errado y la salida. Ese registro no se puede alterar.» |
 | Cerrar la ventana (✕) | |
 
@@ -54,6 +54,7 @@
 **Total: unos 5 minutos.**
 
 ## Si algo sale mal
+- **No recuerdas el usuario:** en la pantalla de ingreso, la tarjeta de **Camila Ospina** en **Accesos de demostración** llena el formulario sola.
 - **No aparece la tarjeta o la fila de San Vicente:** no se restablecieron los datos. Haz el paso 2 de «Antes de la clase».
 - **Te equivocaste en un paso:** sigue adelante; cada paso funciona por separado.
 - **Sin internet:** usa `dist/motorepuestos-oriente.html`.

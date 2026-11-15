@@ -203,7 +203,7 @@ const cuerpo = [
     ["Backend", "Reglas de negocio en la capa de dominio (`js/dominio/reglas-negocio.js`) ejecutadas en el navegador", "API REST en Node.js con Express, autenticación con bcrypt y JWT"],
     ["Base de datos", "Almacenamiento del navegador en JSON, aislado en `js/datos/persistencia.js`", "PostgreSQL 15: 29 tablas, restricciones CHECK y 5 triggers (`docs/modelo-datos.sql`)"],
     ["Seguridad", "Roles y permisos (RBAC), segregación de funciones, bitácora encadenada con SHA-256", "Además: HTTPS, tokens con expiración y bloqueo por intentos fallidos"],
-    ["Pruebas", "node:test, Playwright y axe-core (64 pruebas automatizadas)", "Además: k6 para carga y monitoreo de disponibilidad"],
+    ["Pruebas", "node:test, Playwright y axe-core (66 pruebas automatizadas)", "Además: k6 para carga y monitoreo de disponibilidad"],
     ["Gestión y despliegue", "Git y GitHub (rama protegida), Trello, GitHub Pages", "Contenedores Docker con autoescalado en dos zonas"]], [1900, 3900, 3560]),
   P("El paso del prototipo a producción no exige reescribir las vistas ni los controladores: basta con reemplazar el módulo de persistencia por llamadas a la API y trasladar la capa de dominio al servidor. Las decisiones de diseño y sus alternativas están documentadas en `docs/arquitectura.md`."),
 
@@ -211,7 +211,7 @@ const cuerpo = [
   H2("4.1", "Calidad interna y externa"),
   P("La calidad se evaluó con el modelo ISO/IEC 25010. La **calidad interna** se refiere a las propiedades del código (modularidad, capacidad de prueba, analizabilidad) y se verificó con técnicas estáticas; la **calidad externa** se refiere al comportamiento del software en uso y se validó con técnicas dinámicas. Esta distinción corresponde a la diferencia entre verificación y validación del Modelo en V."),
   ...tabla("Atributos de calidad aplicados (ISO/IEC 25010)", [["Característica", "Tipo", "Evidencia"],
-    ["Adecuación funcional", "Externa", "21 pruebas de sistema sobre los requisitos; todas pasan"],
+    ["Adecuación funcional", "Externa", "23 pruebas de sistema sobre los requisitos; todas pasan"],
     ["Eficiencia de desempeño", "Externa", "Cada pantalla se dibuja en menos de 8 ms; con 5.000 facturas extra, la lista responde en menos de 1 s"],
     ["Usabilidad y accesibilidad", "Externa", "0 violaciones WCAG 2.1 A/AA en 8 pantallas; texto al 130 %; alto contraste; teclado"],
     ["Fiabilidad", "Externa", "Funciona con el almacenamiento bloqueado; 300 cambios de pantalla sin errores"],
@@ -265,7 +265,7 @@ const cuerpo = [
   H2("4.4", "Pruebas complementarias"),
   P("Se ejecutaron las pruebas complementarias vistas en la Sesión 5. La **prueba de regresión** consistió en volver a correr toda la suite después de cada corrección; así se detectó que un botón agregado para la demostración había roto el diseño en celulares de 360 px (DEF-04). El **testing exploratorio** se hizo con la misión de «romper el flujo de facturación con acciones inesperadas» en una sesión de 15 minutos."),
   ...tabla("Resultados de las pruebas complementarias", [["ID", "Tipo de prueba", "Caso", "Resultado obtenido"], ...compl.map(r => [r.id, r.tipo, r.nombre, r.detalle])], [800, 2000, 3100, 3460], "En la primera ejecución fallaron CC-02, CC-04 y CC-10; los defectos encontrados (DEF-04 a DEF-09) se corrigieron y la regresión confirmó la corrección.", 18),
-  P("En **seguridad** se aplicaron las categorías del OWASP Top 10 pertinentes: control de acceso (A01), inyección y XSS (A03), autenticación (A07) e integridad de datos (A08). Se reconoce como limitación del prototipo que la contraseña de demostración se valida en el navegador; en producción la autenticación se hace en el servidor con bcrypt y tokens JWT. La **prueba de estrés** mostró que el almacenamiento del navegador se llena con unas 30.000 facturas (31 MB); la aplicación no se cae y sigue trabajando en memoria, pero confirma la necesidad de la base de datos PostgreSQL para producción."),
+  P("En **seguridad** se aplicaron las categorías del OWASP Top 10 pertinentes: control de acceso (A01), inyección y XSS (A03), autenticación (A07) e integridad de datos (A08). El prototipo exige usuario y contraseña (guardada como hash SHA-256) y bloquea la cuenta 5 minutos tras 3 intentos fallidos; se reconoce como limitación que esta validación ocurre en el navegador; en producción la autenticación se hace en el servidor con bcrypt y tokens JWT. La **prueba de estrés** mostró que el almacenamiento del navegador se llena con unas 30.000 facturas (31 MB); la aplicación no se cae y sigue trabajando en memoria, pero confirma la necesidad de la base de datos PostgreSQL para producción."),
 
   H1("5", "Conclusiones y retos"),
   H2("5.1", "Desviaciones entre los requisitos iniciales y el producto entregado"),
@@ -281,7 +281,7 @@ const cuerpo = [
   B("**Pruebas.** Las pruebas automatizadas encontraron diez defectos que una revisión visual no había detectado, entre ellos una regresión introducida por el propio equipo. Repetir toda la suite después de cada cambio es lo que da confianza para seguir modificando el código."),
   B("**Trabajo en equipo.** Con siete integrantes, asignar roles con archivos propios y un canal formal de entregas fue más efectivo que coordinar todo por mensajería."),
   B("**Mitigación de defectos.** Corregir la causa raíz, como validar números enteros en todos los formularios y no solo en el que falló, evita que el mismo error reaparezca en otro lugar."),
-  P("En conclusión, el proyecto transformó las necesidades ambiguas de un cliente en una solución web funcional, publicada y verificada con 64 pruebas automatizadas. La ingeniería de requisitos definió qué construir y las pruebas por niveles confirmaron que se construyó correctamente: ambas fueron determinantes para el resultado."),
+  P("En conclusión, el proyecto transformó las necesidades ambiguas de un cliente en una solución web funcional, publicada y verificada con 66 pruebas automatizadas. La ingeniería de requisitos definió qué construir y las pruebas por niveles confirmaron que se construyó correctamente: ambas fueron determinantes para el resultado."),
 
   H1("6", "Anexos"),
   H2("6.1", "Enlaces del proyecto"),

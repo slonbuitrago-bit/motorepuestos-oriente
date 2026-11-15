@@ -8,16 +8,17 @@ Prototipo funcional para la asignatura **Ingeniería de Software III**. Resuelve
 
 No necesita instalar nada. Abre **`index.html`** con doble clic en cualquier navegador (Chrome, Edge, Firefox, Safari), en computador o celular.
 
-Usuarios de demostración (contraseña `demo2026` para todos):
+Usuarios de demostración (contraseña `demo2026` para todos). Se entra escribiendo usuario y contraseña; tras 3 intentos fallidos la cuenta se bloquea 5 minutos. En la pantalla de ingreso, el panel **Accesos de demostración** llena el formulario con un clic, y dentro de la app el selector **Modo demostración · cambiar de usuario** permite saltar de rol durante la presentación. Ambos desaparecen poniendo `modoDemo: false` en `js/nucleo/seguridad.js`.
 
-| Usuario | Rol | Qué puede hacer |
-|---|---|---|
-| Camila Ospina | Logística | Registrar pedidos de venta y facturarlos, facturas manuales sin pedido, clientes |
-| Andrés Restrepo | Gerente | Autorizar o rechazar, registrar pagos, cerrar novedades, cupos |
-| Julián Zuluaga | Despachos | Remisiones, conteo ciego, salida y entrega |
-| Diana Marín | Bodega | Inventario, traslados, ajustes, importaciones |
-| Mateo Ríos | Auditor | Consultar trazabilidad e integridad |
-| Laura Gómez | Administrador | Todo, incluidos usuarios, permisos y catálogos |
+| Usuario | Nombre | Rol | Qué puede hacer |
+|---|---|---|---|
+| `cospina` | Camila Ospina | Logística | Registrar pedidos de venta y facturarlos, facturas manuales sin pedido, clientes |
+| `shenao` | Sara Henao | Logística | Lo mismo que Camila |
+| `arestrepo` | Andrés Restrepo | Gerente | Autorizar o rechazar, registrar pagos, cerrar novedades, cupos |
+| `jzuluaga` | Julián Zuluaga | Despachos | Remisiones, conteo ciego, salida y entrega |
+| `dmarin` | Diana Marín | Bodega | Inventario, traslados, ajustes, importaciones |
+| `mrios` | Mateo Ríos | Auditor | Consultar trazabilidad e integridad |
+| `lgomez` | Laura Gómez | Administrador | Todo, incluidos usuarios, permisos y catálogos |
 
 **Recorrido sugerido para la presentación:**
 1. Camila registra un **pedido de venta** y lo factura: queda contabilizado de inmediato y se envía correo al cliente.
@@ -75,7 +76,7 @@ Cada archivo de `js/` empieza con un comentario que dice a qué capa pertenece y
 
 ## Pruebas
 
-64 pruebas automatizadas organizadas por niveles del Modelo en V:
+66 pruebas automatizadas organizadas por niveles del Modelo en V:
 
 ```bash
 npm install
@@ -86,7 +87,7 @@ npm test
 |---|---|---|
 | Unitarias (componentes) | `tests/unitarias.test.js` | 17 |
 | Integración (incremental bottom-up) | `tests/integracion.test.js` | 10 |
-| Sistema + complementarias (smoke, responsive, robustez, OWASP, accesibilidad, rendimiento, carga, estrés, estabilidad, exploratoria, regresión) | `tests/sistema-y-complementarias.js` | 37 |
+| Sistema + complementarias (smoke, responsive, robustez, OWASP, accesibilidad, rendimiento, carga, estrés, estabilidad, exploratoria, regresión) | `tests/sistema-y-complementarias.js` | 39 |
 
 Las evidencias (capturas y `resultados.json`) quedan en `docs/final/evidencias/`. El registro de defectos está en `docs/final/registro-defectos.md`.
 
@@ -103,4 +104,4 @@ Botón **Accesibilidad** en la barra superior: tamaño de texto hasta 130 %, alt
 
 - Los datos viven en el navegador (localStorage); en producción irían a PostgreSQL con el modelo de `docs/modelo-datos.sql`.
 - El CUFE se calcula con SHA-256 en ambiente de pruebas; la DIAN exige SHA-384 y la transmisión se hace a través de un proveedor tecnológico autorizado.
-- La contraseña de demostración es la misma para todos; en producción se guardaría con bcrypt y bloqueo por intentos fallidos.
+- Las contraseñas se guardan como hash SHA-256 con el usuario como sal y la de demostración es la misma para todos; en producción se usaría bcrypt o Argon2 en el servidor.

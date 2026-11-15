@@ -8,7 +8,7 @@ function seed(){
   const pick = a => a[Math.floor(R() * a.length)];
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
   const db = {
-    version: 4, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
+    version: 5, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], bloqueos:{}, kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
     empresa:{ nombre:"Motorepuestos del Oriente S.A.S.", nit:"901.482.315-7", ciudad:"Rionegro, Antioquia", resolucion:"Resolución DIAN 18764000001234 (simulada) · Prefijo MRO · Rango 1 a 50.000 · Vigencia 2026-2027" },
     roles: JSON.parse(JSON.stringify(ROLES_BASE)),
     usuarios:[
@@ -75,6 +75,7 @@ function seed(){
   ];
   db.clientes = clis.map((c, i) => ({ id:"C" + (i+1), nombre:c[0], nit:c[1], ciudadId:c[2], direccion:c[3], contacto:c[4], telefono:c[5], cupo:c[6], email:c[7], activo:true, autorizaDatos:true }));
 
+  db.usuarios.forEach(u => { u.claveHash = hashClave(u.usuario, CONFIG.claveDemo); });
   const U = id => db.usuarios.find(u => u.id === id);
   const events = []; // [ts, accion, entidad, ref, detalle, user]
   const ev = (ts, a, en, ref, d, u) => events.push([ts.toISOString(), a, en, ref, d, U(u)]);

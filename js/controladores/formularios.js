@@ -5,9 +5,23 @@
 /* ---------- Formularios ---------- */
 const FORM = {
   noop(){},
-  login(){
-    const u = usr(UI.loginSel || "U3"); const pass = $("#lg-pass").value;
-    if (pass !== "demo2026"){ toast("Contraseña incorrecta. En la demostración es demo2026.", true); $("#lg-pass").setAttribute("aria-invalid", "true"); $("#lg-pass").focus(); return; }
+  login(form){
+    const nombre = form.usuario.value.trim().toLowerCase(), clave = form.clave.value;
+    const err = m => { $("#lg-err").innerHTML = `<div class="note bad">${m}</div>`; form.clave.value = ""; form.clave.setAttribute("aria-invalid", "true"); (nombre ? form.clave : form.usuario).focus(); };
+    if (!nombre || !clave) return err("Escribe tu usuario y tu contraseña.");
+    DB.bloqueos = DB.bloqueos || {};
+    const b = DB.bloqueos[nombre] || { fallos:0, hasta:null };
+    if (b.hasta && new Date(b.hasta) > new Date()){ const min = Math.ceil((new Date(b.hasta) - new Date()) / 60000); return err(`Usuario bloqueado por intentos fallidos. Intenta de nuevo en ${min} ${min === 1 ? "minuto" : "minutos"}.`); }
+    const u = DB.usuarios.find(x => x.usuario.toLowerCase() === nombre);
+    if (!u || u.claveHash !== hashClave(u.usuario, clave)){
+      b.fallos = (b.hasta ? 0 : b.fallos) + 1; b.hasta = null;
+      if (b.fallos >= CONFIG.intentosMaximos){ b.hasta = new Date(Date.now() + CONFIG.minutosBloqueo * 60000).toISOString(); b.fallos = 0; }
+      DB.bloqueos[nombre] = b;
+      audit(b.hasta ? "Bloquear usuario por intentos fallidos" : "Intento de ingreso fallido", "Sesión", nombre, b.hasta ? `${CONFIG.intentosMaximos} intentos fallidos · bloqueo de ${CONFIG.minutosBloqueo} min` : "Usuario o contraseña incorrectos", { user:{ nombre:"Sistema", rol:"Sistema" } }); save();
+      return err(b.hasta ? `Demasiados intentos fallidos. El usuario queda bloqueado ${CONFIG.minutosBloqueo} minutos.` : `Usuario o contraseña incorrectos. Te ${CONFIG.intentosMaximos - b.fallos === 1 ? "queda 1 intento" : `quedan ${CONFIG.intentosMaximos - b.fallos} intentos`}.`);
+    }
+    if (!u.activo) return err("Este usuario está desactivado. Habla con el administrador.");
+    delete DB.bloqueos[nombre];
     ME = u; store.set(SES_KEY, u.id); UI.a11yOpen = false; UI.publico = false;
     audit("Iniciar sesión", "Sesión", u.usuario, u.rol); save();
     if (!location.hash || location.hash === "#certificados") location.hash = "inicio";
@@ -194,11 +208,11 @@ const FORM = {
     const v = Object.fromEntries(new FormData(form));
     if (!v.nombre.trim() || !/^[a-z0-9.]{3,20}$/.test(v.usuario)){ $("#us-err").innerHTML = `<div class="note bad">Completa el nombre y un usuario válido (minúsculas, 3 a 20).</div>`; return; }
     if (DB.usuarios.some(u => u.usuario === v.usuario)){ $("#us-err").innerHTML = `<div class="note bad">Ese usuario ya existe.</div>`; return; }
-    const u = { id:"U" + (DB.usuarios.length + 1) + "-" + Date.now().toString(36), nombre:v.nombre.trim(), usuario:v.usuario, rol:v.rol, sucursalId:v.suc, activo:true };
-    DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast("Usuario creado. Ya aparece en la pantalla de ingreso.");
+    const u = { id:"U" + (DB.usuarios.length + 1) + "-" + Date.now().toString(36), nombre:v.nombre.trim(), usuario:v.usuario, rol:v.rol, sucursalId:v.suc, activo:true, claveHash:hashClave(v.usuario, CONFIG.claveDemo) };
+    DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast(`Usuario ${u.usuario} creado. Su contraseña inicial es ${CONFIG.claveDemo}.`);
   },
   restaurar(form){
-    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 4 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
+    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 5 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
     catch(e){ toast("El texto no es un respaldo válido de este sistema.", true); }
   }
 };
