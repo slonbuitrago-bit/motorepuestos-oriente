@@ -87,3 +87,13 @@ function estadoLogistico(f){
 }
 const pillFactura = f => `<span class="pill ${ {Pendiente:"warn",Autorizada:"ok",Rechazada:"bad"}[f.estado] || "" }">${esc(f.estado === "Pendiente" ? "Pendiente de autorización" : f.estado)}</span>`;
 const pill = (txt, cls) => `<span class="pill ${cls||""}">${esc(txt)}</span>`;
+
+/* Importaciones: flujo de estados y costo nacionalizado (FOB + flete + seguro + arancel) */
+const FLUJO_IMP = ["Orden emitida","En tránsito","En aduana","Nacionalizada","Recibida"];
+function costeo(im){
+  const fob = sum(im.items, it => it.cantidad * it.fobUSD);
+  const cif = fob + im.fleteUSD + im.seguroUSD;
+  const cifCOP = cif * im.trm, arancel = cifCOP * im.arancelPct / 100, ivaImp = (cifCOP + arancel) * IVA;
+  const costoTotal = cifCOP + arancel; // IVA importación es descontable
+  return { fob, cif, cifCOP, arancel, ivaImp, costoTotal, factor: fob ? costoTotal / (fob * im.trm) : 1 };
+}

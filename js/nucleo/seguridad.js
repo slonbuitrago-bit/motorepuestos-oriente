@@ -19,6 +19,14 @@ const PERMISOS = {
   "admin.usuarios":       "Gestionar usuarios y permisos",
   "admin.catalogos":      "Gestionar ciudades, municipios y sucursales"
 };
+const ROL_DESC = {
+  "Administrador": "Usuarios, permisos, ciudades y sucursales",
+  "Gerente": "Autoriza facturas manuales, registra pagos y cierra novedades",
+  "Logística": "Registra pedidos de venta y facturas manuales",
+  "Despachos": "Crea remisiones, hace el conteo ciego y registra entregas",
+  "Bodega": "Inventario, traslados e importaciones",
+  "Auditor": "Consulta la trazabilidad y verifica la integridad"
+};
 const ROLES_BASE = {
   "Administrador": Object.keys(PERMISOS),
   "Gerente":    ["tablero","pedidos.gestionar","facturas.ver","facturas.autorizar","cartera.pagos","inventario.ver","clientes.gestionar","auditoria.ver","despachos.gestionar"],

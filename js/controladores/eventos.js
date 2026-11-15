@@ -22,6 +22,7 @@ document.addEventListener("input", e => {
 });
 document.addEventListener("change", e => {
   const t = e.target;
+  if (t.dataset.switchUser !== undefined){ ACT.demoPaso({ u:t.value, r:ruta() }); return; }
   if (t.dataset.ch){ UI.filtros[t.dataset.ch] = t.value; render(); $("#" + t.id)?.focus(); }
   if (t.dataset.pref){ setPref(t.dataset.pref, t.checked); render(); $("#" + t.id)?.focus(); }
   if (t.dataset.draft && t.dataset.draft !== "obs"){

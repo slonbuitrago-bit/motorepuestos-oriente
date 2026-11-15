@@ -13,7 +13,7 @@ function vClientes(){
 function dlgCliente(id){
   const c = id ? cli(id) : { nombre:"", nit:"", ciudadId:"05615", direccion:"", contacto:"", telefono:"", cupo:5000000, autorizaDatos:false };
   const cupoOnlyGer = !P("facturas.autorizar");
-  openDlg(id ? "Editar cliente" : "Nuevo cliente", `<form id="frm-cl" data-form="cliente" data-id="${id || ""}" class="grid g2">
+  openDlg(id ? "Editar cliente" : "Nuevo cliente", `<form id="frm-cl" data-form="cliente" data-id="${id || ""}" class="grid g2" novalidate>
     <div class="field"><label for="cl-n">Razón social *</label><input id="cl-n" name="nombre" required value="${esc(c.nombre)}"></div>
     <div class="field"><label for="cl-nit">NIT *</label><input id="cl-nit" name="nit" required pattern="[0-9.]{6,13}-[0-9]" placeholder="900.123.456-7" value="${esc(c.nit)}" aria-describedby="cl-nit-h"><span class="hint" id="cl-nit-h">Formato 900.123.456-7 (con dígito de verificación).</span></div>
     <div class="field"><label for="cl-ci">Municipio *</label><select id="cl-ci" name="ciudadId">${DB.ciudades.filter(x => byId(DB.estados, x.estadoId).paisId === "CO").map(x => `<option value="${x.id}" ${c.ciudadId === x.id ? "selected" : ""}>${esc(x.nombre)}</option>`).join("")}</select></div>

@@ -22,8 +22,8 @@ const FORM = {
     const ids = items.map(x => x.productoId);
     if (new Set(ids).size !== ids.length) E.items = "Hay referencias repetidas. Une las cantidades en una sola línea.";
     for (const it of items){
-      const q = parseInt(it.cantidad); const p = prod(it.productoId);
-      if (!(q > 0)){ E.items = `La cantidad de ${p.sku} debe ser un número entero mayor que cero.`; break; }
+      const q = Number(it.cantidad); const p = prod(it.productoId);
+      if (!(Number.isInteger(q) && q > 0)){ E.items = `La cantidad de ${p.sku} debe ser un número entero mayor que cero.`; break; }
       if (q > (p.stock[d.sucursalId] || 0)){ E.items = `No hay existencia suficiente de ${p.sku} en ${suc(d.sucursalId).nombre}: hay ${p.stock[d.sucursalId] || 0}, pides ${q}.`; break; }
     }
     const lines = items.map(it => ({ productoId:it.productoId, cantidad:parseInt(it.cantidad), precio:prod(it.productoId).precio }));
@@ -69,7 +69,7 @@ const FORM = {
   conteo(form){
     const r = rem(form.dataset.id);
     const vals = r.items.map((_, i) => form["c" + i].value);
-    if (vals.some(v => v === "" || !(parseInt(v) >= 0))){ $("#conteo-res").innerHTML = `<div class="note bad">Escribe la cantidad contada en todas las líneas.</div>`; return; }
+    if (vals.some(v => v === "" || !(Number.isInteger(Number(v)) && Number(v) >= 0))){ $("#conteo-res").innerHTML = `<div class="note bad">Escribe en todas las líneas la cantidad contada, en unidades enteras.</div>`; return; }
     r.items.forEach((it, i) => it.contado = parseInt(vals[i]));
     const dif = r.items.filter(it => it.contado !== it.cantidad);
     if (dif.length){
@@ -115,7 +115,8 @@ const FORM = {
     n.estado = "Cerrada"; n.resolucion = v; audit("Cerrar novedad", "Remisión", rem(n.remisionId).numero, v); closeDlg(); commit(); toast("Novedad cerrada.");
   },
   ajuste(form){
-    const p = prod(form.dataset.id); const s = form.suc.value; const c = parseInt(form.cant.value); const det = form.detalle.value.trim();
+    const p = prod(form.dataset.id); const s = form.suc.value; const c = Number(form.cant.value); const det = form.detalle.value.trim();
+    if (!Number.isInteger(c)){ $("#aj-err").innerHTML = `<div class="note bad">La cantidad debe ser un número entero de unidades.</div>`; return; }
     if (!c){ $("#aj-err").innerHTML = `<div class="note bad">La cantidad debe ser distinta de cero.</div>`; return; }
     if (det.length < 10){ $("#aj-err").innerHTML = `<div class="note bad">Describe el ajuste con al menos 10 caracteres.</div>`; return; }
     if ((p.stock[s] || 0) + c < 0){ $("#aj-err").innerHTML = `<div class="note bad">El ajuste dejaría existencia negativa (hay ${p.stock[s] || 0}).</div>`; return; }
@@ -124,9 +125,9 @@ const FORM = {
     audit("Ajustar inventario", "Producto", p.sku, `${c > 0 ? "+" : ""}${c} en ${suc(s).nombre} · ${form.motivo.value} · ${det}`); closeDlg(); commit(); toast("Ajuste registrado.");
   },
   traslado(form){
-    const p = prod(form.prod.value), o = form.o.value, d = form.d.value, c = parseInt(form.cant.value);
+    const p = prod(form.prod.value), o = form.o.value, d = form.d.value, c = Number(form.cant.value);
     if (o === d){ $("#tr-err").innerHTML = `<div class="note bad">El origen y el destino deben ser distintos.</div>`; return; }
-    if (!(c > 0) || c > (p.stock[o] || 0)){ $("#tr-err").innerHTML = `<div class="note bad">Cantidad no válida. En ${esc(suc(o).nombre)} hay ${p.stock[o] || 0}.</div>`; return; }
+    if (!(Number.isInteger(c) && c > 0) || c > (p.stock[o] || 0)){ $("#tr-err").innerHTML = `<div class="note bad">Cantidad no válida. En ${esc(suc(o).nombre)} hay ${p.stock[o] || 0}.</div>`; return; }
     p.stock[o] -= c; p.stock[d] = (p.stock[d] || 0) + c; const ref = "TR-" + String(nextNum("TR")).padStart(4, "0"); const ts = new Date().toISOString();
     DB.kardex.push({ fecha:ts, productoId:p.id, sucursalId:o, tipo:"Traslado salida", cantidad:-c, ref, usuario:ME.nombre }, { fecha:ts, productoId:p.id, sucursalId:d, tipo:"Traslado entrada", cantidad:c, ref, usuario:ME.nombre });
     audit("Trasladar inventario", "Producto", p.sku, `${c} de ${suc(o).nombre} a ${suc(d).nombre} · ${ref}`); closeDlg(); commit(); toast(`Traslado ${ref} registrado.`);
@@ -194,7 +195,7 @@ const FORM = {
     DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast("Usuario creado. Ya aparece en la pantalla de ingreso.");
   },
   restaurar(form){
-    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 2 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
+    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 3 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
     catch(e){ toast("El texto no es un respaldo válido de este sistema.", true); }
   }
 };

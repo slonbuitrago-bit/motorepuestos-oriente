@@ -8,7 +8,7 @@ function seed(){
   const pick = a => a[Math.floor(R() * a.length)];
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
   const db = {
-    version: 2, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
+    version: 3, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
     empresa:{ nombre:"Motorepuestos del Oriente S.A.S.", nit:"901.482.315-7", ciudad:"Rionegro, Antioquia", resolucion:"Resolución DIAN 18764000001234 (simulada) · Prefijo MRO · Rango 1 a 50.000 · Vigencia 2026-2027" },
     roles: JSON.parse(JSON.stringify(ROLES_BASE)),
     usuarios:[
@@ -52,7 +52,13 @@ function seed(){
     ["ROD-6301","Rodamiento 6301-2RS","Rueda delantera, varias","Rodamientos",6100,12000,40,[130,30,26],"Importado",6],
     ["ACE-20W50","Aceite 4T 20W-50 x 1 L","Universal","Lubricación",21000,32000,48,[210,50,44],"Nacional",0],
     ["CIL-KIT-150","Kit de cilindro 150 cc (pistón y anillos)","Bajaj Pulsar 150","Motor",248000,385000,4,[3,1,0],"Importado",12],
-    ["ESP-RET-M10","Espejos retrovisores par M10","Universal","Accesorios",14500,28000,15,[44,9,12],"Nacional",3]
+    ["ESP-RET-M10","Espejos retrovisores par M10","Universal","Accesorios",14500,28000,15,[44,9,12],"Nacional",3],
+    ["DIS-FRE-240","Disco de freno delantero 240 mm","Pulsar NS200, Apache 200","Frenos",96000,149000,8,[22,4,3],"Importado",12],
+    ["CDI-AKT-125","CDI de encendido 6 pines","AKT NKD 125, Flex 125","Eléctrico",58000,92000,10,[27,6,5],"Importado",6],
+    ["BOB-ENC-UNI","Bobina de alta (encendido)","Motos 100–150 cc","Eléctrico",31000,52000,12,[35,8,6],"Importado",6],
+    ["EMP-KIT-150","Kit de empaques de motor 150 cc","Bajaj Pulsar 150","Motor",34000,56000,10,[24,5,4],"Importado",3],
+    ["LLA-90-90-18","Llanta trasera 90/90-18","Honda CB110, Yamaha YBR","Llantas",112000,168000,10,[28,6,4],"Nacional",12],
+    ["MAN-FRE-DER","Manigueta de freno derecha","Universal","Mandos",13500,24000,20,[48,10,12],"Nacional",3]
   ];
   db.productos = prods.map((p, i) => ({ id:"PR" + (i+1), sku:p[0], nombre:p[1], compat:p[2], categoria:p[3], costo:p[4], precio:p[5], minimo:p[6], stock:{ S1:p[7][0], S2:p[7][1], S3:p[7][2] }, origen:p[8], garantiaMeses:p[9], activo:true }));
   const clis = [
@@ -62,7 +68,10 @@ function seed(){
     ["Motocentro Marinilla S.A.S.","900.889.432-5","05440","Cra. 30 # 31-15","Paula Duque","604 548 3376",20000000,"compras@motocentromarinilla.example"],
     ["Repuestos El Carmen","901.300.777-0","05148","Calle 31 # 30-22","Wilson Ocampo","604 543 0091",6000000,"repuestoselcarmen@correo.example"],
     ["Distrimotos Sonsón","900.121.900-2","05756","Cra. 8 # 7-41","Gloria Valencia","604 869 2240",10000000,"gvalencia@distrimotos.example"],
-    ["Moto Servicio Medellín Centro","901.678.234-9","05001","Calle 44 # 52-17, Barrio Triste","Felipe Correa","604 512 7788",25000000,"facturacion@motoserviciomed.example"]
+    ["Moto Servicio Medellín Centro","901.678.234-9","05001","Calle 44 # 52-17, Barrio Triste","Felipe Correa","604 512 7788",25000000,"facturacion@motoserviciomed.example"],
+    ["Repuestos San Vicente","900.334.871-6","05674","Calle 30 # 29-60","Natalia Gil","604 854 1302",8000000,"natalia.gil@repuestossanvicente.example"],
+    ["Motos y Partes El Retiro","901.402.115-4","05607","Cra. 20 # 21-18","Camilo Ruiz","604 541 0745",9000000,"compras@motoselretiro.example"],
+    ["Distrimotos Bogotá S.A.S.","900.977.640-1","11001","Av. Caracas # 13-41","Andrea Salazar","601 342 8890",30000000,"asalazar@distrimotosbog.example"]
   ];
   db.clientes = clis.map((c, i) => ({ id:"C" + (i+1), nombre:c[0], nit:c[1], ciudadId:c[2], direccion:c[3], contacto:c[4], telefono:c[5], cupo:c[6], email:c[7], activo:true, autorizaDatos:true }));
 
@@ -101,7 +110,7 @@ function seed(){
     const fechas = [];
     for (let k = 0; k < count; k++){
       const d = new Date(base.getFullYear(), base.getMonth(), ri(1, daysInMonth), ri(7, 16), ri(0, 59));
-      if (+d > +now - 4 * 36e5) d.setTime(+now - ri(5, 40) * 36e5);
+      if (+d > +now - 6 * 36e5) d.setTime(+now - ri(6, 40) * 36e5);
       fechas.push(d);
     }
     fechas.sort((x, y) => x - y); // consecutivos en orden cronológico
@@ -177,24 +186,67 @@ function seed(){
       }
     }
   }
-  // Facturas pendientes de autorización para la demostración
-  const mk = (cid, sucId, its, hoursAgo, creador) => {
-    const d = new Date(+now - hoursAgo * 36e5); const c = db.clientes.find(x => x.id === cid);
-    const f = buildFactura(db, cid, sucId, c.ciudadId, its.map(([pid, q]) => ({ productoId:pid, cantidad:q, precio:db.productos.find(p => p.id === pid).precio })), d.toISOString(), creador);
-    ev(d, "Registrar factura manual", "Factura", f.numero, c.nombre + " · " + money(f.total), creador);
-    ev(new Date(+d + 2000), "Validar cupo del cliente", "Factura", f.numero, "Cupo suficiente", creador);
-  };
-  mk("C4", "S1", [["PR4",4],["PR3",10],["PR1",24]], 3, "U3");
-  mk("C3", "S3", [["PR6",12],["PR12",20]], 1.5, "U7");
-  // Pedidos de venta registrados, listos para facturar
-  const mkPed = (cid, its, hoursAgo) => {
-    const d = new Date(+now - hoursAgo * 36e5); const c = db.clientes.find(x => x.id === cid);
-    const pd = buildPedido(db, cid, "S1", c.ciudadId, its.map(([pid, q]) => ({ productoId:pid, cantidad:q, precio:db.productos.find(p => p.id === pid).precio })), d.toISOString(), "U3");
-    ev(d, "Registrar pedido de venta", "Pedido", pd.numero, c.nombre + " · " + money(pd.total), "U3");
+  /* ---------- Escenario de demostración ----------
+     Garantiza que cada estado del flujo tenga ejemplos el día de la demo.
+     Se crea en orden cronológico para que los consecutivos sigan en orden. */
+  const H = h => new Date(+now - h * 36e5);
+  const lineas = its => its.map(([pid, q]) => ({ productoId:pid, cantidad:q, precio:db.productos.find(p => p.id === pid).precio }));
+  const C = id => db.clientes.find(x => x.id === id);
+  const mkPed = (cid, its, h, creador = "U3") => {
+    const c = C(cid), d = H(h);
+    const pd = buildPedido(db, cid, "S1", c.ciudadId, lineas(its), d.toISOString(), creador);
+    ev(d, "Registrar pedido de venta", "Pedido", pd.numero, c.nombre + " · " + money(pd.total), creador);
     correo(db, "Pedido de venta", pd, d.toISOString());
+    return pd;
   };
-  mkPed("C1", [["PR2",10],["PR11",20]], 5);
+  const mkFac = (cid, sucId, its, h, creador, ped) => {
+    const c = C(cid), d = H(h);
+    const f = buildFactura(db, cid, sucId, c.ciudadId, ped ? ped.items.map(x => ({ ...x })) : lineas(its), d.toISOString(), creador, ped);
+    ev(d, ped ? "Facturar pedido de venta" : "Registrar factura manual", "Factura", f.numero, (ped ? "Pedido " + ped.numero + " · " : c.nombre + " · ") + money(f.total), creador);
+    ev(new Date(+d + 2000), "Validar cupo del cliente", "Factura", f.numero, "Cupo suficiente", creador);
+    return f;
+  };
+  const autorizar = (f, h) => {
+    const t = H(h).toISOString();
+    if (f.origen === "Pedido"){ autorizarFactura(db, f, "SYS", t); ev(new Date(t), "Contabilizar factura (automática, origen pedido)", "Factura", f.numero, "Asiento " + f.asiento.numero + " · CUFE " + f.cufe.slice(0,16) + "…", null); }
+    else { autorizarFactura(db, f, "U2", t); ev(new Date(t), "Autorizar factura manual", "Factura", f.numero, "CUFE " + f.cufe.slice(0,16) + "…", "U2"); ev(new Date(+new Date(t) + 1000), "Contabilizar factura autorizada", "Factura", f.numero, "Asiento " + f.asiento.numero, "U2"); }
+    correo(db, "Factura emitida", f, new Date(+new Date(t) + 2000).toISOString());
+  };
+  const remision = (f, h, transp, guia) => {
+    const c = C(f.clienteId), t = H(h);
+    const r = buildRemision(db, f, t.toISOString(), { direccion:c.direccion, referencia:"Local comercial, frente a la vía principal", contacto:c.contacto, telefono:c.telefono, transportadora:transp, guia, franja:"8:00 a. m. – 12:00 m.", observaciones:"Entregar únicamente a la persona de contacto. Exigir firma y cédula." });
+    ev(t, "Registrar despacho", "Remisión", r.numero, "Factura " + f.numero, "U4");
+    ev(new Date(+t + 500), "Registrar instrucciones de envío", "Remisión", r.numero, transp + (guia ? " · guía " + guia : ""), "U4");
+    return r;
+  };
+  const verificar = (r, h) => { const t = H(h); r.items.forEach(it => it.contado = it.cantidad); r.estado = "Verificada"; r.verificadaEn = t.toISOString(); r.sello = sha(r.numero + r.verificadaEn).slice(0, 10).toUpperCase(); ev(t, "Verificar alistamiento (conteo ciego)", "Remisión", r.numero, "Conteo conforme · sello " + r.sello, "U4"); };
+  const transito = (r, h) => { const t = H(h); r.estado = "En tránsito"; r.salidaEn = t.toISOString(); ev(t, "Despachar remisión", "Remisión", r.numero, "Salida de bodega", "U4"); correo(db, "Despacho", r, t.toISOString()); };
+
+  // 1. Pedido registrado temprano (queda por facturar)
+  mkPed("C1", [["PR2",10],["PR11",20]], 4.95);
+  // 2. Facturas autorizadas que esperan remisión
+  const fA = mkFac("C2", "S1", [["PR15",2],["PR6",10]], 4.9, "U3"); autorizar(fA, 4.85);
+  const pB = mkPed("C5", [["PR10",30],["PR18",4]], 4.88); const fB = mkFac("C5", "S1", null, 4.8, "U3", pB); autorizar(fB, 4.8);
+  // 3. Remisión verificada (sellada), con un primer conteo errado que abrió una novedad
+  const fC = mkFac("C7", "S1", [["PR3",10],["PR17",6]], 4.75, "U3"); autorizar(fC, 4.7);
+  const rC = remision(fC, 4.6, "Coordinadora", "CO458812");
+  const tNov = H(4.5);
+  rC.items[0].contado = 11;
+  const novC = { id:"N" + nextNumDb(db, "NOV"), tipo:"Alistamiento", remisionId:rC.id, facturaId:fC.id, fecha:tNov.toISOString(), usuario:"Julián Zuluaga", detalle:difDetalle(db, rC.items, "contado"), estado:"Abierta", resolucion:"" };
+  db.novedades.push(novC); ev(tNov, "Discrepancia en conteo de alistamiento", "Remisión", rC.numero, novC.detalle, "U4");
+  verificar(rC, 4.4);
+  // 4. Dos remisiones en tránsito
+  const pD = mkPed("C9", [["PR16",5],["PR1",30]], 4.68); const fD = mkFac("C9", "S1", null, 4.6, "U3", pD); autorizar(fD, 4.6);
+  const rD = remision(fD, 4.5, "Servientrega", "SV7712045"); verificar(rD, 4.3); transito(rD, 4.1);
+  const fE = mkFac("C6", "S1", [["PR19",3],["PR8",12]], 4.45, "U3"); autorizar(fE, 4.35);
+  const rE = remision(fE, 4.25, "Flota propia", ""); verificar(rE, 4.15); transito(rE, 4.0);
+  // 5. Facturas manuales pendientes de autorización
+  mkFac("C4", "S1", [["PR4",4],["PR3",10],["PR1",24]], 3, "U3");
+  mkFac("C8", "S1", [["PR20",6],["PR11",20]], 2.2, "U3");
   mkPed("C6", [["PR5",6],["PR8",15]], 2);
+  mkFac("C3", "S3", [["PR6",12],["PR12",20]], 1.5, "U7");
+  // 6. Pedido recién llegado
+  mkPed("C10", [["PR14",8],["PR7",3]], 0.7);
   // Las existencias de la tabla representan el saldo actual después del histórico
   prods.forEach((p, i) => { db.productos[i].stock = { S1:p[7][0], S2:p[7][1], S3:p[7][2] }; });
   events.sort((a, b) => a[0] < b[0] ? -1 : 1);

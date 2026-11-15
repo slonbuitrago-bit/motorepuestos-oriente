@@ -9,7 +9,10 @@ function openDlg(title, body, foot){
   if (!d.open){ UI.lastFocus = document.activeElement; d.showModal(); }
   const first = d.querySelector(".dlg-body input:not([disabled]), .dlg-body select, .dlg-body textarea");
   (first || d.querySelector(".dlg-head button")).focus();
+  regionesTeclado(d);
 }
+/* Las tablas que se desplazan a lo ancho deben poder enfocarse para recorrerlas con el teclado (WCAG 2.1.1) */
+function regionesTeclado(raiz){ raiz.querySelectorAll(".tw").forEach(el => { if (el.scrollWidth > el.clientWidth + 1){ el.tabIndex = 0; el.setAttribute("role", "region"); el.setAttribute("aria-label", "Tabla desplazable"); } }); }
 function closeDlg(){ const d = $("#dlg"); if (d.open) d.close(); UI.dlgCtx = null; }
 $("#dlg").addEventListener("close", () => { UI.tab.fac = "doc"; UI.dlgCtx = null; if (UI.lastFocus && document.contains(UI.lastFocus)) UI.lastFocus.focus(); });
 function toast(msg, bad){ const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; $("#toasts").appendChild(t); setTimeout(() => t.remove(), 5000); }

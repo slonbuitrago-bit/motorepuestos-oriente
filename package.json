@@ -1,0 +1,16 @@
+{
+  "name": "motorepuestos-oriente",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de gestión comercial de Motorepuestos del Oriente (Ingeniería de Software III)",
+  "scripts": {
+    "build": "bash build.sh",
+    "test": "node --test tests/unitarias.test.js tests/integracion.test.js && node tests/sistema-y-complementarias.js",
+    "test:unitarias": "node --test tests/unitarias.test.js",
+    "test:integracion": "node --test tests/integracion.test.js",
+    "test:sistema": "node tests/sistema-y-complementarias.js"
+  },
+  "devDependencies": {
+    "axe-core": "4.10.2"
+  }
+}

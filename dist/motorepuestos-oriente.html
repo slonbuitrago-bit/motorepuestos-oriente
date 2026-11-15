@@ -60,14 +60,14 @@ a{ color:var(--accent) }
 .skip:focus{ top:calc(env(safe-area-inset-top,0px) + 10px) }
 
 /* Shell */
-.shell{ display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100vh }
+.shell{ display:grid; grid-template-columns:minmax(248px, 15.5rem) minmax(0,1fr); min-height:100vh }
 .rail{ background:var(--rail); color:var(--rail-ink); padding-block:18px; position:sticky; top:0; height:100vh; overflow-y:auto; display:flex; flex-direction:column; gap:18px; padding-left:max(14px, env(safe-area-inset-left,0px)); padding-right:14px }
 .brand{ display:flex; align-items:center; gap:10px; color:var(--rail-hi); padding:0 6px }
 .mark{ width:38px; height:38px; flex:none; border-radius:8px; background:var(--brand); display:grid; place-items:center; font-family:var(--f-display); font-weight:700; color:#fff; font-size:1.05rem; letter-spacing:.02em }
 .brand b{ font-family:var(--f-display); font-size:1.2rem; line-height:1.05; display:block; font-weight:700 }
 .brand small{ font-size:.72rem; color:var(--rail-ink); letter-spacing:.06em; text-transform:uppercase }
 .nav{ display:flex; flex-direction:column; gap:2px }
-.nav .grp{ font-size:.68rem; text-transform:uppercase; letter-spacing:.12em; color:var(--rail-ink); opacity:.75; padding:12px 10px 4px }
+.nav .grp{ font-size:.68rem; text-transform:uppercase; letter-spacing:.12em; color:var(--rail-ink); padding:12px 10px 4px }
 .nav a{ display:flex; align-items:center; gap:10px; color:var(--rail-ink); text-decoration:none; padding:8px 10px; border-radius:6px; font-size:.95rem }
 .nav a svg{ width:18px; height:18px; flex:none; stroke:currentColor; fill:none; stroke-width:1.8 }
 .nav a:hover{ background:var(--rail-act); color:var(--rail-hi) }
@@ -81,6 +81,7 @@ body::before{ content:""; position:fixed; inset:0 0 auto; height:env(safe-area-i
 .topbar .crumb{ font-family:var(--f-display); font-size:1.15rem; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
 .topbar .sp{ flex:1 }
 .menu-btn{ display:none }
+@media (max-width: 520px){ .topbar .lbl{ display:none } .topbar .btn{ padding:8px 10px } .topbar{ gap:6px } }
 #main{ padding-block:22px 48px; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); max-width:1320px; width:100%; display:flex; flex-direction:column; gap:22px }
 #main:focus{ outline:none }
 @media (max-width: 900px){
@@ -133,7 +134,7 @@ textarea{ min-height:80px; resize:vertical }
 @media (max-width: 1100px){ .kpis{ grid-template-columns:repeat(2,minmax(0,1fr)) } .kpi{ border-left:0; border-top:var(--bw) solid var(--line) } .kpi:nth-child(-n+2){ border-top:0 } .kpi:nth-child(even){ border-left:var(--bw) solid var(--line) } }
 
 /* Tables */
-.tw{ overflow-x:auto; border:var(--bw) solid var(--line); border-radius:8px; background:var(--surface) }
+.tw{ position:relative; overflow-x:auto; border:var(--bw) solid var(--line); border-radius:8px; background:var(--surface) }
 table{ border-collapse:collapse; width:100%; font-size:.92rem }
 th,td{ text-align:left; padding:9px 12px; border-bottom:var(--bw) solid var(--line); vertical-align:middle; white-space:nowrap }
 td.wrap{ white-space:normal; min-width:200px }
@@ -206,8 +207,8 @@ dialog::backdrop{ background:rgba(8,14,20,.55) }
 @keyframes tin{ from{ transform:translateY(8px); opacity:.4 } }
 
 /* A11y panel */
-.a11y{ position:absolute; right:max(16px, env(safe-area-inset-right,0px)); top:56px; z-index:40; width:min(340px, calc(100vw - 32px)); background:var(--surface); border:var(--bw) solid var(--line); border-radius:10px; box-shadow:0 12px 40px rgba(0,0,0,.2); padding:16px; display:flex; flex-direction:column; gap:12px }
-.switch{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-weight:400 }
+.a11y{ position:absolute; right:max(16px, env(safe-area-inset-right,0px)); top:56px; z-index:40; width:min(400px, calc(100vw - 32px)); background:var(--surface); border:var(--bw) solid var(--line); border-radius:10px; box-shadow:0 12px 40px rgba(0,0,0,.2); padding:16px; display:flex; flex-direction:column; gap:12px }
+.switch{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 10px; font-weight:400 }
 .switch input{ width:auto; min-height:0; accent-color:var(--accent); width:20px; height:20px }
 .seg{ display:inline-flex; border:var(--bw) solid var(--line); border-radius:6px; overflow:hidden }
 .seg button{ font:inherit; border:0; background:var(--surface); color:var(--ink); padding:6px 12px; cursor:pointer; min-width:44px; font-weight:700 }
@@ -298,6 +299,14 @@ const PERMISOS = {
   "admin.usuarios":       "Gestionar usuarios y permisos",
   "admin.catalogos":      "Gestionar ciudades, municipios y sucursales"
 };
+const ROL_DESC = {
+  "Administrador": "Usuarios, permisos, ciudades y sucursales",
+  "Gerente": "Autoriza facturas manuales, registra pagos y cierra novedades",
+  "Logística": "Registra pedidos de venta y facturas manuales",
+  "Despachos": "Crea remisiones, hace el conteo ciego y registra entregas",
+  "Bodega": "Inventario, traslados e importaciones",
+  "Auditor": "Consulta la trazabilidad y verifica la integridad"
+};
 const ROLES_BASE = {
   "Administrador": Object.keys(PERMISOS),
   "Gerente":    ["tablero","pedidos.gestionar","facturas.ver","facturas.autorizar","cartera.pagos","inventario.ver","clientes.gestionar","auditoria.ver","despachos.gestionar"],
@@ -352,7 +361,7 @@ function seed(){
   const pick = a => a[Math.floor(R() * a.length)];
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
   const db = {
-    version: 2, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
+    version: 3, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
     empresa:{ nombre:"Motorepuestos del Oriente S.A.S.", nit:"901.482.315-7", ciudad:"Rionegro, Antioquia", resolucion:"Resolución DIAN 18764000001234 (simulada) · Prefijo MRO · Rango 1 a 50.000 · Vigencia 2026-2027" },
     roles: JSON.parse(JSON.stringify(ROLES_BASE)),
     usuarios:[
@@ -396,7 +405,13 @@ function seed(){
     ["ROD-6301","Rodamiento 6301-2RS","Rueda delantera, varias","Rodamientos",6100,12000,40,[130,30,26],"Importado",6],
     ["ACE-20W50","Aceite 4T 20W-50 x 1 L","Universal","Lubricación",21000,32000,48,[210,50,44],"Nacional",0],
     ["CIL-KIT-150","Kit de cilindro 150 cc (pistón y anillos)","Bajaj Pulsar 150","Motor",248000,385000,4,[3,1,0],"Importado",12],
-    ["ESP-RET-M10","Espejos retrovisores par M10","Universal","Accesorios",14500,28000,15,[44,9,12],"Nacional",3]
+    ["ESP-RET-M10","Espejos retrovisores par M10","Universal","Accesorios",14500,28000,15,[44,9,12],"Nacional",3],
+    ["DIS-FRE-240","Disco de freno delantero 240 mm","Pulsar NS200, Apache 200","Frenos",96000,149000,8,[22,4,3],"Importado",12],
+    ["CDI-AKT-125","CDI de encendido 6 pines","AKT NKD 125, Flex 125","Eléctrico",58000,92000,10,[27,6,5],"Importado",6],
+    ["BOB-ENC-UNI","Bobina de alta (encendido)","Motos 100–150 cc","Eléctrico",31000,52000,12,[35,8,6],"Importado",6],
+    ["EMP-KIT-150","Kit de empaques de motor 150 cc","Bajaj Pulsar 150","Motor",34000,56000,10,[24,5,4],"Importado",3],
+    ["LLA-90-90-18","Llanta trasera 90/90-18","Honda CB110, Yamaha YBR","Llantas",112000,168000,10,[28,6,4],"Nacional",12],
+    ["MAN-FRE-DER","Manigueta de freno derecha","Universal","Mandos",13500,24000,20,[48,10,12],"Nacional",3]
   ];
   db.productos = prods.map((p, i) => ({ id:"PR" + (i+1), sku:p[0], nombre:p[1], compat:p[2], categoria:p[3], costo:p[4], precio:p[5], minimo:p[6], stock:{ S1:p[7][0], S2:p[7][1], S3:p[7][2] }, origen:p[8], garantiaMeses:p[9], activo:true }));
   const clis = [
@@ -406,7 +421,10 @@ function seed(){
     ["Motocentro Marinilla S.A.S.","900.889.432-5","05440","Cra. 30 # 31-15","Paula Duque","604 548 3376",20000000,"compras@motocentromarinilla.example"],
     ["Repuestos El Carmen","901.300.777-0","05148","Calle 31 # 30-22","Wilson Ocampo","604 543 0091",6000000,"repuestoselcarmen@correo.example"],
     ["Distrimotos Sonsón","900.121.900-2","05756","Cra. 8 # 7-41","Gloria Valencia","604 869 2240",10000000,"gvalencia@distrimotos.example"],
-    ["Moto Servicio Medellín Centro","901.678.234-9","05001","Calle 44 # 52-17, Barrio Triste","Felipe Correa","604 512 7788",25000000,"facturacion@motoserviciomed.example"]
+    ["Moto Servicio Medellín Centro","901.678.234-9","05001","Calle 44 # 52-17, Barrio Triste","Felipe Correa","604 512 7788",25000000,"facturacion@motoserviciomed.example"],
+    ["Repuestos San Vicente","900.334.871-6","05674","Calle 30 # 29-60","Natalia Gil","604 854 1302",8000000,"natalia.gil@repuestossanvicente.example"],
+    ["Motos y Partes El Retiro","901.402.115-4","05607","Cra. 20 # 21-18","Camilo Ruiz","604 541 0745",9000000,"compras@motoselretiro.example"],
+    ["Distrimotos Bogotá S.A.S.","900.977.640-1","11001","Av. Caracas # 13-41","Andrea Salazar","601 342 8890",30000000,"asalazar@distrimotosbog.example"]
   ];
   db.clientes = clis.map((c, i) => ({ id:"C" + (i+1), nombre:c[0], nit:c[1], ciudadId:c[2], direccion:c[3], contacto:c[4], telefono:c[5], cupo:c[6], email:c[7], activo:true, autorizaDatos:true }));
 
@@ -445,7 +463,7 @@ function seed(){
     const fechas = [];
     for (let k = 0; k < count; k++){
       const d = new Date(base.getFullYear(), base.getMonth(), ri(1, daysInMonth), ri(7, 16), ri(0, 59));
-      if (+d > +now - 4 * 36e5) d.setTime(+now - ri(5, 40) * 36e5);
+      if (+d > +now - 6 * 36e5) d.setTime(+now - ri(6, 40) * 36e5);
       fechas.push(d);
     }
     fechas.sort((x, y) => x - y); // consecutivos en orden cronológico
@@ -521,24 +539,67 @@ function seed(){
       }
     }
   }
-  // Facturas pendientes de autorización para la demostración
-  const mk = (cid, sucId, its, hoursAgo, creador) => {
-    const d = new Date(+now - hoursAgo * 36e5); const c = db.clientes.find(x => x.id === cid);
-    const f = buildFactura(db, cid, sucId, c.ciudadId, its.map(([pid, q]) => ({ productoId:pid, cantidad:q, precio:db.productos.find(p => p.id === pid).precio })), d.toISOString(), creador);
-    ev(d, "Registrar factura manual", "Factura", f.numero, c.nombre + " · " + money(f.total), creador);
-    ev(new Date(+d + 2000), "Validar cupo del cliente", "Factura", f.numero, "Cupo suficiente", creador);
-  };
-  mk("C4", "S1", [["PR4",4],["PR3",10],["PR1",24]], 3, "U3");
-  mk("C3", "S3", [["PR6",12],["PR12",20]], 1.5, "U7");
-  // Pedidos de venta registrados, listos para facturar
-  const mkPed = (cid, its, hoursAgo) => {
-    const d = new Date(+now - hoursAgo * 36e5); const c = db.clientes.find(x => x.id === cid);
-    const pd = buildPedido(db, cid, "S1", c.ciudadId, its.map(([pid, q]) => ({ productoId:pid, cantidad:q, precio:db.productos.find(p => p.id === pid).precio })), d.toISOString(), "U3");
-    ev(d, "Registrar pedido de venta", "Pedido", pd.numero, c.nombre + " · " + money(pd.total), "U3");
+  /* ---------- Escenario de demostración ----------
+     Garantiza que cada estado del flujo tenga ejemplos el día de la demo.
+     Se crea en orden cronológico para que los consecutivos sigan en orden. */
+  const H = h => new Date(+now - h * 36e5);
+  const lineas = its => its.map(([pid, q]) => ({ productoId:pid, cantidad:q, precio:db.productos.find(p => p.id === pid).precio }));
+  const C = id => db.clientes.find(x => x.id === id);
+  const mkPed = (cid, its, h, creador = "U3") => {
+    const c = C(cid), d = H(h);
+    const pd = buildPedido(db, cid, "S1", c.ciudadId, lineas(its), d.toISOString(), creador);
+    ev(d, "Registrar pedido de venta", "Pedido", pd.numero, c.nombre + " · " + money(pd.total), creador);
     correo(db, "Pedido de venta", pd, d.toISOString());
+    return pd;
   };
-  mkPed("C1", [["PR2",10],["PR11",20]], 5);
+  const mkFac = (cid, sucId, its, h, creador, ped) => {
+    const c = C(cid), d = H(h);
+    const f = buildFactura(db, cid, sucId, c.ciudadId, ped ? ped.items.map(x => ({ ...x })) : lineas(its), d.toISOString(), creador, ped);
+    ev(d, ped ? "Facturar pedido de venta" : "Registrar factura manual", "Factura", f.numero, (ped ? "Pedido " + ped.numero + " · " : c.nombre + " · ") + money(f.total), creador);
+    ev(new Date(+d + 2000), "Validar cupo del cliente", "Factura", f.numero, "Cupo suficiente", creador);
+    return f;
+  };
+  const autorizar = (f, h) => {
+    const t = H(h).toISOString();
+    if (f.origen === "Pedido"){ autorizarFactura(db, f, "SYS", t); ev(new Date(t), "Contabilizar factura (automática, origen pedido)", "Factura", f.numero, "Asiento " + f.asiento.numero + " · CUFE " + f.cufe.slice(0,16) + "…", null); }
+    else { autorizarFactura(db, f, "U2", t); ev(new Date(t), "Autorizar factura manual", "Factura", f.numero, "CUFE " + f.cufe.slice(0,16) + "…", "U2"); ev(new Date(+new Date(t) + 1000), "Contabilizar factura autorizada", "Factura", f.numero, "Asiento " + f.asiento.numero, "U2"); }
+    correo(db, "Factura emitida", f, new Date(+new Date(t) + 2000).toISOString());
+  };
+  const remision = (f, h, transp, guia) => {
+    const c = C(f.clienteId), t = H(h);
+    const r = buildRemision(db, f, t.toISOString(), { direccion:c.direccion, referencia:"Local comercial, frente a la vía principal", contacto:c.contacto, telefono:c.telefono, transportadora:transp, guia, franja:"8:00 a. m. – 12:00 m.", observaciones:"Entregar únicamente a la persona de contacto. Exigir firma y cédula." });
+    ev(t, "Registrar despacho", "Remisión", r.numero, "Factura " + f.numero, "U4");
+    ev(new Date(+t + 500), "Registrar instrucciones de envío", "Remisión", r.numero, transp + (guia ? " · guía " + guia : ""), "U4");
+    return r;
+  };
+  const verificar = (r, h) => { const t = H(h); r.items.forEach(it => it.contado = it.cantidad); r.estado = "Verificada"; r.verificadaEn = t.toISOString(); r.sello = sha(r.numero + r.verificadaEn).slice(0, 10).toUpperCase(); ev(t, "Verificar alistamiento (conteo ciego)", "Remisión", r.numero, "Conteo conforme · sello " + r.sello, "U4"); };
+  const transito = (r, h) => { const t = H(h); r.estado = "En tránsito"; r.salidaEn = t.toISOString(); ev(t, "Despachar remisión", "Remisión", r.numero, "Salida de bodega", "U4"); correo(db, "Despacho", r, t.toISOString()); };
+
+  // 1. Pedido registrado temprano (queda por facturar)
+  mkPed("C1", [["PR2",10],["PR11",20]], 4.95);
+  // 2. Facturas autorizadas que esperan remisión
+  const fA = mkFac("C2", "S1", [["PR15",2],["PR6",10]], 4.9, "U3"); autorizar(fA, 4.85);
+  const pB = mkPed("C5", [["PR10",30],["PR18",4]], 4.88); const fB = mkFac("C5", "S1", null, 4.8, "U3", pB); autorizar(fB, 4.8);
+  // 3. Remisión verificada (sellada), con un primer conteo errado que abrió una novedad
+  const fC = mkFac("C7", "S1", [["PR3",10],["PR17",6]], 4.75, "U3"); autorizar(fC, 4.7);
+  const rC = remision(fC, 4.6, "Coordinadora", "CO458812");
+  const tNov = H(4.5);
+  rC.items[0].contado = 11;
+  const novC = { id:"N" + nextNumDb(db, "NOV"), tipo:"Alistamiento", remisionId:rC.id, facturaId:fC.id, fecha:tNov.toISOString(), usuario:"Julián Zuluaga", detalle:difDetalle(db, rC.items, "contado"), estado:"Abierta", resolucion:"" };
+  db.novedades.push(novC); ev(tNov, "Discrepancia en conteo de alistamiento", "Remisión", rC.numero, novC.detalle, "U4");
+  verificar(rC, 4.4);
+  // 4. Dos remisiones en tránsito
+  const pD = mkPed("C9", [["PR16",5],["PR1",30]], 4.68); const fD = mkFac("C9", "S1", null, 4.6, "U3", pD); autorizar(fD, 4.6);
+  const rD = remision(fD, 4.5, "Servientrega", "SV7712045"); verificar(rD, 4.3); transito(rD, 4.1);
+  const fE = mkFac("C6", "S1", [["PR19",3],["PR8",12]], 4.45, "U3"); autorizar(fE, 4.35);
+  const rE = remision(fE, 4.25, "Flota propia", ""); verificar(rE, 4.15); transito(rE, 4.0);
+  // 5. Facturas manuales pendientes de autorización
+  mkFac("C4", "S1", [["PR4",4],["PR3",10],["PR1",24]], 3, "U3");
+  mkFac("C8", "S1", [["PR20",6],["PR11",20]], 2.2, "U3");
   mkPed("C6", [["PR5",6],["PR8",15]], 2);
+  mkFac("C3", "S3", [["PR6",12],["PR12",20]], 1.5, "U7");
+  // 6. Pedido recién llegado
+  mkPed("C10", [["PR14",8],["PR7",3]], 0.7);
   // Las existencias de la tabla representan el saldo actual después del histórico
   prods.forEach((p, i) => { db.productos[i].stock = { S1:p[7][0], S2:p[7][1], S3:p[7][2] }; });
   events.sort((a, b) => a[0] < b[0] ? -1 : 1);
@@ -640,6 +701,16 @@ function estadoLogistico(f){
 }
 const pillFactura = f => `<span class="pill ${ {Pendiente:"warn",Autorizada:"ok",Rechazada:"bad"}[f.estado] || "" }">${esc(f.estado === "Pendiente" ? "Pendiente de autorización" : f.estado)}</span>`;
 const pill = (txt, cls) => `<span class="pill ${cls||""}">${esc(txt)}</span>`;
+
+/* Importaciones: flujo de estados y costo nacionalizado (FOB + flete + seguro + arancel) */
+const FLUJO_IMP = ["Orden emitida","En tránsito","En aduana","Nacionalizada","Recibida"];
+function costeo(im){
+  const fob = sum(im.items, it => it.cantidad * it.fobUSD);
+  const cif = fob + im.fleteUSD + im.seguroUSD;
+  const cifCOP = cif * im.trm, arancel = cifCOP * im.arancelPct / 100, ivaImp = (cifCOP + arancel) * IVA;
+  const costoTotal = cifCOP + arancel; // IVA importación es descontable
+  return { fob, cif, cifCOP, arancel, ivaImp, costoTotal, factor: fob ? costoTotal / (fob * im.trm) : 1 };
+}
 </script>
 <script>
 "use strict";
@@ -648,7 +719,7 @@ const pill = (txt, cls) => `<span class="pill ${cls||""}">${esc(txt)}</span>`;
 
 function load(){
   const raw = store.get(STORE_KEY);
-  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 2) return; } catch(e){} }
+  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 3) return; } catch(e){} }
   DB = seed(); save();
 }
 function save(){ store.set(STORE_KEY, JSON.stringify(DB)); }
@@ -747,14 +818,17 @@ function render(){
       <div class="brand"><div class="mark" aria-hidden="true">MRO</div><div><b>Motorepuestos<br>del Oriente</b><small>Rionegro · Antioquia</small></div></div>
       <nav class="nav" aria-label="Secciones">${nav}</nav>
       <div class="me"><b>${esc(ME.nombre)}</b><span>${esc(ME.rol)} · ${esc(sucNom)}</span>
+        <label for="sw-user" style="margin-top:12px;font-weight:400;font-size:.78rem;color:var(--rail-ink)">Cambiar de usuario (demostración)</label>
+        <select id="sw-user" data-switch-user style="margin-top:4px">${DB.usuarios.filter(u => u.activo).map(u => `<option value="${u.id}" ${u.id === ME.id ? "selected" : ""}>${esc(u.nombre)} · ${esc(u.rol)}</option>`).join("")}</select>
         <div class="row" style="margin-top:10px"><button class="btn sm" data-act="logout">${icon("salir")} Cerrar sesión</button></div></div>
     </aside>
     <div class="main">
       <header class="topbar">
         <button class="btn ghost menu-btn" data-act="menu" aria-expanded="${UI.menuOpen}" aria-controls="rail">${icon("menu")}<span class="sr">Abrir menú</span></button>
         <span class="crumb">${esc(meta.label)}</span><span class="sp"></span>
+        <button class="btn" data-act="guia" title="Recorrido sugerido para la demostración" aria-label="Guía de demostración">${icon("calidad")}<span class="lbl">Guía</span></button>
         <button class="btn ghost" data-act="leer" title="Leer esta pantalla en voz alta">${icon("voz")}<span class="sr">Leer en voz alta</span></button>
-        <button class="btn" data-act="a11y" aria-expanded="${UI.a11yOpen}" aria-controls="a11y-panel">${icon("a11y")}<span>Accesibilidad</span></button>
+        <button class="btn" data-act="a11y" aria-label="Opciones de accesibilidad" aria-expanded="${UI.a11yOpen}" aria-controls="a11y-panel">${icon("a11y")}<span class="lbl">Accesibilidad</span></button>
       </header>
       ${UI.a11yOpen ? vA11y() : ""}
       <main id="main" tabindex="-1">${VIEWS[r]()}</main>
@@ -762,6 +836,7 @@ function render(){
   </div>`;
   document.title = meta.label + " · Motorepuestos del Oriente";
   if (AFTER[r]) AFTER[r]();
+  regionesTeclado(app);
 }
 </script>
 <script>
@@ -784,12 +859,13 @@ function vLogin(){
       <div><p class="eyebrow">Ingreso al sistema</p><h2 id="lg-f">Elige un usuario de demostración</h2>
       <p class="muted" style="margin-top:6px">Cada usuario tiene un rol con permisos distintos. Prueba el flujo completo: Logística registra, Gerencia autoriza, Despachos entrega.</p></div>
       <div class="users" role="group" aria-label="Usuarios de demostración">
-        ${DB.usuarios.filter(u => u.activo).map(u => `<button class="ucard" data-act="loginSel" data-id="${u.id}" aria-pressed="${u.id === sel}"><b>${esc(u.nombre)}</b><small>${esc(u.rol)} · ${esc(suc(u.sucursalId)?.nombre || "")}</small></button>`).join("")}
+        ${DB.usuarios.filter(u => u.activo).map(u => `<button class="ucard" data-act="loginSel" data-id="${u.id}" aria-pressed="${u.id === sel}"><b>${esc(u.nombre)}</b><small>${esc(u.rol)} · ${esc(suc(u.sucursalId)?.nombre || "")}</small><small style="margin-top:4px">${esc(ROL_DESC[u.rol] || "")}</small></button>`).join("")}
       </div>
       <form data-form="login" class="grid">
         <div class="field"><label for="lg-pass">Contraseña</label><input id="lg-pass" type="password" autocomplete="current-password" value="demo2026" aria-describedby="lg-h"><span class="hint" id="lg-h">En la demostración la contraseña de todos los usuarios es <span class="mono">demo2026</span>.</span></div>
         <button class="btn primary" type="submit">Ingresar</button>
       </form>
+      <div class="row"><button class="btn sm" data-act="guia">${icon("calidad")} Ver la guía de demostración (8 pasos)</button></div>
       <div class="row"><a href="#certificados" class="linklike" data-act="verifPublico">Verificar un certificado de garantía sin iniciar sesión</a></div>
       <div class="row"><button class="btn sm" data-act="a11y">${icon("a11y")} Opciones de accesibilidad</button></div>
       ${UI.a11yOpen ? vA11y(true) : ""}
@@ -1236,14 +1312,6 @@ function dlgProducto(){
    Vista · Importaciones y costeo nacionalizado. */
 
 /* --- Importaciones --- */
-const FLUJO_IMP = ["Orden emitida","En tránsito","En aduana","Nacionalizada","Recibida"];
-function costeo(im){
-  const fob = sum(im.items, it => it.cantidad * it.fobUSD);
-  const cif = fob + im.fleteUSD + im.seguroUSD;
-  const cifCOP = cif * im.trm, arancel = cifCOP * im.arancelPct / 100, ivaImp = (cifCOP + arancel) * IVA;
-  const costoTotal = cifCOP + arancel; // IVA importación es descontable
-  return { fob, cif, cifCOP, arancel, ivaImp, costoTotal, factor: fob ? costoTotal / (fob * im.trm) : 1 };
-}
 function vImportaciones(){
   return `<div class="page-head"><div><h1>Importaciones</h1><p>Órdenes al proveedor de la Zona Libre de Colón (Panamá). El costo nacionalizado reparte flete, seguro y arancel sobre el valor FOB. La mercancía solo entra al inventario cuando se recibe y cuenta en bodega.</p></div>
     <button class="btn primary" data-act="importDlg">${icon("plus")} Nueva orden</button></div>
@@ -1285,7 +1353,7 @@ function vClientes(){
 function dlgCliente(id){
   const c = id ? cli(id) : { nombre:"", nit:"", ciudadId:"05615", direccion:"", contacto:"", telefono:"", cupo:5000000, autorizaDatos:false };
   const cupoOnlyGer = !P("facturas.autorizar");
-  openDlg(id ? "Editar cliente" : "Nuevo cliente", `<form id="frm-cl" data-form="cliente" data-id="${id || ""}" class="grid g2">
+  openDlg(id ? "Editar cliente" : "Nuevo cliente", `<form id="frm-cl" data-form="cliente" data-id="${id || ""}" class="grid g2" novalidate>
     <div class="field"><label for="cl-n">Razón social *</label><input id="cl-n" name="nombre" required value="${esc(c.nombre)}"></div>
     <div class="field"><label for="cl-nit">NIT *</label><input id="cl-nit" name="nit" required pattern="[0-9.]{6,13}-[0-9]" placeholder="900.123.456-7" value="${esc(c.nit)}" aria-describedby="cl-nit-h"><span class="hint" id="cl-nit-h">Formato 900.123.456-7 (con dígito de verificación).</span></div>
     <div class="field"><label for="cl-ci">Municipio *</label><select id="cl-ci" name="ciudadId">${DB.ciudades.filter(x => byId(DB.estados, x.estadoId).paisId === "CO").map(x => `<option value="${x.id}" ${c.ciudadId === x.id ? "selected" : ""}>${esc(x.nombre)}</option>`).join("")}</select></div>
@@ -1487,7 +1555,10 @@ function openDlg(title, body, foot){
   if (!d.open){ UI.lastFocus = document.activeElement; d.showModal(); }
   const first = d.querySelector(".dlg-body input:not([disabled]), .dlg-body select, .dlg-body textarea");
   (first || d.querySelector(".dlg-head button")).focus();
+  regionesTeclado(d);
 }
+/* Las tablas que se desplazan a lo ancho deben poder enfocarse para recorrerlas con el teclado (WCAG 2.1.1) */
+function regionesTeclado(raiz){ raiz.querySelectorAll(".tw").forEach(el => { if (el.scrollWidth > el.clientWidth + 1){ el.tabIndex = 0; el.setAttribute("role", "region"); el.setAttribute("aria-label", "Tabla desplazable"); } }); }
 function closeDlg(){ const d = $("#dlg"); if (d.open) d.close(); UI.dlgCtx = null; }
 $("#dlg").addEventListener("close", () => { UI.tab.fac = "doc"; UI.dlgCtx = null; if (UI.lastFocus && document.contains(UI.lastFocus)) UI.lastFocus.focus(); });
 function toast(msg, bad){ const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; $("#toasts").appendChild(t); setTimeout(() => t.remove(), 5000); }
@@ -1513,6 +1584,30 @@ const ACT = {
   loginSel(d){ UI.loginSel = d.id; render(); $(`[data-act="loginSel"][data-id="${d.id}"]`)?.focus(); },
   verifPublico(){ UI.publico = true; UI.certRes = ""; render(); $("#cc")?.focus(); },
   cerrarPublico(){ UI.publico = false; render(); },
+  guia(){
+    const pasos = [
+      ["U3","pedidos","Camila · Logística","Facturar el pedido de venta pendiente: queda contabilizado sin pasar por Gerencia y se envía correo al cliente.","B2 · A1"],
+      ["U3","factura-nueva","Camila · Logística","Registrar una factura manual: cambiar de país para ver cómo se filtran los departamentos; probar con Repuestos San Vicente y una cantidad alta para ver el bloqueo por cupo.","B3 · cupo"],
+      ["U2","autorizaciones","Andrés · Gerente","Autorizar una factura manual pendiente: genera CUFE, asiento contable, certificados y correo. Intentar con la propia no es posible (segregación).","B2"],
+      ["U4","despachos","Julián · Despachos","Crear la remisión de una factura autorizada con instrucciones de envío. Hacer el conteo ciego con un número errado (abre novedad) y luego correcto (sella).","Fraude · envíos"],
+      ["U4","despachos","Julián · Despachos","Pestaña En proceso: registrar la entrega de una remisión en tránsito con un faltante. Queda una novedad para Gerencia.","Fraude"],
+      ["U6","trazabilidad","Mateo · Auditor","Rastrear una factura (pedido → factura → remisión) y verificar la integridad de la bitácora.","ISO 9001 · B1"],
+      ["U1","trazabilidad","Laura · Administradora","Simular una alteración de la bitácora: el sistema la detecta. Luego deshacer la simulación.","Integridad"],
+      ["U2","notificaciones","Andrés · Gerente","Ver los correos enviados por cada transacción. Abrir el botón Accesibilidad y ajustar texto y contraste; mostrar la app en el celular.","A1 · B4 · A3"]
+    ];
+    openDlg("Guía de demostración", `<p>Recorrido de unos 5 minutos que muestra todos los requisitos. Cada botón <b>Ir</b> cambia al usuario indicado y abre la pantalla.</p>
+      <div class="tw"><table><thead><tr><th class="r">#</th><th>Usuario</th><th>Qué mostrar</th><th>Requisito</th><th></th></tr></thead><tbody>
+      ${pasos.map((p, i) => `<tr><td class="r num">${i + 1}</td><td>${esc(p[2])}</td><td class="wrap">${esc(p[3])}</td><td>${pill(p[4], "acc")}</td><td><button class="btn sm primary" data-act="demoPaso" data-u="${p[0]}" data-r="${p[1]}">Ir</button></td></tr>`).join("")}
+      </tbody></table></div>
+      <p class="muted" style="font-size:.85rem">Antes de presentar: Administración → Datos y respaldo → Restablecer datos de ejemplo, para empezar con todos los casos disponibles.</p>`, `<button class="btn" data-act="cerrarDlg">Cerrar</button>`);
+  },
+  demoPaso(d){
+    const u = usr(d.u); if (!u || !u.activo) return;
+    if (!ME || ME.id !== u.id){ ME = u; store.set(SES_KEY, u.id); audit("Cambiar de usuario (demostración)", "Sesión", u.usuario, u.rol); save(); }
+    closeDlg(); UI.publico = false; UI.a11yOpen = false; UI.draft = null;
+    if (location.hash === "#" + d.r) render(); else location.hash = d.r;
+    toast(`Ahora estás como ${u.nombre} (${u.rol}).`);
+  },
   logout(){ audit("Cerrar sesión", "Sesión", ME.usuario, ""); save(); ME = null; store.del(SES_KEY); UI.menuOpen = false; UI.draft = null; location.hash = ""; render(); },
   tab(d){ UI.tab[d.g] = d.v; if (d.g === "fac") dlgFactura(d.ref); else render(); },
   cerrarDlg(){ closeDlg(); },
@@ -1638,8 +1733,8 @@ const FORM = {
     const ids = items.map(x => x.productoId);
     if (new Set(ids).size !== ids.length) E.items = "Hay referencias repetidas. Une las cantidades en una sola línea.";
     for (const it of items){
-      const q = parseInt(it.cantidad); const p = prod(it.productoId);
-      if (!(q > 0)){ E.items = `La cantidad de ${p.sku} debe ser un número entero mayor que cero.`; break; }
+      const q = Number(it.cantidad); const p = prod(it.productoId);
+      if (!(Number.isInteger(q) && q > 0)){ E.items = `La cantidad de ${p.sku} debe ser un número entero mayor que cero.`; break; }
       if (q > (p.stock[d.sucursalId] || 0)){ E.items = `No hay existencia suficiente de ${p.sku} en ${suc(d.sucursalId).nombre}: hay ${p.stock[d.sucursalId] || 0}, pides ${q}.`; break; }
     }
     const lines = items.map(it => ({ productoId:it.productoId, cantidad:parseInt(it.cantidad), precio:prod(it.productoId).precio }));
@@ -1685,7 +1780,7 @@ const FORM = {
   conteo(form){
     const r = rem(form.dataset.id);
     const vals = r.items.map((_, i) => form["c" + i].value);
-    if (vals.some(v => v === "" || !(parseInt(v) >= 0))){ $("#conteo-res").innerHTML = `<div class="note bad">Escribe la cantidad contada en todas las líneas.</div>`; return; }
+    if (vals.some(v => v === "" || !(Number.isInteger(Number(v)) && Number(v) >= 0))){ $("#conteo-res").innerHTML = `<div class="note bad">Escribe en todas las líneas la cantidad contada, en unidades enteras.</div>`; return; }
     r.items.forEach((it, i) => it.contado = parseInt(vals[i]));
     const dif = r.items.filter(it => it.contado !== it.cantidad);
     if (dif.length){
@@ -1731,7 +1826,8 @@ const FORM = {
     n.estado = "Cerrada"; n.resolucion = v; audit("Cerrar novedad", "Remisión", rem(n.remisionId).numero, v); closeDlg(); commit(); toast("Novedad cerrada.");
   },
   ajuste(form){
-    const p = prod(form.dataset.id); const s = form.suc.value; const c = parseInt(form.cant.value); const det = form.detalle.value.trim();
+    const p = prod(form.dataset.id); const s = form.suc.value; const c = Number(form.cant.value); const det = form.detalle.value.trim();
+    if (!Number.isInteger(c)){ $("#aj-err").innerHTML = `<div class="note bad">La cantidad debe ser un número entero de unidades.</div>`; return; }
     if (!c){ $("#aj-err").innerHTML = `<div class="note bad">La cantidad debe ser distinta de cero.</div>`; return; }
     if (det.length < 10){ $("#aj-err").innerHTML = `<div class="note bad">Describe el ajuste con al menos 10 caracteres.</div>`; return; }
     if ((p.stock[s] || 0) + c < 0){ $("#aj-err").innerHTML = `<div class="note bad">El ajuste dejaría existencia negativa (hay ${p.stock[s] || 0}).</div>`; return; }
@@ -1740,9 +1836,9 @@ const FORM = {
     audit("Ajustar inventario", "Producto", p.sku, `${c > 0 ? "+" : ""}${c} en ${suc(s).nombre} · ${form.motivo.value} · ${det}`); closeDlg(); commit(); toast("Ajuste registrado.");
   },
   traslado(form){
-    const p = prod(form.prod.value), o = form.o.value, d = form.d.value, c = parseInt(form.cant.value);
+    const p = prod(form.prod.value), o = form.o.value, d = form.d.value, c = Number(form.cant.value);
     if (o === d){ $("#tr-err").innerHTML = `<div class="note bad">El origen y el destino deben ser distintos.</div>`; return; }
-    if (!(c > 0) || c > (p.stock[o] || 0)){ $("#tr-err").innerHTML = `<div class="note bad">Cantidad no válida. En ${esc(suc(o).nombre)} hay ${p.stock[o] || 0}.</div>`; return; }
+    if (!(Number.isInteger(c) && c > 0) || c > (p.stock[o] || 0)){ $("#tr-err").innerHTML = `<div class="note bad">Cantidad no válida. En ${esc(suc(o).nombre)} hay ${p.stock[o] || 0}.</div>`; return; }
     p.stock[o] -= c; p.stock[d] = (p.stock[d] || 0) + c; const ref = "TR-" + String(nextNum("TR")).padStart(4, "0"); const ts = new Date().toISOString();
     DB.kardex.push({ fecha:ts, productoId:p.id, sucursalId:o, tipo:"Traslado salida", cantidad:-c, ref, usuario:ME.nombre }, { fecha:ts, productoId:p.id, sucursalId:d, tipo:"Traslado entrada", cantidad:c, ref, usuario:ME.nombre });
     audit("Trasladar inventario", "Producto", p.sku, `${c} de ${suc(o).nombre} a ${suc(d).nombre} · ${ref}`); closeDlg(); commit(); toast(`Traslado ${ref} registrado.`);
@@ -1810,7 +1906,7 @@ const FORM = {
     DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast("Usuario creado. Ya aparece en la pantalla de ingreso.");
   },
   restaurar(form){
-    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 2 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
+    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 3 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
     catch(e){ toast("El texto no es un respaldo válido de este sistema.", true); }
   }
 };
@@ -1840,6 +1936,7 @@ document.addEventListener("input", e => {
 });
 document.addEventListener("change", e => {
   const t = e.target;
+  if (t.dataset.switchUser !== undefined){ ACT.demoPaso({ u:t.value, r:ruta() }); return; }
   if (t.dataset.ch){ UI.filtros[t.dataset.ch] = t.value; render(); $("#" + t.id)?.focus(); }
   if (t.dataset.pref){ setPref(t.dataset.pref, t.checked); render(); $("#" + t.id)?.focus(); }
   if (t.dataset.draft && t.dataset.draft !== "obs"){

@@ -17,12 +17,13 @@ function vLogin(){
       <div><p class="eyebrow">Ingreso al sistema</p><h2 id="lg-f">Elige un usuario de demostración</h2>
       <p class="muted" style="margin-top:6px">Cada usuario tiene un rol con permisos distintos. Prueba el flujo completo: Logística registra, Gerencia autoriza, Despachos entrega.</p></div>
       <div class="users" role="group" aria-label="Usuarios de demostración">
-        ${DB.usuarios.filter(u => u.activo).map(u => `<button class="ucard" data-act="loginSel" data-id="${u.id}" aria-pressed="${u.id === sel}"><b>${esc(u.nombre)}</b><small>${esc(u.rol)} · ${esc(suc(u.sucursalId)?.nombre || "")}</small></button>`).join("")}
+        ${DB.usuarios.filter(u => u.activo).map(u => `<button class="ucard" data-act="loginSel" data-id="${u.id}" aria-pressed="${u.id === sel}"><b>${esc(u.nombre)}</b><small>${esc(u.rol)} · ${esc(suc(u.sucursalId)?.nombre || "")}</small><small style="margin-top:4px">${esc(ROL_DESC[u.rol] || "")}</small></button>`).join("")}
       </div>
       <form data-form="login" class="grid">
         <div class="field"><label for="lg-pass">Contraseña</label><input id="lg-pass" type="password" autocomplete="current-password" value="demo2026" aria-describedby="lg-h"><span class="hint" id="lg-h">En la demostración la contraseña de todos los usuarios es <span class="mono">demo2026</span>.</span></div>
         <button class="btn primary" type="submit">Ingresar</button>
       </form>
+      <div class="row"><button class="btn sm" data-act="guia">${icon("calidad")} Ver la guía de demostración (8 pasos)</button></div>
       <div class="row"><a href="#certificados" class="linklike" data-act="verifPublico">Verificar un certificado de garantía sin iniciar sesión</a></div>
       <div class="row"><button class="btn sm" data-act="a11y">${icon("a11y")} Opciones de accesibilidad</button></div>
       ${UI.a11yOpen ? vA11y(true) : ""}

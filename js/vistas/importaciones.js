@@ -3,14 +3,6 @@
    Vista · Importaciones y costeo nacionalizado. */
 
 /* --- Importaciones --- */
-const FLUJO_IMP = ["Orden emitida","En tránsito","En aduana","Nacionalizada","Recibida"];
-function costeo(im){
-  const fob = sum(im.items, it => it.cantidad * it.fobUSD);
-  const cif = fob + im.fleteUSD + im.seguroUSD;
-  const cifCOP = cif * im.trm, arancel = cifCOP * im.arancelPct / 100, ivaImp = (cifCOP + arancel) * IVA;
-  const costoTotal = cifCOP + arancel; // IVA importación es descontable
-  return { fob, cif, cifCOP, arancel, ivaImp, costoTotal, factor: fob ? costoTotal / (fob * im.trm) : 1 };
-}
 function vImportaciones(){
   return `<div class="page-head"><div><h1>Importaciones</h1><p>Órdenes al proveedor de la Zona Libre de Colón (Panamá). El costo nacionalizado reparte flete, seguro y arancel sobre el valor FOB. La mercancía solo entra al inventario cuando se recibe y cuenta en bodega.</p></div>
     <button class="btn primary" data-act="importDlg">${icon("plus")} Nueva orden</button></div>

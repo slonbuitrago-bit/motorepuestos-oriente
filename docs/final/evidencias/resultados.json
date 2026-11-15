@@ -1,0 +1,320 @@
+{
+ "fecha": "2026-11-15T19:05:27.584Z",
+ "resultados": [
+  {
+   "id": "CS-01",
+   "nivel": "Sistema",
+   "tipo": "Funcional",
+   "nombre": "Ingreso con contraseña incorrecta es rechazado",
+   "resultado": "PASA",
+   "detalle": "Mensaje de error y sin sesión",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-02",
+   "nivel": "Sistema",
+   "tipo": "Funcional",
+   "nombre": "Ingreso correcto muestra solo el menú del rol",
+   "resultado": "PASA",
+   "detalle": "Logística ve Pedidos y no Autorizaciones",
+   "evidencia": "evidencias/02-tablero-logistica.png"
+  },
+  {
+   "id": "CS-03",
+   "nivel": "Sistema",
+   "tipo": "Funcional (B2, A1)",
+   "nombre": "Facturar un pedido lo contabiliza sin autorización y avisa por correo",
+   "resultado": "PASA",
+   "detalle": "Pedido Facturado, factura Autorizada con asiento, +1 correo",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-04",
+   "nivel": "Sistema",
+   "tipo": "Funcional (B3)",
+   "nombre": "Al elegir Panamá solo se listan sus estados y no hay ciudad de texto libre",
+   "resultado": "PASA",
+   "detalle": "Estados: Colón,Panamá",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-05",
+   "nivel": "Sistema",
+   "tipo": "Funcional (regla de cupo)",
+   "nombre": "Factura que supera el cupo del cliente no se guarda",
+   "resultado": "PASA",
+   "detalle": "Cupo insuficiente: Repuestos San Vicente tiene $ 1.326.480 disponibles y la factura suma $",
+   "evidencia": "evidencias/04-cupo-insuficiente.png"
+  },
+  {
+   "id": "CS-06",
+   "nivel": "Sistema",
+   "tipo": "Funcional",
+   "nombre": "Cantidad mayor que la existencia es rechazada",
+   "resultado": "PASA",
+   "detalle": "No hay existencia suficiente de LLA-90-90-18 en Rionegro · Bodega principal: hay 28, pides",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-07",
+   "nivel": "Sistema",
+   "tipo": "Funcional (B2)",
+   "nombre": "Factura manual válida queda pendiente y sin contabilizar",
+   "resultado": "PASA",
+   "detalle": "MRO-001058: Pendiente, sin asiento",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-08",
+   "nivel": "Sistema",
+   "tipo": "Funcional (B2)",
+   "nombre": "Gerente autoriza: CUFE, asiento cuadrado y certificados",
+   "resultado": "PASA",
+   "detalle": "Asiento cuadrado: true, certificados: 3",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-09",
+   "nivel": "Sistema",
+   "tipo": "Funcional (B2)",
+   "nombre": "Rechazo exige motivo de al menos 10 caracteres",
+   "resultado": "PASA",
+   "detalle": "Con motivo corto: Pendiente; con motivo válido: Rechazada",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-10",
+   "nivel": "Sistema",
+   "tipo": "Seguridad (segregación)",
+   "nombre": "Quien registra una factura no puede autorizarla",
+   "resultado": "PASA",
+   "detalle": "Botón Autorizar deshabilitado para la autora",
+   "evidencia": "evidencias/07-segregacion.png"
+  },
+  {
+   "id": "CS-11",
+   "nivel": "Sistema",
+   "tipo": "Funcional (instrucciones de envío)",
+   "nombre": "Remisión con transportadora externa exige número de guía",
+   "resultado": "PASA",
+   "detalle": "Escribe el número de guía de la transportadora.",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-12",
+   "nivel": "Sistema",
+   "tipo": "Funcional (antifraude)",
+   "nombre": "Conteo ciego con diferencia bloquea la salida y abre novedad",
+   "resultado": "PASA",
+   "detalle": "Estado: Alistamiento, novedad registrada",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-13",
+   "nivel": "Sistema",
+   "tipo": "Funcional (antifraude, A1)",
+   "nombre": "Conteo correcto sella la remisión y permite despacharla",
+   "resultado": "PASA",
+   "detalle": "Verificada · sello A2098D316C → En tránsito",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-14",
+   "nivel": "Sistema",
+   "tipo": "Funcional (antifraude)",
+   "nombre": "Entrega con faltante queda Con novedad",
+   "resultado": "PASA",
+   "detalle": "Estado final: Con novedad",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-15",
+   "nivel": "Sistema",
+   "tipo": "Seguridad (integridad, ISO 9001)",
+   "nombre": "La verificación detecta una alteración de la bitácora",
+   "resultado": "PASA",
+   "detalle": "Cadena rota en el registro #10. Ese registro o uno anterior ",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-16",
+   "nivel": "Sistema",
+   "tipo": "Funcional (trazabilidad)",
+   "nombre": "Rastrear una factura muestra pedido, factura y remisión",
+   "resultado": "PASA",
+   "detalle": "10 eventos encadenados",
+   "evidencia": "evidencias/11-rastreo.png"
+  },
+  {
+   "id": "CS-17",
+   "nivel": "Sistema",
+   "tipo": "Funcional",
+   "nombre": "Certificado auténtico se valida y uno falso se rechaza, sin iniciar sesión",
+   "resultado": "PASA",
+   "detalle": "Auténtico y falso diferenciados",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-18",
+   "nivel": "Sistema",
+   "tipo": "Funcional",
+   "nombre": "Recibir una importación aumenta las existencias",
+   "resultado": "PASA",
+   "detalle": "60 → 210",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-19",
+   "nivel": "Sistema",
+   "tipo": "Funcional",
+   "nombre": "Traslado con origen igual al destino es rechazado",
+   "resultado": "PASA",
+   "detalle": "El origen y el destino deben ser distintos.",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-01",
+   "nivel": "Complementaria",
+   "tipo": "Smoke test",
+   "nombre": "Las 15 pantallas cargan sin errores con los 6 roles",
+   "resultado": "PASA",
+   "detalle": "90 combinaciones rol × pantalla sin errores de JavaScript",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-02",
+   "nivel": "Complementaria",
+   "tipo": "Usabilidad responsive (A3)",
+   "nombre": "Sin desplazamiento horizontal en 360, 768, 1024 y 1440 px",
+   "resultado": "PASA",
+   "detalle": "24 combinaciones pantalla × ancho correctas",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-03",
+   "nivel": "Complementaria",
+   "tipo": "Compatibilidad",
+   "nombre": "Funciona en emulación de iPhone, Android y tableta",
+   "resultado": "PASA",
+   "detalle": "iPhone 13: OK · Pixel 7: OK · iPad (gen 7): OK · firefox: no instalado en el entorno de pruebas · webkit: no instalado en el entorno de pruebas",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-04",
+   "nivel": "Complementaria",
+   "tipo": "Robustez",
+   "nombre": "Entradas erróneas son rechazadas con mensaje",
+   "resultado": "PASA",
+   "detalle": "0:rechazado · -5:rechazado · abc:rechazado · 2.5:rechazado · NIT y correo inválidos: rechazados",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-05",
+   "nivel": "Complementaria",
+   "tipo": "Robustez / tolerancia a fallos",
+   "nombre": "Con el almacenamiento del navegador bloqueado la app sigue funcionando",
+   "resultado": "PASA",
+   "detalle": "Carga y trabaja en memoria",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-06",
+   "nivel": "Complementaria",
+   "tipo": "Seguridad OWASP A03 (Inyección / XSS)",
+   "nombre": "Código malicioso en formularios se muestra como texto y no se ejecuta",
+   "resultado": "PASA",
+   "detalle": "Script ejecutado: false; etiqueta creada: false",
+   "evidencia": "evidencias/14-xss-neutralizado.png"
+  },
+  {
+   "id": "CC-07",
+   "nivel": "Complementaria",
+   "tipo": "Seguridad OWASP A01 (Control de acceso)",
+   "nombre": "Un rol sin permiso no entra a pantallas restringidas escribiendo la dirección",
+   "resultado": "PASA",
+   "detalle": "Auditor redirigido a: Hola, Mateo",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-08",
+   "nivel": "Complementaria",
+   "tipo": "Seguridad OWASP A07 (Autenticación)",
+   "nombre": "Contraseña incorrecta no permite el ingreso",
+   "resultado": "PASA",
+   "detalle": "Ver CS-01",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-09",
+   "nivel": "Complementaria",
+   "tipo": "Seguridad OWASP A08 (Integridad de datos)",
+   "nombre": "Alteración de registros detectada por la cadena SHA-256",
+   "resultado": "PASA",
+   "detalle": "Ver CS-15 y CU-14",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-10",
+   "nivel": "Complementaria",
+   "tipo": "Usabilidad / Accesibilidad WCAG 2.1 AA (B4)",
+   "nombre": "Auditoría automática axe-core en 9 pantallas",
+   "resultado": "PASA",
+   "detalle": "0 violaciones WCAG 2.1 A/AA",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-11",
+   "nivel": "Complementaria",
+   "tipo": "Rendimiento",
+   "nombre": "Tiempo de dibujo de cada pantalla < 300 ms",
+   "resultado": "PASA",
+   "detalle": "Promedio 10.1 ms · máximo 19.6 ms",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-12",
+   "nivel": "Complementaria",
+   "tipo": "Carga (volumen)",
+   "nombre": "Con 5.000 facturas adicionales la lista y el tablero responden < 1 s",
+   "resultado": "PASA",
+   "detalle": "Lista 17 ms · tablero 15 ms · datos 5.51 MB",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-13",
+   "nivel": "Complementaria",
+   "tipo": "Estrés",
+   "nombre": "Excede la capacidad del almacenamiento del navegador (30.000 facturas)",
+   "resultado": "PASA",
+   "detalle": "Datos: 31.0 MB · ¿se pudo guardar?: no (límite del navegador alcanzado; la app no se cae y sigue en memoria)",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-14",
+   "nivel": "Complementaria",
+   "tipo": "Estabilidad",
+   "nombre": "300 cambios de pantalla seguidos sin errores",
+   "resultado": "PASA",
+   "detalle": "6.6 s, 0 errores",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-15",
+   "nivel": "Complementaria",
+   "tipo": "Testing exploratorio",
+   "nombre": "Sesión de 15 min: doble clic en Facturar, recarga a mitad de formulario, nombres largos con emoji y ñ",
+   "resultado": "PASA",
+   "detalle": "Doble facturación: no ocurre · sesión tras recargar: se conserva · nombre de 170 caracteres sin romper el diseño: true",
+   "evidencia": ""
+  },
+  {
+   "id": "CC-16",
+   "nivel": "Complementaria",
+   "tipo": "Regresión",
+   "nombre": "Toda la suite se ejecutó de nuevo tras la modularización y el movimiento de costeo() al dominio",
+   "resultado": "PASA",
+   "detalle": "34 de 34 pruebas de esta corrida pasan",
+   "evidencia": ""
+  }
+ ]
+}
