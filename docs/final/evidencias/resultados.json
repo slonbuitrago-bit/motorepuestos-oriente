@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-15T19:33:31.747Z",
+ "fecha": "2026-11-15T20:38:58.412Z",
  "resultados": [
   {
    "id": "CS-01",
@@ -43,7 +43,7 @@
    "tipo": "Funcional (regla de cupo)",
    "nombre": "Factura que supera el cupo del cliente no se guarda",
    "resultado": "PASA",
-   "detalle": "Cupo insuficiente: Repuestos San Vicente tiene $ 1.326.480 disponibles y la factura suma $",
+   "detalle": "Cupo insuficiente: Repuestos San Vicente tiene $ 1.783.440 disponibles y la factura suma $",
    "evidencia": "evidencias/04-cupo-insuficiente.png"
   },
   {
@@ -115,7 +115,7 @@
    "tipo": "Funcional (antifraude, A1)",
    "nombre": "Conteo correcto sella la remisión y permite despacharla",
    "resultado": "PASA",
-   "detalle": "Verificada · sello D956F2A03C → En tránsito",
+   "detalle": "Verificada · sello 3009DE408F → En tránsito",
    "evidencia": ""
   },
   {
@@ -268,7 +268,7 @@
    "tipo": "Rendimiento",
    "nombre": "Tiempo de dibujo de cada pantalla < 300 ms",
    "resultado": "PASA",
-   "detalle": "Promedio 12.0 ms · máximo 22.2 ms",
+   "detalle": "Promedio 10.1 ms · máximo 19 ms",
    "evidencia": ""
   },
   {
@@ -277,7 +277,7 @@
    "tipo": "Carga (volumen)",
    "nombre": "Con 5.000 facturas adicionales la lista y el tablero responden < 1 s",
    "resultado": "PASA",
-   "detalle": "Lista 17 ms · tablero 28 ms · datos 5.51 MB",
+   "detalle": "Lista 16 ms · tablero 17 ms · datos 5.51 MB",
    "evidencia": ""
   },
   {
@@ -295,7 +295,7 @@
    "tipo": "Estabilidad",
    "nombre": "300 cambios de pantalla seguidos sin errores",
    "resultado": "PASA",
-   "detalle": "6.5 s, 0 errores",
+   "detalle": "5.6 s, 0 errores",
    "evidencia": ""
   },
   {

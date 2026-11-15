@@ -8,7 +8,7 @@ function seed(){
   const pick = a => a[Math.floor(R() * a.length)];
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
   const db = {
-    version: 3, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
+    version: 4, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
     empresa:{ nombre:"Motorepuestos del Oriente S.A.S.", nit:"901.482.315-7", ciudad:"Rionegro, Antioquia", resolucion:"Resolución DIAN 18764000001234 (simulada) · Prefijo MRO · Rango 1 a 50.000 · Vigencia 2026-2027" },
     roles: JSON.parse(JSON.stringify(ROLES_BASE)),
     usuarios:[
@@ -242,7 +242,7 @@ function seed(){
   const rE = remision(fE, 4.25, "Flota propia", ""); verificar(rE, 4.15); transito(rE, 4.0);
   // 5. Facturas manuales pendientes de autorización
   mkFac("C4", "S1", [["PR4",4],["PR3",10],["PR1",24]], 3, "U3");
-  mkFac("C8", "S1", [["PR20",6],["PR11",20]], 2.2, "U3");
+  mkFac("C10", "S1", [["PR20",6],["PR11",20]], 2.2, "U3");
   mkPed("C6", [["PR5",6],["PR8",15]], 2);
   mkFac("C3", "S3", [["PR6",12],["PR12",20]], 1.5, "U7");
   // 6. Pedido recién llegado

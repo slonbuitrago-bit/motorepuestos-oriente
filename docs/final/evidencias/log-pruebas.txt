@@ -1,4 +1,4 @@
-Ejecución de pruebas · 2026-11-15 19:32 · npm test
+Ejecución de pruebas · 2026-11-15 20:38 · npm test
 
 ok 1 - CI-01 · Datos + dominio: un pedido facturado queda contabilizado sin autorización (B2)
 ok 2 - CI-02 · Factura manual: queda Pendiente y sin asiento hasta que un gerente la autorice (B2)
@@ -35,7 +35,7 @@ ok 27 - CU-17 · Cupo disponible = cupo − facturas sin pagar − pedidos regis
 ✔ CS-02 Ingreso correcto muestra solo el menú del rol — Logística ve Pedidos y no Autorizaciones
 ✔ CS-03 Facturar un pedido lo contabiliza sin autorización y avisa por correo — Pedido Facturado, factura Autorizada con asiento, +1 correo
 ✔ CS-04 Al elegir Panamá solo se listan sus estados y no hay ciudad de texto libre — Estados: Colón,Panamá
-✔ CS-05 Factura que supera el cupo del cliente no se guarda — Cupo insuficiente: Repuestos San Vicente tiene $ 1.326.480 disponibles y la factura suma $
+✔ CS-05 Factura que supera el cupo del cliente no se guarda — Cupo insuficiente: Repuestos San Vicente tiene $ 1.783.440 disponibles y la factura suma $
 ✔ CS-06 Cantidad mayor que la existencia es rechazada — No hay existencia suficiente de LLA-90-90-18 en Rionegro · Bodega principal: hay 28, pides
 ✔ CS-07 Factura manual válida queda pendiente y sin contabilizar — MRO-001058: Pendiente, sin asiento
 ✔ CS-08 Gerente autoriza: CUFE, asiento cuadrado y certificados — Asiento cuadrado: true, certificados: 3
@@ -43,7 +43,7 @@ ok 27 - CU-17 · Cupo disponible = cupo − facturas sin pagar − pedidos regis
 ✔ CS-10 Quien registra una factura no puede autorizarla — Botón Autorizar deshabilitado para la autora
 ✔ CS-11 Remisión con transportadora externa exige número de guía — Escribe el número de guía de la transportadora.
 ✔ CS-12 Conteo ciego con diferencia bloquea la salida y abre novedad — Estado: Alistamiento, novedad registrada
-✔ CS-13 Conteo correcto sella la remisión y permite despacharla — Verificada · sello D956F2A03C → En tránsito
+✔ CS-13 Conteo correcto sella la remisión y permite despacharla — Verificada · sello 3009DE408F → En tránsito
 ✔ CS-14 Entrega con faltante queda Con novedad — Estado final: Con novedad
 ✔ CS-15 La verificación detecta una alteración de la bitácora — Cadena rota en el registro #10. Ese registro o uno anterior 
 ✔ CS-16 Rastrear una factura muestra pedido, factura y remisión — 10 eventos encadenados
@@ -60,10 +60,10 @@ ok 27 - CU-17 · Cupo disponible = cupo − facturas sin pagar − pedidos regis
 ✔ CC-08 Contraseña incorrecta no permite el ingreso — Ver CS-01
 ✔ CC-09 Alteración de registros detectada por la cadena SHA-256 — Ver CS-15 y CU-14
 ✔ CC-10 Auditoría automática axe-core en 8 pantallas — 0 violaciones WCAG 2.1 A/AA
-✔ CC-11 Tiempo de dibujo de cada pantalla < 300 ms — Promedio 12.0 ms · máximo 22.2 ms
-✔ CC-12 Con 5.000 facturas adicionales la lista y el tablero responden < 1 s — Lista 17 ms · tablero 28 ms · datos 5.51 MB
+✔ CC-11 Tiempo de dibujo de cada pantalla < 300 ms — Promedio 10.1 ms · máximo 19 ms
+✔ CC-12 Con 5.000 facturas adicionales la lista y el tablero responden < 1 s — Lista 16 ms · tablero 17 ms · datos 5.51 MB
 ✔ CC-13 Excede la capacidad del almacenamiento del navegador (30.000 facturas) — Datos: 31.0 MB · ¿se pudo guardar?: no (límite del navegador alcanzado; la app no se cae y sigue en memoria)
-✔ CC-14 300 cambios de pantalla seguidos sin errores — 6.5 s, 0 errores
+✔ CC-14 300 cambios de pantalla seguidos sin errores — 5.6 s, 0 errores
 ✔ CC-15 Sesión de 15 min: doble clic en Facturar, recarga a mitad de formulario, nombres largos con emoji y ñ — Doble facturación: no ocurre · sesión tras recargar: se conserva · nombre de 170 caracteres sin romper el diseño: true
 ✔ CC-16 Toda la suite se ejecutó de nuevo tras la modularización y el movimiento de costeo() al dominio — 34 de 34 pruebas de esta corrida pasan
 35 de 35 pruebas pasan. Evidencias en docs/final/evidencias/
