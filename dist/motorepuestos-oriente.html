@@ -1040,6 +1040,16 @@ function vNotificaciones(){
 /* Motorepuestos del Oriente
    Vista · Facturas: listado, formulario (pedido o manual), documento y detalle. */
 
+/* --- Buscadores con sugerencias ---
+   Campos de texto con lista de sugerencias del navegador (datalist): se escribe parte del
+   nombre, la referencia, el NIT, el municipio o la moto, y la lista se filtra sola. */
+const etqCliente = c => `${c.nombre} · NIT ${c.nit} · ${ciudad(c.ciudadId)?.nombre || ""}`;
+const etqProducto = p => `${p.sku} · ${p.nombre} · ${p.compat}`;
+const clientePorEtiqueta = v => DB.clientes.find(c => c.activo && etqCliente(c) === String(v).trim());
+const productoPorEtiqueta = v => DB.productos.find(p => p.activo && etqProducto(p) === String(v).trim());
+const listaClientes = () => `<datalist id="dl-clientes">${DB.clientes.filter(c => c.activo).map(c => `<option value="${esc(etqCliente(c))}"></option>`).join("")}</datalist>`;
+const listaProductos = sucId => `<datalist id="dl-productos">${DB.productos.filter(p => p.activo).map(p => `<option value="${esc(etqProducto(p))}" label="Existencia ${sucId ? (p.stock[sucId] || 0) : stockTotal(p)} · ${money(p.precio)}"></option>`).join("")}</datalist>`;
+
 /* --- Facturas --- */
 function vFacturas(){
   const q = (UI.filtros.fq || "").toLowerCase(), fe = UI.filtros.fe || "", fsu = UI.filtros.fsu || "";
@@ -1085,8 +1095,8 @@ function vFacturaNueva(){
     <section class="panel" aria-labelledby="s-cli"><header><h2 id="s-cli">1. Cliente y origen</h2></header>
       <div class="grid g2">
         <div class="field"><label for="d-cli">Cliente <span aria-hidden="true">*</span></label>
-          <select id="d-cli" data-draft="clienteId" required aria-invalid="${!!E.clienteId}" aria-describedby="d-cli-h"><option value="">Selecciona un cliente</option>${DB.clientes.filter(x => x.activo).map(x => `<option value="${x.id}" ${d.clienteId === x.id ? "selected" : ""}>${esc(x.nombre)} · NIT ${esc(x.nit)}</option>`).join("")}</select>
-          <span class="hint" id="d-cli-h">${E.clienteId ? `<span style="color:var(--bad)">${esc(E.clienteId)}</span>` : c ? `Cupo ${money(c.cupo)} · disponible <b>${money(disp)}</b>` : "El cupo disponible aparece al elegir el cliente."}</span></div>
+          <input id="d-cli" type="text" list="dl-clientes" autocomplete="off" data-buscar="cliente" required placeholder="Escribe el nombre, el NIT o el municipio" value="${esc(c ? etqCliente(c) : (d.cliTxt || ""))}" aria-invalid="${!!E.clienteId}" aria-describedby="d-cli-h">${listaClientes()}
+          <span class="hint" id="d-cli-h">${E.clienteId ? `<span style="color:var(--bad)">${esc(E.clienteId)}</span>` : c ? `Cupo ${money(c.cupo)} · disponible <b>${money(disp)}</b>` : "Escribe parte del nombre y elige de las sugerencias. Luego verás su cupo."}</span></div>
         <div class="field"><label for="d-suc">Sucursal que factura y despacha</label>
           <select id="d-suc" data-draft="sucursalId">${DB.sucursales.map(s => `<option value="${s.id}" ${d.sucursalId === s.id ? "selected" : ""}>${esc(s.nombre)}</option>`).join("")}</select></div>
       </div>
@@ -1105,12 +1115,12 @@ function vFacturaNueva(){
       ${E.items ? `<div class="note bad" role="alert">${esc(E.items)}</div>` : ""}
       <div class="tw"><table class="items-table"><thead><tr><th>Referencia</th><th class="r">Existencia</th><th class="r" style="width:110px">Cantidad</th><th class="r">Precio unit.</th><th class="r">Subtotal</th><th><span class="sr">Quitar</span></th></tr></thead><tbody>
       ${d.items.map((it, i) => { const p = it.productoId ? prod(it.productoId) : null; const st = p ? (p.stock[d.sucursalId] || 0) : 0; const q = parseInt(it.cantidad) || 0; const over = p && q > st; return `<tr>
-        <td style="min-width:260px"><label class="sr" for="it-p-${i}">Referencia línea ${i + 1}</label><select id="it-p-${i}" data-item="${i}" data-k="productoId"><option value="">Selecciona</option>${DB.productos.filter(x => x.activo).map(x => `<option value="${x.id}" ${it.productoId === x.id ? "selected" : ""}>${esc(x.sku)} · ${esc(x.nombre)}</option>`).join("")}</select></td>
+        <td style="min-width:260px"><label class="sr" for="it-p-${i}">Referencia línea ${i + 1}</label><input id="it-p-${i}" type="text" list="dl-productos" autocomplete="off" data-buscar="producto" data-item="${i}" placeholder="Escribe la referencia, el repuesto o la moto" value="${esc(p ? etqProducto(p) : (it.txt || ""))}"></td>
         <td class="r">${p ? `<span style="color:${over ? "var(--bad)" : "inherit"}">${st}</span>` : "—"}</td>
         <td><label class="sr" for="it-q-${i}">Cantidad línea ${i + 1}</label><input id="it-q-${i}" type="number" min="1" step="1" inputmode="numeric" value="${esc(it.cantidad)}" data-item="${i}" data-k="cantidad" style="text-align:right" aria-invalid="${!!over}"></td>
         <td class="r">${p ? money(p.precio) : "—"}</td><td class="r">${p ? money(p.precio * q) : "—"}</td>
         <td><button type="button" class="btn sm ghost" data-act="delItem" data-i="${i}" aria-label="Quitar línea ${i + 1}" ${d.items.length === 1 ? "disabled" : ""}>✕</button></td></tr>`; }).join("")}
-      </tbody></table></div>
+      </tbody></table></div>${listaProductos(d.sucursalId)}
       <div class="totals" aria-live="polite"><div><span>Subtotal</span><span>${money(t.subtotal)}</span></div><div><span>IVA 19 %</span><span>${money(t.iva)}</span></div><div class="grand"><span>Total</span><span>${money(t.total)}</span></div></div>
       ${c && !cupoOk ? `<div class="note bad" role="alert"><b>Cupo insuficiente.</b> El total supera el cupo disponible en ${money(t.total - disp)}. Reduce cantidades o pide a Gerencia ampliar el cupo antes de registrar.</div>` : ""}
     </section>
@@ -1288,7 +1298,7 @@ function dlgAjuste(id){
 }
 function dlgTraslado(){
   openDlg("Traslado entre sucursales", `<form id="frm-tr" data-form="traslado" class="grid">
-    <div class="field"><label for="tr-p">Referencia</label><select id="tr-p" name="prod">${DB.productos.map(p => `<option value="${p.id}">${esc(p.sku)} · ${esc(p.nombre)}</option>`).join("")}</select></div>
+    <div class="field"><label for="tr-p">Referencia</label><input id="tr-p" name="prod" type="text" list="dl-productos" autocomplete="off" placeholder="Escribe la referencia, el repuesto o la moto">${listaProductos()}</div>
     <div class="grid g3"><div class="field"><label for="tr-o">Origen</label><select id="tr-o" name="o">${DB.sucursales.map(s => `<option value="${s.id}">${esc(s.nombre)}</option>`).join("")}</select></div>
     <div class="field"><label for="tr-d">Destino</label><select id="tr-d" name="d">${DB.sucursales.map((s, i) => `<option value="${s.id}" ${i === 1 ? "selected" : ""}>${esc(s.nombre)}</option>`).join("")}</select></div>
     <div class="field"><label for="tr-c">Cantidad</label><input id="tr-c" name="cant" type="number" min="1" required></div></div><div id="tr-err" role="alert"></div></form>`,
@@ -1346,10 +1356,14 @@ function dlgNuevaImport(){
 
 /* --- Clientes --- */
 function vClientes(){
+  const q = (UI.filtros.cq || "").toLowerCase().trim();
+  const lista = DB.clientes.filter(c => !q || [c.nombre, c.nit, ciudad(c.ciudadId)?.nombre, c.contacto, c.email].join(" ").toLowerCase().includes(q));
   return `<div class="page-head"><div><h1>Clientes y cupos</h1><p>Almacenes y talleres de los municipios atendidos. El cupo comprometido suma facturas pendientes y autorizadas sin pago. Los datos personales se tratan según la Ley 1581 de 2012.</p></div>
     ${P("clientes.gestionar") ? `<button class="btn primary" data-act="clienteDlg">${icon("plus")} Nuevo cliente</button>` : ""}</div>
+  <div class="field" style="max-width:460px"><label for="cq">Buscar cliente</label><input id="cq" type="search" placeholder="Nombre, NIT, municipio o contacto" value="${esc(UI.filtros.cq || "")}" data-in="cq"></div>
   <div class="tw"><table><thead><tr><th>Cliente</th><th>NIT</th><th>Municipio</th><th>Contacto</th><th class="r">Cupo</th><th class="r">Comprometido</th><th style="min-width:140px">Uso</th><th class="r">Disponible</th>${P("clientes.gestionar") ? "<th></th>" : ""}</tr></thead><tbody>
-  ${DB.clientes.map(c => { const u = cupoComprometido(c.id), pct = u / c.cupo * 100; return `<tr><td>${esc(c.nombre)}</td><td class="mono">${esc(c.nit)}</td><td>${esc(ciudad(c.ciudadId)?.nombre)}</td><td>${esc(c.contacto)}<br><span class="muted" style="font-size:.8rem">${esc(c.telefono)} · ${esc(c.email || "sin correo")}</span></td><td class="r">${money(c.cupo)}</td><td class="r">${money(u)}</td><td><div class="meter ${pct > 100 ? "bad" : pct > 80 ? "warn" : ""}" role="meter" aria-label="Uso del cupo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><span style="width:${Math.min(100, pct)}%"></span></div><span class="muted" style="font-size:.78rem">${pct.toFixed(0)} %</span></td><td class="r"><b>${money(c.cupo - u)}</b></td>${P("clientes.gestionar") ? `<td><button class="btn sm" data-act="clienteDlg" data-id="${c.id}">Editar</button></td>` : ""}</tr>`; }).join("")}
+  ${lista.map(c => { const u = cupoComprometido(c.id), pct = u / c.cupo * 100; return `<tr><td>${esc(c.nombre)}</td><td class="mono">${esc(c.nit)}</td><td>${esc(ciudad(c.ciudadId)?.nombre)}</td><td>${esc(c.contacto)}<br><span class="muted" style="font-size:.8rem">${esc(c.telefono)} · ${esc(c.email || "sin correo")}</span></td><td class="r">${money(c.cupo)}</td><td class="r">${money(u)}</td><td><div class="meter ${pct > 100 ? "bad" : pct > 80 ? "warn" : ""}" role="meter" aria-label="Uso del cupo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><span style="width:${Math.min(100, pct)}%"></span></div><span class="muted" style="font-size:.78rem">${pct.toFixed(0)} %</span></td><td class="r"><b>${money(c.cupo - u)}</b></td>${P("clientes.gestionar") ? `<td><button class="btn sm" data-act="clienteDlg" data-id="${c.id}">Editar</button></td>` : ""}</tr>`; }).join("")}
+  ${lista.length ? "" : `<tr><td colspan="9" class="empty">Ningún cliente coincide con «${esc(UI.filtros.cq)}».</td></tr>`}
   </tbody></table></div>`;
 }
 function dlgCliente(id){
@@ -1649,9 +1663,11 @@ const FORM = {
   factura(){
     const d = UI.draft; const E = {};
     const items = d.items.filter(it => it.productoId);
-    if (!d.clienteId) E.clienteId = "Elige el cliente.";
+    if (!d.clienteId) E.clienteId = d.cliTxt && d.cliTxt.trim() ? "No encontramos ese cliente. Elígelo de la lista de sugerencias." : "Elige el cliente.";
     if (!d.ciudadId) E.ciudadId = "Elige la ciudad o municipio de destino.";
     if (!items.length) E.items = "Agrega al menos una referencia.";
+    const sinElegir = d.items.findIndex(it => !it.productoId && it.txt && it.txt.trim());
+    if (sinElegir >= 0) E.items = `La línea ${sinElegir + 1} no tiene una referencia válida: elígela de la lista de sugerencias.`;
     const ids = items.map(x => x.productoId);
     if (new Set(ids).size !== ids.length) E.items = "Hay referencias repetidas. Une las cantidades en una sola línea.";
     for (const it of items){
@@ -1758,8 +1774,9 @@ const FORM = {
     audit("Ajustar inventario", "Producto", p.sku, `${c > 0 ? "+" : ""}${c} en ${suc(s).nombre} · ${form.motivo.value} · ${det}`); closeDlg(); commit(); toast("Ajuste registrado.");
   },
   traslado(form){
-    const p = prod(form.prod.value), o = form.o.value, d = form.d.value, c = Number(form.cant.value);
+    const p = productoPorEtiqueta(form.prod.value), o = form.o.value, d = form.d.value, c = Number(form.cant.value);
     if (o === d){ $("#tr-err").innerHTML = `<div class="note bad">El origen y el destino deben ser distintos.</div>`; return; }
+    if (!p){ $("#tr-err").innerHTML = `<div class="note bad">Escribe la referencia y elígela de la lista de sugerencias.</div>`; form.prod.focus(); return; }
     if (!(Number.isInteger(c) && c > 0) || c > (p.stock[o] || 0)){ $("#tr-err").innerHTML = `<div class="note bad">Cantidad no válida. En ${esc(suc(o).nombre)} hay ${p.stock[o] || 0}.</div>`; return; }
     p.stock[o] -= c; p.stock[d] = (p.stock[d] || 0) + c; const ref = "TR-" + String(nextNum("TR")).padStart(4, "0"); const ts = new Date().toISOString();
     DB.kardex.push({ fecha:ts, productoId:p.id, sucursalId:o, tipo:"Traslado salida", cantidad:-c, ref, usuario:ME.nombre }, { fecha:ts, productoId:p.id, sucursalId:d, tipo:"Traslado entrada", cantidad:c, ref, usuario:ME.nombre });
@@ -1855,6 +1872,16 @@ document.addEventListener("input", e => {
   if (t.dataset.in){ clearTimeout(tIn); const k = t.dataset.in, v = t.value, id = t.id; tIn = setTimeout(() => { UI.filtros[k] = v; render(); const el = $("#" + id); if (el){ el.focus(); el.setSelectionRange(v.length, v.length); } }, 220); }
   if (t.dataset.item !== undefined && t.dataset.k === "cantidad"){ UI.draft.items[+t.dataset.item].cantidad = t.value; clearTimeout(tIn); const id = t.id; tIn = setTimeout(() => { const pos = t.selectionStart; render(); const el = $("#" + id); if (el){ el.focus(); try { el.setSelectionRange(pos, pos); } catch(_){} } }, 350); }
   if (t.dataset.draft === "obs") UI.draft.obs = t.value;
+  if (t.dataset.buscar === "cliente"){
+    const d = UI.draft; d.cliTxt = t.value; const c = clientePorEtiqueta(t.value);
+    if (c){ const ci = ciudad(c.ciudadId); Object.assign(d, { clienteId:c.id, ciudadId:c.ciudadId, estadoId:ci.estadoId, paisId:byId(DB.estados, ci.estadoId).paisId }); if (d.errores) delete d.errores.clienteId; render(); $("#it-p-0")?.focus(); }
+    else if (d.clienteId) d.clienteId = "";
+  }
+  if (t.dataset.buscar === "producto"){
+    const i = +t.dataset.item, it = UI.draft.items[i]; it.txt = t.value; const p = productoPorEtiqueta(t.value);
+    if (p){ it.productoId = p.id; render(); const q = $("#it-q-" + i); if (q){ q.focus(); q.select(); } }
+    else if (it.productoId) it.productoId = "";
+  }
 });
 document.addEventListener("change", e => {
   const t = e.target;

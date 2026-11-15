@@ -16,9 +16,11 @@ const FORM = {
   factura(){
     const d = UI.draft; const E = {};
     const items = d.items.filter(it => it.productoId);
-    if (!d.clienteId) E.clienteId = "Elige el cliente.";
+    if (!d.clienteId) E.clienteId = d.cliTxt && d.cliTxt.trim() ? "No encontramos ese cliente. Elígelo de la lista de sugerencias." : "Elige el cliente.";
     if (!d.ciudadId) E.ciudadId = "Elige la ciudad o municipio de destino.";
     if (!items.length) E.items = "Agrega al menos una referencia.";
+    const sinElegir = d.items.findIndex(it => !it.productoId && it.txt && it.txt.trim());
+    if (sinElegir >= 0) E.items = `La línea ${sinElegir + 1} no tiene una referencia válida: elígela de la lista de sugerencias.`;
     const ids = items.map(x => x.productoId);
     if (new Set(ids).size !== ids.length) E.items = "Hay referencias repetidas. Une las cantidades en una sola línea.";
     for (const it of items){
@@ -125,8 +127,9 @@ const FORM = {
     audit("Ajustar inventario", "Producto", p.sku, `${c > 0 ? "+" : ""}${c} en ${suc(s).nombre} · ${form.motivo.value} · ${det}`); closeDlg(); commit(); toast("Ajuste registrado.");
   },
   traslado(form){
-    const p = prod(form.prod.value), o = form.o.value, d = form.d.value, c = Number(form.cant.value);
+    const p = productoPorEtiqueta(form.prod.value), o = form.o.value, d = form.d.value, c = Number(form.cant.value);
     if (o === d){ $("#tr-err").innerHTML = `<div class="note bad">El origen y el destino deben ser distintos.</div>`; return; }
+    if (!p){ $("#tr-err").innerHTML = `<div class="note bad">Escribe la referencia y elígela de la lista de sugerencias.</div>`; form.prod.focus(); return; }
     if (!(Number.isInteger(c) && c > 0) || c > (p.stock[o] || 0)){ $("#tr-err").innerHTML = `<div class="note bad">Cantidad no válida. En ${esc(suc(o).nombre)} hay ${p.stock[o] || 0}.</div>`; return; }
     p.stock[o] -= c; p.stock[d] = (p.stock[d] || 0) + c; const ref = "TR-" + String(nextNum("TR")).padStart(4, "0"); const ts = new Date().toISOString();
     DB.kardex.push({ fecha:ts, productoId:p.id, sucursalId:o, tipo:"Traslado salida", cantidad:-c, ref, usuario:ME.nombre }, { fecha:ts, productoId:p.id, sucursalId:d, tipo:"Traslado entrada", cantidad:c, ref, usuario:ME.nombre });

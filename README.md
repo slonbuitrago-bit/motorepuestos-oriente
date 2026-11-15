@@ -75,7 +75,7 @@ Cada archivo de `js/` empieza con un comentario que dice a qué capa pertenece y
 
 ## Pruebas
 
-62 pruebas automatizadas organizadas por niveles del Modelo en V:
+64 pruebas automatizadas organizadas por niveles del Modelo en V:
 
 ```bash
 npm install
@@ -86,7 +86,7 @@ npm test
 |---|---|---|
 | Unitarias (componentes) | `tests/unitarias.test.js` | 17 |
 | Integración (incremental bottom-up) | `tests/integracion.test.js` | 10 |
-| Sistema + complementarias (smoke, responsive, robustez, OWASP, accesibilidad, rendimiento, carga, estrés, estabilidad, exploratoria, regresión) | `tests/sistema-y-complementarias.js` | 35 |
+| Sistema + complementarias (smoke, responsive, robustez, OWASP, accesibilidad, rendimiento, carga, estrés, estabilidad, exploratoria, regresión) | `tests/sistema-y-complementarias.js` | 37 |
 
 Las evidencias (capturas y `resultados.json`) quedan en `docs/final/evidencias/`. El registro de defectos está en `docs/final/registro-defectos.md`.
 

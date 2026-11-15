@@ -19,8 +19,8 @@
 |---|---|
 | Menú **Facturas** → botón **Registrar factura manual** | «Una venta que no vino de un pedido: esta necesita autorización del gerente.» |
 | En **País** elige **Panamá** y abre **Departamento / estado** | «Las listas se filtran por país: solo aparecen los estados de Panamá.» |
-| En **Cliente** elige **Repuestos San Vicente** | «Al elegir el cliente, el destino se llena solo y vemos su cupo: 1,78 millones disponibles.» |
-| En la línea 1 elige **LLA-90-90-18 · Llanta trasera 90/90-18**, cantidad **12** → **Validar y enviar a autorización** | «Pide 12 llantas, unos 2,4 millones…» |
+| En **Cliente** escribe **san vic** y elige **Repuestos San Vicente** en las sugerencias | «Se busca escribiendo, sin bajar por listas largas. Al elegir el cliente, el destino se llena solo y vemos su cupo: 1,78 millones disponibles.» |
+| En **Referencia** escribe **llanta** y elige **LLA-90-90-18 · Llanta trasera 90/90-18**; el cursor salta a **Cantidad**: escribe **12** → **Validar y enviar a autorización** | «Pide 12 llantas, unos 2,4 millones…» |
 | Señala el mensaje rojo | «…el sistema no deja facturar por encima del cupo.» |
 | Cambia la cantidad a **2** → **Validar y enviar a autorización** | «Con 2 llantas sí cabe: queda **pendiente** y todavía **no se contabiliza**.» |
 

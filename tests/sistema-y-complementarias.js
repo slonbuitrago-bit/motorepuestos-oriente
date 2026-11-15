@@ -57,8 +57,8 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
   await p.selectOption("#d-pais", "CO"); await p.waitForTimeout(60);
 
   // Cupo insuficiente
-  await p.selectOption("#d-cli", "C8"); await p.waitForTimeout(60);
-  await p.selectOption("#it-p-0", "PR19"); await p.fill("#it-q-0", "12"); await p.waitForTimeout(450);
+  await p.fill("#d-cli", await ev(p, id => etqCliente(cli(id)), "C8")); await p.waitForTimeout(60);
+  await p.fill("#it-p-0", await ev(p, id => etqProducto(prod(id)), "PR19")); await p.fill("#it-q-0", "12"); await p.waitForTimeout(450);
   const nF0 = await ev(p, () => DB.facturas.length);
   await p.click('form[data-form="factura"] button[type=submit]'); await p.waitForTimeout(120);
   const nF1 = await ev(p, () => DB.facturas.length);
@@ -99,7 +99,7 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
 
   // Segregación de funciones
   p = await nueva(); await p.login("U1"); await p.go("factura-nueva");
-  await p.selectOption("#d-cli", "C2"); await p.waitForTimeout(60); await p.selectOption("#it-p-0", "PR1"); await p.fill("#it-q-0", "3"); await p.waitForTimeout(450);
+  await p.fill("#d-cli", await ev(p, id => etqCliente(cli(id)), "C2")); await p.waitForTimeout(60); await p.fill("#it-p-0", await ev(p, id => etqProducto(prod(id)), "PR1")); await p.fill("#it-q-0", "3"); await p.waitForTimeout(450);
   await p.click('form[data-form="factura"] button[type=submit]'); await p.waitForTimeout(120);
   const propia = await ev(p, () => DB.facturas[DB.facturas.length - 1].id);
   await p.go("autorizaciones");
@@ -176,6 +176,24 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
   reg("CS-19", "Sistema", "Funcional", "Traslado con origen igual al destino es rechazado", /distintos/.test(errTr), errTr);
   await p.cerrar();
 
+  // Buscadores con sugerencias
+  p = await nueva(); await p.login("U3"); await p.go("factura-nueva");
+  const sugerencias = await ev(p, () => [...document.querySelectorAll("#dl-productos option")].filter(o => o.value.toLowerCase().includes("llanta")).length);
+  await p.fill("#d-cli", "san vic"); await p.waitForTimeout(80);
+  const parcial = await ev(p, () => !UI.draft.clienteId);
+  await p.fill("#d-cli", await ev(p, () => etqCliente(cli("C8")))); await p.waitForTimeout(150);
+  const elegido = await ev(p, () => ({ id: UI.draft.clienteId, ciudad: document.querySelector("#d-ciu").selectedOptions[0].text, foco: document.activeElement.id }));
+  await p.fill("#it-p-0", await ev(p, () => etqProducto(prod("PR19")))); await p.waitForTimeout(150);
+  const focoCant = await ev(p, () => document.activeElement.id);
+  reg("CS-20", "Sistema", "Usabilidad (búsqueda)", "Buscador de cliente y referencia: sugiere, completa el destino y pasa al siguiente campo", sugerencias >= 2 && parcial && elegido.id === "C8" && /San Vicente/.test(elegido.ciudad) && elegido.foco === "it-p-0" && focoCant === "it-q-0", `«llanta» sugiere ${sugerencias} referencias · texto parcial no elige · al elegir: destino ${elegido.ciudad.split(" ·")[0]}, el cursor pasa a referencia y luego a cantidad`, await p.foto("16-buscador-cliente"));
+  await p.go("pedidos"); await p.go("factura-nueva"); await p.fill("#d-cli", "Cliente que no existe"); await p.waitForTimeout(60);
+  await p.click('form[data-form="factura"] button[type=submit]'); await p.waitForTimeout(100);
+  const msgCli = await ev(p, () => document.querySelector("#d-cli-h").innerText);
+  await p.go("clientes"); await p.fill("#cq", "sonsón"); await p.waitForTimeout(350);
+  const filas = await ev(p, () => [...document.querySelectorAll("tbody tr")].map(r => r.children[0].innerText));
+  reg("CS-21", "Sistema", "Usabilidad (búsqueda)", "Cliente inexistente se rechaza y la lista de clientes se filtra al escribir", /no encontramos/i.test(msgCli) && filas.length === 1 && /Sonsón/.test(filas[0]), `Mensaje: «${msgCli.slice(0, 45)}…» · «sonsón» deja 1 cliente: ${filas[0] || "—"}`);
+  await p.cerrar();
+
   /* ================= PRUEBAS COMPLEMENTARIAS ================= */
   // Smoke test por rol
   const rutas = ["inicio","pedidos","facturas","factura-nueva","pedido-nuevo","autorizaciones","despachos","inventario","importaciones","clientes","trazabilidad","notificaciones","certificados","administracion"];
@@ -206,7 +224,7 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
 
   // Robustez
   p = await nueva(); await p.login("U3"); await p.go("factura-nueva");
-  await p.selectOption("#d-cli", "C1"); await p.waitForTimeout(60); await p.selectOption("#it-p-0", "PR1");
+  await p.fill("#d-cli", await ev(p, id => etqCliente(cli(id)), "C1")); await p.waitForTimeout(60); await p.fill("#it-p-0", await ev(p, id => etqProducto(prod(id)), "PR1"));
   const casos = [];
   for (const val of ["0", "-5", "abc", "2.5"]){ await p.evaluate(v => { const el = document.querySelector("#it-q-0"); el.type = "text"; el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })); }, val); await p.waitForTimeout(450); const n0 = await ev(p, () => DB.facturas.length); await p.click('form[data-form="factura"] button[type=submit]'); await p.waitForTimeout(100); casos.push(`${val}:${(await ev(p, () => DB.facturas.length)) === n0 ? "rechazado" : "aceptado"}`); }
   await p.go("clientes"); await p.click('[data-act="clienteDlg"]'); await p.waitForTimeout(60);
@@ -290,7 +308,7 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
   const fac0 = await ev(p, () => DB.facturas.length);
   await p.evaluate(id => { ACT.facturarPedido({ id }); ACT.facturarPedido({ id }); }, pid2);
   const dobles = (await ev(p, () => DB.facturas.length)) - fac0;
-  await p.go("factura-nueva"); await p.selectOption("#d-cli", "C1"); await p.waitForTimeout(60);
+  await p.go("factura-nueva"); await p.fill("#d-cli", await ev(p, id => etqCliente(cli(id)), "C1")); await p.waitForTimeout(60);
   await p.reload(); await p.waitForTimeout(100);
   const sigueSesion = await ev(p, () => !!ME);
   await p.go("clientes"); await p.click('[data-act="clienteDlg"]'); await p.waitForTimeout(60);

@@ -203,7 +203,7 @@ const cuerpo = [
     ["Backend", "Reglas de negocio en la capa de dominio (`js/dominio/reglas-negocio.js`) ejecutadas en el navegador", "API REST en Node.js con Express, autenticación con bcrypt y JWT"],
     ["Base de datos", "Almacenamiento del navegador en JSON, aislado en `js/datos/persistencia.js`", "PostgreSQL 15: 29 tablas, restricciones CHECK y 5 triggers (`docs/modelo-datos.sql`)"],
     ["Seguridad", "Roles y permisos (RBAC), segregación de funciones, bitácora encadenada con SHA-256", "Además: HTTPS, tokens con expiración y bloqueo por intentos fallidos"],
-    ["Pruebas", "node:test, Playwright y axe-core (62 pruebas automatizadas)", "Además: k6 para carga y monitoreo de disponibilidad"],
+    ["Pruebas", "node:test, Playwright y axe-core (64 pruebas automatizadas)", "Además: k6 para carga y monitoreo de disponibilidad"],
     ["Gestión y despliegue", "Git y GitHub (rama protegida), Trello, GitHub Pages", "Contenedores Docker con autoescalado en dos zonas"]], [1900, 3900, 3560]),
   P("El paso del prototipo a producción no exige reescribir las vistas ni los controladores: basta con reemplazar el módulo de persistencia por llamadas a la API y trasladar la capa de dominio al servidor. Las decisiones de diseño y sus alternativas están documentadas en `docs/arquitectura.md`."),
 
@@ -211,7 +211,7 @@ const cuerpo = [
   H2("4.1", "Calidad interna y externa"),
   P("La calidad se evaluó con el modelo ISO/IEC 25010. La **calidad interna** se refiere a las propiedades del código (modularidad, capacidad de prueba, analizabilidad) y se verificó con técnicas estáticas; la **calidad externa** se refiere al comportamiento del software en uso y se validó con técnicas dinámicas. Esta distinción corresponde a la diferencia entre verificación y validación del Modelo en V."),
   ...tabla("Atributos de calidad aplicados (ISO/IEC 25010)", [["Característica", "Tipo", "Evidencia"],
-    ["Adecuación funcional", "Externa", "19 pruebas de sistema sobre los requisitos; todas pasan"],
+    ["Adecuación funcional", "Externa", "21 pruebas de sistema sobre los requisitos; todas pasan"],
     ["Eficiencia de desempeño", "Externa", "Cada pantalla se dibuja en menos de 8 ms; con 5.000 facturas extra, la lista responde en menos de 1 s"],
     ["Usabilidad y accesibilidad", "Externa", "0 violaciones WCAG 2.1 A/AA en 8 pantallas; texto al 130 %; alto contraste; teclado"],
     ["Fiabilidad", "Externa", "Funciona con el almacenamiento bloqueado; 300 cambios de pantalla sin errores"],
@@ -281,7 +281,7 @@ const cuerpo = [
   B("**Pruebas.** Las pruebas automatizadas encontraron diez defectos que una revisión visual no había detectado, entre ellos una regresión introducida por el propio equipo. Repetir toda la suite después de cada cambio es lo que da confianza para seguir modificando el código."),
   B("**Trabajo en equipo.** Con siete integrantes, asignar roles con archivos propios y un canal formal de entregas fue más efectivo que coordinar todo por mensajería."),
   B("**Mitigación de defectos.** Corregir la causa raíz, como validar números enteros en todos los formularios y no solo en el que falló, evita que el mismo error reaparezca en otro lugar."),
-  P("En conclusión, el proyecto transformó las necesidades ambiguas de un cliente en una solución web funcional, publicada y verificada con 62 pruebas automatizadas. La ingeniería de requisitos definió qué construir y las pruebas por niveles confirmaron que se construyó correctamente: ambas fueron determinantes para el resultado."),
+  P("En conclusión, el proyecto transformó las necesidades ambiguas de un cliente en una solución web funcional, publicada y verificada con 64 pruebas automatizadas. La ingeniería de requisitos definió qué construir y las pruebas por niveles confirmaron que se construyó correctamente: ambas fueron determinantes para el resultado."),
 
   H1("6", "Anexos"),
   H2("6.1", "Enlaces del proyecto"),

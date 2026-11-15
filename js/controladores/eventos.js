@@ -19,6 +19,16 @@ document.addEventListener("input", e => {
   if (t.dataset.in){ clearTimeout(tIn); const k = t.dataset.in, v = t.value, id = t.id; tIn = setTimeout(() => { UI.filtros[k] = v; render(); const el = $("#" + id); if (el){ el.focus(); el.setSelectionRange(v.length, v.length); } }, 220); }
   if (t.dataset.item !== undefined && t.dataset.k === "cantidad"){ UI.draft.items[+t.dataset.item].cantidad = t.value; clearTimeout(tIn); const id = t.id; tIn = setTimeout(() => { const pos = t.selectionStart; render(); const el = $("#" + id); if (el){ el.focus(); try { el.setSelectionRange(pos, pos); } catch(_){} } }, 350); }
   if (t.dataset.draft === "obs") UI.draft.obs = t.value;
+  if (t.dataset.buscar === "cliente"){
+    const d = UI.draft; d.cliTxt = t.value; const c = clientePorEtiqueta(t.value);
+    if (c){ const ci = ciudad(c.ciudadId); Object.assign(d, { clienteId:c.id, ciudadId:c.ciudadId, estadoId:ci.estadoId, paisId:byId(DB.estados, ci.estadoId).paisId }); if (d.errores) delete d.errores.clienteId; render(); $("#it-p-0")?.focus(); }
+    else if (d.clienteId) d.clienteId = "";
+  }
+  if (t.dataset.buscar === "producto"){
+    const i = +t.dataset.item, it = UI.draft.items[i]; it.txt = t.value; const p = productoPorEtiqueta(t.value);
+    if (p){ it.productoId = p.id; render(); const q = $("#it-q-" + i); if (q){ q.focus(); q.select(); } }
+    else if (it.productoId) it.productoId = "";
+  }
 });
 document.addEventListener("change", e => {
   const t = e.target;

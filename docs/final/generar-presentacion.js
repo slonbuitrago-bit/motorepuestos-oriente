@@ -126,13 +126,13 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
   sec("4. Auditoría de QA");
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "4. Auditoría de QA" });
   s.addText("CONTROL DE CALIDAD", { placeholder: "eyebrow" });
-  s.addText("62 pruebas por niveles del Modelo en V", { placeholder: "title" });
+  s.addText("64 pruebas por niveles del Modelo en V", { placeholder: "title" });
   s.addImage({ path: path.join(REPO, "docs/final/img/modelo-v.png"), x: 0.5, y: 1.05, w: 9, h: 1.2, sizing: { type: "contain", w: 9, h: 1.2 }, objectName: "Modelo en V", altText: "Modelo en V: requisitos con pruebas de aceptación, diseño funcional con sistema, diseño técnico con integración y componentes con unitarias" });
-  const q = [["17", "unitarias", "funciones aisladas"], ["10", "integración", "bottom-up"], ["19", "sistema", "extremo a extremo"], ["16", "complementarias", "OWASP, carga, responsive…"]];
+  const q = [["17", "unitarias", "funciones aisladas"], ["10", "integración", "bottom-up"], ["21", "sistema", "extremo a extremo"], ["16", "complementarias", "OWASP, carga, responsive…"]];
   q.forEach((t, i) => { const x = 0.5 + i * 2.3; card(s, x, 2.45, 2.15, 1.3, C.background2, "nivel " + t[1]); txt(s, t[0], { x: x + 0.18, y: 2.55, w: 1.8, h: 0.6, fontSize: 32, bold: true, color: C.accent1, fontFace: "Arial" }); txt(s, t[1], { x: x + 0.18, y: 3.12, w: 1.85, h: 0.28, fontSize: 13, bold: true }); txt(s, t[2], { x: x + 0.18, y: 3.4, w: 1.85, h: 0.28, fontSize: 11, color: C.accent5 }); });
   card(s, 0.5, 3.95, 9, 1.05, C.text1, "OWASP");
   txt(s, "OWASP", { x: 0.75, y: 4.05, w: 1.5, h: 0.85, fontSize: 26, bold: true, color: C.accent2, fontFace: "Arial", valign: "middle" });
-  txt(s, "A01 control de acceso · A03 inyección y XSS · A07 autenticación · A08 integridad de datos: todas pasan. Además: robustez, carga (5.000 facturas en < 1 s), responsive y accesibilidad (0 violaciones). Resultado: 62 de 62.", { x: 2.25, y: 4.08, w: 7.05, h: 0.85, fontSize: 13, color: C.background1, valign: "middle" });
+  txt(s, "A01 control de acceso · A03 inyección y XSS · A07 autenticación · A08 integridad de datos: todas pasan. Además: robustez, carga (5.000 facturas en < 1 s), responsive y accesibilidad (0 violaciones). Resultado: 64 de 64.", { x: 2.25, y: 4.08, w: 7.05, h: 0.85, fontSize: 13, color: C.background1, valign: "middle" });
   s.addNotes("BLOQUE 4 · Auditoría de QA (3 min). Presenta: Rol 7 (Calidad). Explicar verificación (rama izquierda) y validación (rama derecha). Unitarias = funciones aisladas; integración = bottom-up (datos → dominio → contabilidad → correo); OWASP con ejemplos concretos.");
 
   /* 9 · Bugs de las pruebas cruzadas */

@@ -2,6 +2,16 @@
 /* Motorepuestos del Oriente
    Vista · Facturas: listado, formulario (pedido o manual), documento y detalle. */
 
+/* --- Buscadores con sugerencias ---
+   Campos de texto con lista de sugerencias del navegador (datalist): se escribe parte del
+   nombre, la referencia, el NIT, el municipio o la moto, y la lista se filtra sola. */
+const etqCliente = c => `${c.nombre} · NIT ${c.nit} · ${ciudad(c.ciudadId)?.nombre || ""}`;
+const etqProducto = p => `${p.sku} · ${p.nombre} · ${p.compat}`;
+const clientePorEtiqueta = v => DB.clientes.find(c => c.activo && etqCliente(c) === String(v).trim());
+const productoPorEtiqueta = v => DB.productos.find(p => p.activo && etqProducto(p) === String(v).trim());
+const listaClientes = () => `<datalist id="dl-clientes">${DB.clientes.filter(c => c.activo).map(c => `<option value="${esc(etqCliente(c))}"></option>`).join("")}</datalist>`;
+const listaProductos = sucId => `<datalist id="dl-productos">${DB.productos.filter(p => p.activo).map(p => `<option value="${esc(etqProducto(p))}" label="Existencia ${sucId ? (p.stock[sucId] || 0) : stockTotal(p)} · ${money(p.precio)}"></option>`).join("")}</datalist>`;
+
 /* --- Facturas --- */
 function vFacturas(){
   const q = (UI.filtros.fq || "").toLowerCase(), fe = UI.filtros.fe || "", fsu = UI.filtros.fsu || "";
@@ -47,8 +57,8 @@ function vFacturaNueva(){
     <section class="panel" aria-labelledby="s-cli"><header><h2 id="s-cli">1. Cliente y origen</h2></header>
       <div class="grid g2">
         <div class="field"><label for="d-cli">Cliente <span aria-hidden="true">*</span></label>
-          <select id="d-cli" data-draft="clienteId" required aria-invalid="${!!E.clienteId}" aria-describedby="d-cli-h"><option value="">Selecciona un cliente</option>${DB.clientes.filter(x => x.activo).map(x => `<option value="${x.id}" ${d.clienteId === x.id ? "selected" : ""}>${esc(x.nombre)} · NIT ${esc(x.nit)}</option>`).join("")}</select>
-          <span class="hint" id="d-cli-h">${E.clienteId ? `<span style="color:var(--bad)">${esc(E.clienteId)}</span>` : c ? `Cupo ${money(c.cupo)} · disponible <b>${money(disp)}</b>` : "El cupo disponible aparece al elegir el cliente."}</span></div>
+          <input id="d-cli" type="text" list="dl-clientes" autocomplete="off" data-buscar="cliente" required placeholder="Escribe el nombre, el NIT o el municipio" value="${esc(c ? etqCliente(c) : (d.cliTxt || ""))}" aria-invalid="${!!E.clienteId}" aria-describedby="d-cli-h">${listaClientes()}
+          <span class="hint" id="d-cli-h">${E.clienteId ? `<span style="color:var(--bad)">${esc(E.clienteId)}</span>` : c ? `Cupo ${money(c.cupo)} · disponible <b>${money(disp)}</b>` : "Escribe parte del nombre y elige de las sugerencias. Luego verás su cupo."}</span></div>
         <div class="field"><label for="d-suc">Sucursal que factura y despacha</label>
           <select id="d-suc" data-draft="sucursalId">${DB.sucursales.map(s => `<option value="${s.id}" ${d.sucursalId === s.id ? "selected" : ""}>${esc(s.nombre)}</option>`).join("")}</select></div>
       </div>
@@ -67,12 +77,12 @@ function vFacturaNueva(){
       ${E.items ? `<div class="note bad" role="alert">${esc(E.items)}</div>` : ""}
       <div class="tw"><table class="items-table"><thead><tr><th>Referencia</th><th class="r">Existencia</th><th class="r" style="width:110px">Cantidad</th><th class="r">Precio unit.</th><th class="r">Subtotal</th><th><span class="sr">Quitar</span></th></tr></thead><tbody>
       ${d.items.map((it, i) => { const p = it.productoId ? prod(it.productoId) : null; const st = p ? (p.stock[d.sucursalId] || 0) : 0; const q = parseInt(it.cantidad) || 0; const over = p && q > st; return `<tr>
-        <td style="min-width:260px"><label class="sr" for="it-p-${i}">Referencia línea ${i + 1}</label><select id="it-p-${i}" data-item="${i}" data-k="productoId"><option value="">Selecciona</option>${DB.productos.filter(x => x.activo).map(x => `<option value="${x.id}" ${it.productoId === x.id ? "selected" : ""}>${esc(x.sku)} · ${esc(x.nombre)}</option>`).join("")}</select></td>
+        <td style="min-width:260px"><label class="sr" for="it-p-${i}">Referencia línea ${i + 1}</label><input id="it-p-${i}" type="text" list="dl-productos" autocomplete="off" data-buscar="producto" data-item="${i}" placeholder="Escribe la referencia, el repuesto o la moto" value="${esc(p ? etqProducto(p) : (it.txt || ""))}"></td>
         <td class="r">${p ? `<span style="color:${over ? "var(--bad)" : "inherit"}">${st}</span>` : "—"}</td>
         <td><label class="sr" for="it-q-${i}">Cantidad línea ${i + 1}</label><input id="it-q-${i}" type="number" min="1" step="1" inputmode="numeric" value="${esc(it.cantidad)}" data-item="${i}" data-k="cantidad" style="text-align:right" aria-invalid="${!!over}"></td>
         <td class="r">${p ? money(p.precio) : "—"}</td><td class="r">${p ? money(p.precio * q) : "—"}</td>
         <td><button type="button" class="btn sm ghost" data-act="delItem" data-i="${i}" aria-label="Quitar línea ${i + 1}" ${d.items.length === 1 ? "disabled" : ""}>✕</button></td></tr>`; }).join("")}
-      </tbody></table></div>
+      </tbody></table></div>${listaProductos(d.sucursalId)}
       <div class="totals" aria-live="polite"><div><span>Subtotal</span><span>${money(t.subtotal)}</span></div><div><span>IVA 19 %</span><span>${money(t.iva)}</span></div><div class="grand"><span>Total</span><span>${money(t.total)}</span></div></div>
       ${c && !cupoOk ? `<div class="note bad" role="alert"><b>Cupo insuficiente.</b> El total supera el cupo disponible en ${money(t.total - disp)}. Reduce cantidades o pide a Gerencia ampliar el cupo antes de registrar.</div>` : ""}
     </section>

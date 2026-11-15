@@ -39,7 +39,7 @@ function dlgAjuste(id){
 }
 function dlgTraslado(){
   openDlg("Traslado entre sucursales", `<form id="frm-tr" data-form="traslado" class="grid">
-    <div class="field"><label for="tr-p">Referencia</label><select id="tr-p" name="prod">${DB.productos.map(p => `<option value="${p.id}">${esc(p.sku)} · ${esc(p.nombre)}</option>`).join("")}</select></div>
+    <div class="field"><label for="tr-p">Referencia</label><input id="tr-p" name="prod" type="text" list="dl-productos" autocomplete="off" placeholder="Escribe la referencia, el repuesto o la moto">${listaProductos()}</div>
     <div class="grid g3"><div class="field"><label for="tr-o">Origen</label><select id="tr-o" name="o">${DB.sucursales.map(s => `<option value="${s.id}">${esc(s.nombre)}</option>`).join("")}</select></div>
     <div class="field"><label for="tr-d">Destino</label><select id="tr-d" name="d">${DB.sucursales.map((s, i) => `<option value="${s.id}" ${i === 1 ? "selected" : ""}>${esc(s.nombre)}</option>`).join("")}</select></div>
     <div class="field"><label for="tr-c">Cantidad</label><input id="tr-c" name="cant" type="number" min="1" required></div></div><div id="tr-err" role="alert"></div></form>`,

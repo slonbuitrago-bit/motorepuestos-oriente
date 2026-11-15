@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-15T20:38:58.412Z",
+ "fecha": "2026-11-15T21:12:29.397Z",
  "resultados": [
   {
    "id": "CS-01",
@@ -115,7 +115,7 @@
    "tipo": "Funcional (antifraude, A1)",
    "nombre": "Conteo correcto sella la remisión y permite despacharla",
    "resultado": "PASA",
-   "detalle": "Verificada · sello 3009DE408F → En tránsito",
+   "detalle": "Verificada · sello FB6C024C41 → En tránsito",
    "evidencia": ""
   },
   {
@@ -170,6 +170,24 @@
    "nombre": "Traslado con origen igual al destino es rechazado",
    "resultado": "PASA",
    "detalle": "El origen y el destino deben ser distintos.",
+   "evidencia": ""
+  },
+  {
+   "id": "CS-20",
+   "nivel": "Sistema",
+   "tipo": "Usabilidad (búsqueda)",
+   "nombre": "Buscador de cliente y referencia: sugiere, completa el destino y pasa al siguiente campo",
+   "resultado": "PASA",
+   "detalle": "«llanta» sugiere 2 referencias · texto parcial no elige · al elegir: destino San Vicente Ferrer, el cursor pasa a referencia y luego a cantidad",
+   "evidencia": "evidencias/16-buscador-cliente.png"
+  },
+  {
+   "id": "CS-21",
+   "nivel": "Sistema",
+   "tipo": "Usabilidad (búsqueda)",
+   "nombre": "Cliente inexistente se rechaza y la lista de clientes se filtra al escribir",
+   "resultado": "PASA",
+   "detalle": "Mensaje: «No encontramos ese cliente. Elígelo de la lis…» · «sonsón» deja 1 cliente: Distrimotos Sonsón",
    "evidencia": ""
   },
   {
@@ -268,7 +286,7 @@
    "tipo": "Rendimiento",
    "nombre": "Tiempo de dibujo de cada pantalla < 300 ms",
    "resultado": "PASA",
-   "detalle": "Promedio 10.1 ms · máximo 19 ms",
+   "detalle": "Promedio 10.5 ms · máximo 20.9 ms",
    "evidencia": ""
   },
   {
@@ -277,7 +295,7 @@
    "tipo": "Carga (volumen)",
    "nombre": "Con 5.000 facturas adicionales la lista y el tablero responden < 1 s",
    "resultado": "PASA",
-   "detalle": "Lista 16 ms · tablero 17 ms · datos 5.51 MB",
+   "detalle": "Lista 30 ms · tablero 27 ms · datos 5.51 MB",
    "evidencia": ""
   },
   {
@@ -295,7 +313,7 @@
    "tipo": "Estabilidad",
    "nombre": "300 cambios de pantalla seguidos sin errores",
    "resultado": "PASA",
-   "detalle": "5.6 s, 0 errores",
+   "detalle": "5.1 s, 0 errores",
    "evidencia": ""
   },
   {
@@ -313,7 +331,7 @@
    "tipo": "Regresión",
    "nombre": "Toda la suite se ejecutó de nuevo tras la modularización y el movimiento de costeo() al dominio",
    "resultado": "PASA",
-   "detalle": "34 de 34 pruebas de esta corrida pasan",
+   "detalle": "36 de 36 pruebas de esta corrida pasan",
    "evidencia": ""
   }
  ]
