@@ -15,15 +15,15 @@
 
 | Bloque | Tiempo | Diapositivas | Presenta |
 |---|---|---|---|
-| 1. Introducción y cliente | 2 min | 1–2 | Líder y Rol 5 |
-| 2. Arquitectura y ágil | 3 min | 3–6 | Roles 5, 6 y Líder |
+| 1. Introducción y cliente | 2 min | 1–3 (equipo, problema, requisitos de la tarjeta) | Líder y Rol 5 |
+| 2. Arquitectura y ágil | 3 min | 4–6 (diagrama de clases, backlog en Trello, arquitectura) | Rol 6 y Líder |
 | 3. Demo de la aplicación | 5 min | 7 + app en vivo (botón **Guía**) | Roles 2, 3 y 4 |
-| 4. Auditoría de QA | 3 min | 8–9 | Rol 7 |
+| 4. Auditoría de QA | 3 min | 8 (plan de calidad y OWASP) y 9 (bugs de las pruebas cruzadas) | Rol 7 |
 | 5. Conclusiones | 2 min | 10 | Líder |
 
 **Antes de empezar:** en la app, *Administración → Datos y respaldo → Restablecer datos de ejemplo*. **Plan B sin internet:** abrir `dist/motorepuestos-oriente.html`.
 
 ## Pendiente del equipo
 1. Pegar la captura del tablero de Trello en la Figura 2 del informe.
-2. Completar la Tabla 8 del informe con el reporte del grupo auditor (Actividad 5).
+2. Completar la Tabla 8 del informe y las casillas AUD-01 a AUD-03 de la diapositiva 9 con el reporte del grupo auditor (Actividad 5).
 3. Regenerar el informe (opcional): `node docs/final/generar-informe.js docs/final/.paginas.json`

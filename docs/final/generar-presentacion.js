@@ -42,7 +42,7 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
   txt(s, "Sistema de gestión comercial para Motorepuestos del Oriente · Rionegro, Antioquia", { x: 4.5, y: 2.85, w: 5.1, h: 0.5, fontSize: 14, color: C.accent6 });
   txt(s, "Stiven Marulanda · Maycol Slon Buitrago · Santiago Buitrago · Andrés Bustamante · Maycol Acevedo · Julián Bedoya · Maycol Gómez", { x: 4.5, y: 3.55, w: 5.1, h: 0.7, fontSize: 12, color: C.background1 });
   txt(s, "Docente: Walter Rentería · Corporación Universitaria Remington · Noviembre de 2026", { x: 4.5, y: 4.4, w: 5.1, h: 0.4, fontSize: 11, color: C.accent6 });
-  s.addNotes("BLOQUE 1 · Introducción y cliente (2 min en total con la siguiente diapositiva). Presenta: Líder. Saludo, nombres del equipo y una frase: construimos un sistema web que evita el fraude en despachos y controla la facturación de un mayorista de repuestos de motos.");
+  s.addNotes("BLOQUE 1 · Introducción y cliente (2 min en total, diapositivas 1 a 3). Presenta: Líder. Saludo, nombres del equipo y una frase: construimos un sistema web que evita el fraude en despachos y controla la facturación de un mayorista de repuestos de motos.");
 
   /* 2 · El problema */
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "1. Introducción y cliente" });
@@ -59,9 +59,8 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
   txt(s, "La frase «facturas manuales no asociadas a pedidos» reveló un módulo de pedidos que no estaba en el diseño inicial.", { x: 0.5, y: 4.4, w: 9, h: 0.6, fontSize: 13, italic: true, color: C.accent5 });
   s.addNotes("Presenta: Rol 5 (Requisitos). Contar los 4 problemas de la entrevista y los 4 puntos de la tarjeta B. Remarcar el hallazgo: 'no asociadas a pedidos' implicaba crear pedidos de venta. Ese cambio a mitad de camino justifica Scrum.");
 
-  /* 3 · Requisitos */
-  sec("2. Arquitectura y ágil");
-  s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "2. Arquitectura y ágil" });
+  /* 3 · Requisitos (tarjeta del cliente) */
+  s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "1. Introducción y cliente" });
   s.addText("REQUISITOS", { placeholder: "eyebrow" });
   s.addText("10 requisitos clasificados por tipo", { placeholder: "title" });
   const grupos = [["Funcionales", C.accent1, ["Correos por pedido, factura, despacho y pago", "Facturas manuales con autorización", "Listas filtradas de estado y ciudad", "Conteo ciego contra el fraude", "Instrucciones de envío completas"]],
@@ -71,30 +70,34 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
     s.addShape(pres.shapes.OVAL, { x: x + 0.2, y: 1.33, w: 0.32, h: 0.32, fill: { color: g[1] }, line: { color: g[1] }, objectName: "marca " + g[0] });
     txt(s, `${g[0]} (${g[2].length})`, { x: x + 0.65, y: 1.3, w: 2.1, h: 0.4, bold: true, fontSize: 16 });
     txt(s, g[2].map((t, k) => ({ text: t, options: { bullet: true, breakLine: k < g[2].length - 1 } })), { x: x + 0.2, y: 1.85, w: 2.5, h: 3.0, fontSize: 13, paraSpaceAfter: 8, color: C.text1 }); });
-  s.addNotes("BLOQUE 2 · Arquitectura y ágil (3 min, diapositivas 3 a 6). Presenta: Rol 5. Explicar la diferencia: funcional = qué hace; no funcional = qué tan bien; restricción = condición externa (norma o ley). Los 8 de las tarjetas A y B más 2 de la entrevista.");
+  s.addNotes("BLOQUE 1 (cierre). Presenta: Rol 5. Explicar la diferencia: funcional = qué hace; no funcional = qué tan bien; restricción = condición externa (norma o ley). Los 8 de las tarjetas A y B más 2 de la entrevista.");
 
   /* 4 · Diagrama de clases */
+  sec("2. Arquitectura y ágil");
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "2. Arquitectura y ágil" });
   s.addText("ANÁLISIS ORIENTADO A OBJETOS", { placeholder: "eyebrow" });
   s.addText("Las reglas de negocio viven en las clases", { placeholder: "title" });
   s.addImage({ path: path.join(REPO, "docs/actividad4/diagrama-clases.png"), x: 0.5, y: 1.05, w: 3.45, h: 4.2, sizing: { type: "contain", w: 3.45, h: 4.2 }, objectName: "diagrama de clases", altText: "Diagrama de clases con Usuario, Rol, Pais, Departamento, Ciudad, Cliente, Producto, PedidoVenta, Factura, LineaDetalle, AsientoContable, Remision y Notificacion" });
   const reglas = [["Factura.autorizar(gerente)", "Solo un gerente distinto de quien la registró; luego contabilizar() crea el asiento (B2)"], ["PedidoVenta.facturar()", "La factura de un pedido se contabiliza sola, sin esperar autorización"], ["Pais ◆ Departamento ◆ Ciudad", "Composición: solo se ofrecen destinos registrados (B3)"], ["Remision.verificarConteo()", "Si el conteo ciego no coincide, no sale de bodega"]];
   reglas.forEach((r, i) => { const y = 1.1 + i * 1.02; card(s, 4.3, y, 5.2, 0.88, C.background2, "regla " + (i + 1)); txt(s, r[0], { x: 4.5, y: y + 0.1, w: 4.8, h: 0.32, bold: true, fontSize: 14, fontFace: "Courier New", color: C.accent1 }); txt(s, r[1], { x: 4.5, y: y + 0.45, w: 4.8, h: 0.4, fontSize: 12, color: C.accent5 }); });
-  s.addNotes("Presenta: Rol 6 (Arquitectura). Del requisito a la clase: los sustantivos (factura, pedido, ciudad, gerente) se volvieron clases. Señalar en el diagrama la composición País-Departamento-Ciudad y explicar autorizar() antes de contabilizar().");
+  s.addNotes("BLOQUE 2 · Arquitectura y ágil (3 min, diapositivas 4 a 6). Presenta: Rol 6 (Arquitectura). Del requisito a la clase: los sustantivos (factura, pedido, ciudad, gerente) se volvieron clases. Señalar en el diagrama la composición País-Departamento-Ciudad y explicar autorizar() antes de contabilizar().");
 
   /* 5 · Scrum y backlog */
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "2. Arquitectura y ágil" });
-  s.addText("METODOLOGÍA", { placeholder: "eyebrow" });
-  s.addText("Scrum con tablero Kanban: lo urgente primero", { placeholder: "title" });
-  const stats = [["26", "historias de usuario"], ["107", "puntos de historia"], ["37", "tareas técnicas en el Sprint 1"]];
-  stats.forEach((t, i) => { const x = 0.5 + i * 3.05; txt(s, t[0], { x, y: 1.05, w: 2.85, h: 0.75, fontSize: 44, bold: true, color: C.accent1, fontFace: "Arial" }); txt(s, t[1], { x, y: 1.8, w: 2.85, h: 0.3, fontSize: 13, color: C.accent5 }); });
+  s.addText("METODOLOGÍA · TRELLO", { placeholder: "eyebrow" });
+  s.addText("Backlog gestionado en Trello con Scrum", { placeholder: "title" });
+  const cols = [["Product Backlog", "6", "HU-24, HU-25 y backend"], ["Sprint Backlog", "0", "sprint cerrado"], ["En Desarrollo", "1", "demo para el cliente"], ["En Pruebas (QA)", "0", ""], ["Completado", "26", "24 historias + pruebas"]];
+  cols.forEach((c, i) => { const x = 0.5 + i * 1.835, dark = i === 4; card(s, x, 1.05, 1.66, 1.2, dark ? C.text1 : C.background2, "columna " + c[0]);
+    txt(s, c[0], { x: x + 0.12, y: 1.13, w: 1.45, h: 0.28, fontSize: 11, bold: true, color: dark ? C.accent2 : C.accent5 });
+    txt(s, c[1], { x: x + 0.12, y: 1.4, w: 1.45, h: 0.5, fontSize: 28, bold: true, color: dark ? C.background1 : C.accent1, fontFace: "Arial" });
+    txt(s, c[2], { x: x + 0.12, y: 1.9, w: 1.45, h: 0.3, fontSize: 10, color: dark ? C.accent6 : C.accent5 }); });
   const spr = [["Sprint 1", "Facturas manuales, autorización, listas y accesibilidad", "B2 · B3 · B4"], ["Sprint 2", "Pedidos, correos, remisiones y conteo ciego", "A1 · fraude"], ["Sprint 3", "Inventario, importaciones y trazabilidad", "Control"], ["Sprint 4", "Estadísticas, carga y disponibilidad", "A2 · A4"]];
-  spr.forEach((p, i) => { const x = 0.5 + i * 2.3; card(s, x, 2.4, 2.15, 1.7, i === 0 ? C.text1 : C.background2, p[0]);
-    txt(s, p[0], { x: x + 0.18, y: 2.55, w: 1.8, h: 0.35, bold: true, fontSize: 15, color: i === 0 ? C.accent2 : C.text1 });
-    txt(s, p[1], { x: x + 0.18, y: 2.95, w: 1.85, h: 0.75, fontSize: 12, color: i === 0 ? C.background1 : C.accent5 });
-    txt(s, p[2], { x: x + 0.18, y: 3.72, w: 1.8, h: 0.3, fontSize: 11, bold: true, color: C.accent1 }); });
+  spr.forEach((p, i) => { const x = 0.5 + i * 2.3; card(s, x, 2.5, 2.15, 1.65, i === 0 ? C.text1 : C.background2, p[0]);
+    txt(s, p[0], { x: x + 0.18, y: 2.63, w: 1.8, h: 0.35, bold: true, fontSize: 15, color: i === 0 ? C.accent2 : C.text1 });
+    txt(s, p[1], { x: x + 0.18, y: 3.0, w: 1.85, h: 0.75, fontSize: 12, color: i === 0 ? C.background1 : C.accent5 });
+    txt(s, p[2], { x: x + 0.18, y: 3.78, w: 1.8, h: 0.3, fontSize: 11, bold: true, color: C.accent1 }); });
   txt(s, "¿Por qué no cascada? Los requisitos cambiaron a mitad del proyecto: en cascada habría que rehacer análisis y diseño; en Scrum el cambio entra al siguiente sprint.", { x: 0.5, y: 4.35, w: 9, h: 0.65, fontSize: 13, italic: true, color: C.accent5 });
-  s.addNotes("Presenta: Líder (Scrum Master). Justificar Scrum frente a cascada y espiral (sesión 4). Abrir el tablero de Trello: https://trello.com/b/kugvbCDl/motorepuestos-del-oriente-scrum y mostrar una tarjeta del Sprint Backlog con su checklist Frontend/Backend/BD/Pruebas.");
+  s.addNotes("Presenta: Líder (Scrum Master). Cómo gestionamos el backlog: 26 historias Como/Quiero/Para, priorizadas con MoSCoW en 4 sprints, primero la tarjeta del cliente. Estado real: 24 de 26 entregadas; HU-24 y HU-25 siguen en el backlog porque requieren servidor. Si hay tiempo, abrir https://trello.com/b/kugvbCDl/motorepuestos-del-oriente-scrum y mostrar una tarjeta con su checklist Frontend/Backend/BD/Pruebas. Por qué Scrum y no cascada: la frase de abajo.");
 
   /* 6 · Arquitectura */
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "2. Arquitectura y ágil" });
@@ -127,18 +130,26 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
   s.addImage({ path: path.join(REPO, "docs/final/img/modelo-v.png"), x: 0.5, y: 1.05, w: 9, h: 1.2, sizing: { type: "contain", w: 9, h: 1.2 }, objectName: "Modelo en V", altText: "Modelo en V: requisitos con pruebas de aceptación, diseño funcional con sistema, diseño técnico con integración y componentes con unitarias" });
   const q = [["17", "unitarias", "funciones aisladas"], ["10", "integración", "bottom-up"], ["19", "sistema", "extremo a extremo"], ["16", "complementarias", "OWASP, carga, responsive…"]];
   q.forEach((t, i) => { const x = 0.5 + i * 2.3; card(s, x, 2.45, 2.15, 1.3, C.background2, "nivel " + t[1]); txt(s, t[0], { x: x + 0.18, y: 2.55, w: 1.8, h: 0.6, fontSize: 32, bold: true, color: C.accent1, fontFace: "Arial" }); txt(s, t[1], { x: x + 0.18, y: 3.12, w: 1.85, h: 0.28, fontSize: 13, bold: true }); txt(s, t[2], { x: x + 0.18, y: 3.4, w: 1.85, h: 0.28, fontSize: 11, color: C.accent5 }); });
-  card(s, 0.5, 3.95, 9, 1.05, C.text1, "defectos");
-  txt(s, "10", { x: 0.75, y: 4.05, w: 1.0, h: 0.85, fontSize: 40, bold: true, color: C.accent2, fontFace: "Arial", valign: "middle" });
-  txt(s, "defectos reales encontrados y corregidos: cantidades decimales aceptadas, desbordes a 360 px, contraste WCAG, regla de negocio en la capa equivocada… Resultado final: 62 de 62 pruebas pasan y 0 violaciones de accesibilidad.", { x: 1.8, y: 4.08, w: 7.5, h: 0.85, fontSize: 13, color: C.background1, valign: "middle" });
-  s.addNotes("BLOQUE 4 · Auditoría de QA (3 min). Presenta: Rol 7 (Calidad). Explicar verificación (rama izquierda) y validación (rama derecha). Ejemplo de regresión: el botón 'Guía' rompió el diseño a 360 px y la prueba lo detectó. Luego comentar los bugs que reportó el grupo auditor (Actividad 5) y cómo se respondió a cada uno.");
+  card(s, 0.5, 3.95, 9, 1.05, C.text1, "OWASP");
+  txt(s, "OWASP", { x: 0.75, y: 4.05, w: 1.5, h: 0.85, fontSize: 26, bold: true, color: C.accent2, fontFace: "Arial", valign: "middle" });
+  txt(s, "A01 control de acceso · A03 inyección y XSS · A07 autenticación · A08 integridad de datos: todas pasan. Además: robustez, carga (5.000 facturas en < 1 s), responsive y accesibilidad (0 violaciones). Resultado: 62 de 62.", { x: 2.25, y: 4.08, w: 7.05, h: 0.85, fontSize: 13, color: C.background1, valign: "middle" });
+  s.addNotes("BLOQUE 4 · Auditoría de QA (3 min). Presenta: Rol 7 (Calidad). Explicar verificación (rama izquierda) y validación (rama derecha). Unitarias = funciones aisladas; integración = bottom-up (datos → dominio → contabilidad → correo); OWASP con ejemplos concretos.");
 
-  /* 9 · Seguridad y complementarias */
+  /* 9 · Bugs de las pruebas cruzadas */
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "4. Auditoría de QA" });
-  s.addText("PRUEBAS COMPLEMENTARIAS", { placeholder: "eyebrow" });
-  s.addText("Seguridad, robustez y rendimiento probados", { placeholder: "title" });
-  const comp = [["OWASP A01", "Un rol sin permiso no entra escribiendo la dirección"], ["OWASP A03", "Código malicioso en formularios se muestra como texto"], ["OWASP A08", "Alterar la bitácora rompe la cadena SHA-256"], ["Robustez", "0, −5, «abc» y 2,5 rechazados con mensaje claro"], ["Carga", "5.000 facturas extra: la lista responde en < 1 s"], ["Estrés", "~30.000 facturas llenan el navegador: motivo para PostgreSQL"]];
-  comp.forEach((c, i) => { const x = 0.5 + (i % 3) * 3.05, y = 1.15 + Math.floor(i / 3) * 1.95; card(s, x, y, 2.85, 1.75, C.background2, c[0]); s.addShape(pres.shapes.OVAL, { x: x + 0.2, y: y + 0.22, w: 0.3, h: 0.3, fill: { color: C.accent4 }, line: { color: C.accent4 }, objectName: "pasa " + c[0] }); txt(s, "✓", { x: x + 0.2, y: y + 0.22, w: 0.3, h: 0.3, align: "center", valign: "middle", fontSize: 12, bold: true, color: C.background1 }); txt(s, c[0], { x: x + 0.62, y: y + 0.2, w: 2.1, h: 0.35, bold: true, fontSize: 15 }); txt(s, c[1], { x: x + 0.2, y: y + 0.7, w: 2.5, h: 0.9, fontSize: 13, color: C.accent5 }); });
-  s.addNotes("Presenta: Rol 7. Mencionar también testing exploratorio (doble clic en Facturar no duplica facturas) y estabilidad (300 cambios de pantalla sin errores). Limitación honesta: la contraseña de demostración se valida en el navegador; en producción, bcrypt + JWT en el servidor.");
+  s.addText("PRUEBAS CRUZADAS", { placeholder: "eyebrow" });
+  s.addText("Bugs detectados y cómo se resolvieron", { placeholder: "title" });
+  card(s, 0.5, 1.1, 4.35, 3.9, C.background2, "bugs del grupo auditor");
+  txt(s, "Reportados por el grupo auditor", { x: 0.72, y: 1.27, w: 3.95, h: 0.35, bold: true, fontSize: 15 });
+  ["AUD-01", "AUD-02", "AUD-03"].forEach((id, k) => { const y = 1.8 + k * 0.9; card(s, 0.72, y, 3.91, 0.75, C.background1, id);
+    txt(s, id, { x: 0.88, y: y + 0.1, w: 1.0, h: 0.28, fontSize: 12, bold: true, color: C.accent1 });
+    txt(s, "Escribir el bug reportado y cómo se resolvió", { x: 0.88, y: y + 0.38, w: 3.6, h: 0.3, fontSize: 12, italic: true, color: C.accent6 }); });
+  card(s, 5.15, 1.1, 4.35, 3.9, C.text1, "bugs propios");
+  txt(s, "Encontrados por nuestras pruebas", { x: 5.37, y: 1.27, w: 3.95, h: 0.35, bold: true, fontSize: 15, color: C.background1 });
+  txt(s, "10 de 10 corregidos", { x: 5.37, y: 1.6, w: 3.95, h: 0.3, fontSize: 12, bold: true, color: C.accent2 });
+  const propios = ["Cantidad decimal aceptada y truncada · robustez", "Desborde en celulares de 360 px · regresión", "Contraste insuficiente · auditoría WCAG", "Regla de negocio en la capa de vista · revisión estática", "Consecutivos de factura fuera de orden · sistema"];
+  propios.forEach((t, k) => { const y = 2.05 + k * 0.56; s.addShape(pres.shapes.OVAL, { x: 5.37, y: y + 0.04, w: 0.26, h: 0.26, fill: { color: C.accent4 }, line: { color: C.accent4 }, objectName: "corregido " + (k + 1) }); txt(s, "✓", { x: 5.37, y: y + 0.04, w: 0.26, h: 0.26, align: "center", valign: "middle", fontSize: 10, bold: true, color: C.background1 }); txt(s, t, { x: 5.75, y, w: 3.6, h: 0.45, fontSize: 12, color: C.background1 }); });
+  s.addNotes("Presenta: Rol 7. Primero los bugs que reportó el grupo auditor en la Actividad 5 (escribirlos en las tres casillas de la izquierda antes de la clase) y qué se hizo con cada uno. Luego los encontrados por nuestras pruebas: el más didáctico es la regresión, porque un botón que agregamos para la demo rompió el diseño en celulares de 360 px y la prueba automática lo detectó. Limitación honesta: la contraseña de demostración se valida en el navegador; en producción, bcrypt + JWT en el servidor.");
 
   /* 10 · Conclusiones */
   sec("5. Conclusiones");
