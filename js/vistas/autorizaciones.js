@@ -5,7 +5,7 @@
 /* --- Autorizaciones --- */
 function vAutorizaciones(){
   const pend = DB.facturas.filter(f => f.estado === "Pendiente").sort((a, b) => a.fecha.localeCompare(b.fecha));
-  return `<div class="page-head"><div><p class="eyebrow">Caso de uso · Autorizar factura manual</p><h1>Autorizaciones</h1><p>Solo llegan aquí las facturas manuales, las que no vienen de un pedido de venta. Al autorizar se contabiliza el asiento, se descuenta el inventario, se genera el CUFE, se emiten los certificados de garantía y se envía la factura al cliente por correo. Quien registra una factura no puede autorizarla.</p></div></div>
+  return `<div class="page-head"><div><p class="eyebrow">Gerencia</p><h1>Autorizaciones</h1><p>Solo llegan aquí las facturas manuales, las que no vienen de un pedido de venta. Al autorizar se contabiliza el asiento, se descuenta el inventario, se genera el CUFE, se emiten los certificados de garantía y se envía la factura al cliente por correo. Quien registra una factura no puede autorizarla.</p></div></div>
   ${pend.length ? `<div class="cards">${pend.map(f => { const c = cli(f.clienteId); const disp = cupoDisponible(c, f.id); const ok = f.total <= disp; const own = f.creadoPor === ME.id;
     const sinStock = f.items.filter(it => (prod(it.productoId).stock[f.sucursalId] || 0) < it.cantidad);
     return `<article class="panel" aria-labelledby="a-${f.id}"><header><h3 id="a-${f.id}" class="mono">${f.numero}</h3>${pillFactura(f)}</header>

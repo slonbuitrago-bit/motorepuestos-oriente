@@ -19,17 +19,17 @@ const ACT = {
   cerrarPublico(){ UI.publico = false; render(); },
   guia(){
     const pasos = [
-      ["U3","pedidos","Camila · Logística","Facturar el pedido de venta pendiente: queda contabilizado sin pasar por Gerencia y se envía correo al cliente.","B2 · A1"],
-      ["U3","factura-nueva","Camila · Logística","Registrar una factura manual: cambiar de país para ver cómo se filtran los departamentos; probar con Repuestos San Vicente y una cantidad alta para ver el bloqueo por cupo.","B3 · cupo"],
-      ["U2","autorizaciones","Andrés · Gerente","Autorizar una factura manual pendiente: genera CUFE, asiento contable, certificados y correo. Intentar con la propia no es posible (segregación).","B2"],
-      ["U4","despachos","Julián · Despachos","Crear la remisión de una factura autorizada con instrucciones de envío. Hacer el conteo ciego con un número errado (abre novedad) y luego correcto (sella).","Fraude · envíos"],
-      ["U4","despachos","Julián · Despachos","Pestaña En proceso: registrar la entrega de una remisión en tránsito con un faltante. Queda una novedad para Gerencia.","Fraude"],
-      ["U6","trazabilidad","Mateo · Auditor","Rastrear una factura (pedido → factura → remisión) y verificar la integridad de la bitácora.","ISO 9001 · B1"],
-      ["U1","trazabilidad","Laura · Administradora","Simular una alteración de la bitácora: el sistema la detecta. Luego deshacer la simulación.","Integridad"],
-      ["U2","notificaciones","Andrés · Gerente","Ver los correos enviados por cada transacción. Abrir el botón Accesibilidad y ajustar texto y contraste; mostrar la app en el celular.","A1 · B4 · A3"]
+      ["U3","pedidos","Camila · Logística","Facturar el pedido de venta pendiente: queda contabilizado sin pasar por Gerencia y se envía correo al cliente.","Facturación automática y aviso al cliente"],
+      ["U3","factura-nueva","Camila · Logística","Registrar una factura manual: cambiar de país para ver cómo se filtran los departamentos; probar con Repuestos San Vicente y una cantidad alta para ver el bloqueo por cupo.","Destinos válidos y control de cupo"],
+      ["U2","autorizaciones","Andrés · Gerente","Autorizar una factura manual pendiente: genera CUFE, asiento contable, certificados y correo. Intentar con la propia no es posible (segregación).","Control de facturas manuales"],
+      ["U4","despachos","Julián · Despachos","Crear la remisión de una factura autorizada con instrucciones de envío. Hacer el conteo ciego con un número errado (abre novedad) y luego correcto (sella).","Control de cantidades despachadas"],
+      ["U4","despachos","Julián · Despachos","Pestaña En proceso: registrar la entrega de una remisión en tránsito con un faltante. Queda una novedad para Gerencia.","Control de entregas"],
+      ["U6","trazabilidad","Mateo · Auditor","Rastrear una factura (pedido → factura → remisión) y verificar la integridad de la bitácora.","Trazabilidad de documentos"],
+      ["U1","trazabilidad","Laura · Administradora","Simular una alteración de la bitácora: el sistema la detecta. Luego deshacer la simulación.","Registros que no se pueden alterar"],
+      ["U2","notificaciones","Andrés · Gerente","Ver los correos enviados por cada transacción. Abrir el botón Accesibilidad y ajustar texto y contraste; mostrar la app en el celular.","Avisos, accesibilidad y uso en celular"]
     ];
     openDlg("Guía de demostración", `<p>Recorrido de unos 5 minutos que muestra todos los requisitos. Cada botón <b>Ir</b> cambia al usuario indicado y abre la pantalla.</p>
-      <div class="tw"><table><thead><tr><th class="r">#</th><th>Usuario</th><th>Qué mostrar</th><th>Requisito</th><th></th></tr></thead><tbody>
+      <div class="tw"><table><thead><tr><th class="r">#</th><th>Usuario</th><th>Qué mostrar</th><th>Qué demuestra</th><th></th></tr></thead><tbody>
       ${pasos.map((p, i) => `<tr><td class="r num">${i + 1}</td><td>${esc(p[2])}</td><td class="wrap">${esc(p[3])}</td><td>${pill(p[4], "acc")}</td><td><button class="btn sm primary" data-act="demoPaso" data-u="${p[0]}" data-r="${p[1]}">Ir</button></td></tr>`).join("")}
       </tbody></table></div>
       <p class="muted" style="font-size:.85rem">Antes de presentar: Administración → Datos y respaldo → Restablecer datos de ejemplo, para empezar con todos los casos disponibles.</p>`, `<button class="btn" data-act="cerrarDlg">Cerrar</button>`);
@@ -69,7 +69,7 @@ const ACT = {
   rechazarDlg(d){
     const f = byId(DB.facturas, d.id);
     if (f.creadoPor === ME.id){ toast("No puedes rechazar una factura que tú registraste.", true); return; }
-    openDlg(`Rechazar factura ${f.numero}`, `<form id="frm-rz" data-form="rechazo" data-id="${f.id}" class="grid"><p>Extiende el caso de uso Autorizar. Logística verá el motivo para corregir.</p>
+    openDlg(`Rechazar factura ${f.numero}`, `<form id="frm-rz" data-form="rechazo" data-id="${f.id}" class="grid"><p>Logística verá el motivo para corregir la factura.</p>
       <div class="field"><label for="rz-m">Motivo del rechazo *</label><textarea id="rz-m" name="motivo" required minlength="10" placeholder="Ej.: el cliente pidió 10 kits de arrastre, no 16. Verificar con el pedido firmado."></textarea></div><div id="rz-err" role="alert"></div></form>`,
       `<button class="btn" data-act="cerrarDlg">Cancelar</button><button class="btn danger" type="submit" form="frm-rz">Rechazar factura</button>`);
   },

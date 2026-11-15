@@ -11,7 +11,7 @@ function vLogin(){
       <img class="logo-hero" src="img/logo-512.jpg" alt="Logo de Motorepuestos del Oriente: motociclista con casco sobre una moto, rodeado de un engranaje naranja y un pistón" width="240" height="240">
       <div class="brand"><div><b>Motorepuestos del Oriente</b><small>Mayorista de repuestos para motos · Rionegro, Antioquia</small></div></div>
       <h1 id="lg-t">Cada repuesto facturado, despachado y entregado sin perderle el rastro.</h1>
-      <p>Facturación con autorización de gerencia, control de cupos, remisiones con conteo ciego, inventario por sucursal, importaciones desde la Zona Libre de Colón y auditoría encadenada con SHA-256.</p>
+      <p>Facturación con autorización de gerencia, control de cupos, remisiones con conteo ciego, inventario por sucursal, importaciones desde la Zona Libre de Colón y un registro de auditoría que nadie puede alterar.</p>
       <div class="facts"><div><b>3</b>sucursales en el Oriente antioqueño</div><div><b>12 años</b>de convenio con el proveedor en Panamá</div><div><b>${NUM.format(DB.facturas.length)}</b>facturas de ejemplo cargadas</div></div>
     </section>
     <section class="form" aria-labelledby="lg-f">

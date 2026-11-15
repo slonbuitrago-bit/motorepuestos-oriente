@@ -8,7 +8,7 @@
 |---|---|
 | Tipo de aplicación | Aplicación web de una sola página (SPA, *Single Page Application*) |
 | Estilo arquitectónico | **Arquitectura en capas** con separación **Modelo–Vista–Controlador (MVC)** |
-| Modularidad | 28 módulos JavaScript + 1 hoja de estilos, organizados en 6 capas, con dependencias en un solo sentido |
+| Modularidad | 27 módulos JavaScript + 1 hoja de estilos, organizados en 6 capas, con dependencias en un solo sentido |
 | Tecnologías | HTML5, CSS3 (variables CSS), JavaScript ES2020 sin frameworks |
 | Persistencia | Prototipo: almacenamiento del navegador (localStorage). Producción: API REST + PostgreSQL (`modelo-datos.sql`) |
 | Metodología | Proceso **incremental con prototipado evolutivo**, requisitos según IEEE 830 y procedimiento conforme con ISO 9001 (`manual-procedimientos.md`) |
@@ -79,7 +79,7 @@ Las vistas nunca modifican datos y los controladores nunca generan HTML. Esto ha
 | Presentación | `js/ui/navegacion.js` | Rutas, control de acceso por pantalla, armazón (menú, barra superior) |
 | Presentación | `js/ui/accesibilidad.js` | Tamaño de texto, contraste, espaciado, tema, movimiento |
 | Presentación | `js/ui/dialogos.js`, `js/ui/iconos.js` | Ventanas modales, avisos, iconos |
-| Presentación | `js/vistas/*.js` (14 módulos) | Una pantalla por módulo: acceso, tablero, pedidos, facturas, autorizaciones, despachos, inventario, importaciones, clientes, trazabilidad, notificaciones, certificados, administración, calidad |
+| Presentación | `js/vistas/*.js` (13 módulos) | Una pantalla por módulo: acceso, tablero, pedidos, facturas, autorizaciones, despachos, inventario, importaciones, clientes, trazabilidad, notificaciones, certificados, administración |
 | Control | `js/controladores/eventos.js` | Delegación de eventos: un solo escuchador por tipo de evento para toda la app |
 | Control | `js/controladores/acciones.js` | Acciones de botones (autorizar, facturar pedido, despachar…) |
 | Control | `js/controladores/formularios.js` | Validación y guardado de formularios |
@@ -181,7 +181,7 @@ motorepuestos-oriente/
 │   ├── datos/                estado-y-auditoria.js, datos-ejemplo.js, persistencia.js
 │   ├── dominio/              reglas-negocio.js
 │   ├── ui/                   navegacion.js, accesibilidad.js, dialogos.js, iconos.js
-│   ├── vistas/               una pantalla por archivo (14)
+│   ├── vistas/               una pantalla por archivo (13)
 │   ├── controladores/        eventos.js, acciones.js, formularios.js
 │   └── app.js                arranque
 ├── docs/                     SRS, arquitectura, calidad, actividad 2, manual ISO 9000, modelo SQL

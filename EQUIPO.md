@@ -20,7 +20,7 @@ Escribe tu nombre en la columna *Integrante* (el líder la completa al repartir)
 | 4 | **Inventario y abastecimiento** | | `js/vistas/inventario.js`, `importaciones.js`, `clientes.js`, `certificados.js`, `js/datos/datos-ejemplo.js` | Demo: inventario por sucursal, importación desde Panamá, certificados |
 | 5 | **Requisitos** | | `docs/SRS-IEEE830.md`, `docs/actividad2-consultoria.md` | Requisitos, su clasificación por tipo y casos de uso |
 | 6 | **Arquitectura y base de datos** | | `docs/arquitectura.md`, `docs/modelo-datos.sql`, `js/datos/`, `js/dominio/` | Arquitectura en capas, módulos y modelo de datos |
-| 7 | **Calidad y normas** | | `docs/calidad-ISO25010.md`, `docs/manual-procedimientos.md`, `js/vistas/calidad.js`, `css/estilos.css` | ISO 25010, pruebas, accesibilidad, ISO 9000 y trazabilidad |
+| 7 | **Calidad y normas** | | `docs/calidad-ISO25010.md`, `docs/manual-procedimientos.md`, `css/estilos.css` | ISO 25010, pruebas, accesibilidad, ISO 9000 y trazabilidad |
 
 Si necesitas cambiar un archivo de otro rol, **avísale primero** (comentario en GitHub o WhatsApp) y que esa persona lo revise.
 

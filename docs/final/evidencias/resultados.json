@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-15T19:10:34.469Z",
+ "fecha": "2026-11-15T19:33:31.747Z",
  "resultados": [
   {
    "id": "CS-01",
@@ -115,7 +115,7 @@
    "tipo": "Funcional (antifraude, A1)",
    "nombre": "Conteo correcto sella la remisión y permite despacharla",
    "resultado": "PASA",
-   "detalle": "Verificada · sello 98805AA1F6 → En tránsito",
+   "detalle": "Verificada · sello D956F2A03C → En tránsito",
    "evidencia": ""
   },
   {
@@ -176,9 +176,9 @@
    "id": "CC-01",
    "nivel": "Complementaria",
    "tipo": "Smoke test",
-   "nombre": "Las 15 pantallas cargan sin errores con los 6 roles",
+   "nombre": "Las 14 pantallas cargan sin errores con los 6 roles",
    "resultado": "PASA",
-   "detalle": "90 combinaciones rol × pantalla sin errores de JavaScript",
+   "detalle": "84 combinaciones rol × pantalla sin errores de JavaScript",
    "evidencia": ""
   },
   {
@@ -187,7 +187,7 @@
    "tipo": "Usabilidad responsive (A3)",
    "nombre": "Sin desplazamiento horizontal en 360, 768, 1024 y 1440 px",
    "resultado": "PASA",
-   "detalle": "24 combinaciones pantalla × ancho correctas",
+   "detalle": "20 combinaciones pantalla × ancho correctas",
    "evidencia": ""
   },
   {
@@ -257,7 +257,7 @@
    "id": "CC-10",
    "nivel": "Complementaria",
    "tipo": "Usabilidad / Accesibilidad WCAG 2.1 AA (B4)",
-   "nombre": "Auditoría automática axe-core en 9 pantallas",
+   "nombre": "Auditoría automática axe-core en 8 pantallas",
    "resultado": "PASA",
    "detalle": "0 violaciones WCAG 2.1 A/AA",
    "evidencia": ""
@@ -268,7 +268,7 @@
    "tipo": "Rendimiento",
    "nombre": "Tiempo de dibujo de cada pantalla < 300 ms",
    "resultado": "PASA",
-   "detalle": "Promedio 9.4 ms · máximo 16.9 ms",
+   "detalle": "Promedio 12.0 ms · máximo 22.2 ms",
    "evidencia": ""
   },
   {
@@ -277,7 +277,7 @@
    "tipo": "Carga (volumen)",
    "nombre": "Con 5.000 facturas adicionales la lista y el tablero responden < 1 s",
    "resultado": "PASA",
-   "detalle": "Lista 20 ms · tablero 18 ms · datos 5.51 MB",
+   "detalle": "Lista 17 ms · tablero 28 ms · datos 5.51 MB",
    "evidencia": ""
   },
   {
@@ -295,7 +295,7 @@
    "tipo": "Estabilidad",
    "nombre": "300 cambios de pantalla seguidos sin errores",
    "resultado": "PASA",
-   "detalle": "5.4 s, 0 errores",
+   "detalle": "6.5 s, 0 errores",
    "evidencia": ""
   },
   {

@@ -40,7 +40,7 @@ function vFacturaNueva(){
   const cupoOk = !c || t.total <= disp;
   const E = d.errores || {};
   return `
-  <div class="page-head"><div><p class="eyebrow">Caso de uso · ${esPed ? "Registrar pedido de venta" : "Registrar factura manual (sin pedido)"}</p><h1>${esPed ? "Registrar pedido de venta" : "Registrar factura manual"}</h1><p>${esPed ? "Al guardar, el sistema valida el cupo y la existencia, asigna el número de pedido y envía un correo de confirmación al cliente. Luego se factura con un clic, sin pasar por Gerencia." : "Para ventas que no vienen de un pedido. Al guardar, el sistema valida el cupo y la existencia, asigna el consecutivo de la resolución DIAN y envía la factura a un gerente: no se contabiliza hasta que la autorice."}</p></div>
+  <div class="page-head"><div><p class="eyebrow">${esPed ? "Ventas" : "Facturación · venta sin pedido"}</p><h1>${esPed ? "Registrar pedido de venta" : "Registrar factura manual"}</h1><p>${esPed ? "Al guardar, el sistema valida el cupo y la existencia, asigna el número de pedido y envía un correo de confirmación al cliente. Luego se factura con un clic, sin pasar por Gerencia." : "Para ventas que no vienen de un pedido. Al guardar, el sistema valida el cupo y la existencia, asigna el consecutivo de la resolución DIAN y envía la factura a un gerente: no se contabiliza hasta que la autorice."}</p></div>
     <a class="btn" href="${volver}" data-act="cancelDraft">Cancelar</a></div>
   ${E._general ? `<div class="note bad" role="alert">${esc(E._general)}</div>` : ""}
   <form data-form="factura" class="grid" novalidate>
@@ -55,7 +55,7 @@ function vFacturaNueva(){
       ${c ? `<div><div class="row between" style="font-size:.85rem"><span>Uso del cupo con esta factura</span><span class="num">${money(c.cupo - disp + t.total)} de ${money(c.cupo)}</span></div>
         <div class="meter ${!cupoOk ? "bad" : (c.cupo - disp + t.total) / c.cupo > .8 ? "warn" : ""}" role="meter" aria-valuemin="0" aria-valuemax="${c.cupo}" aria-valuenow="${c.cupo - disp + t.total}" aria-label="Uso del cupo"><span style="width:${Math.min(100, (c.cupo - disp + t.total) / c.cupo * 100)}%"></span></div></div>` : ""}
     </section>
-    <section class="panel" aria-labelledby="s-dest"><header><h2 id="s-dest">2. Destino del envío</h2><span class="muted" style="font-size:.85rem">Incluye: seleccionar país, estado y ciudad</span></header>
+    <section class="panel" aria-labelledby="s-dest"><header><h2 id="s-dest">2. Destino del envío</h2><span class="muted" style="font-size:.85rem">Solo municipios registrados</span></header>
       <div class="grid g3">
         <div class="field"><label for="d-pais">País</label><select id="d-pais" data-draft="paisId">${DB.paises.map(p => `<option value="${p.id}" ${d.paisId === p.id ? "selected" : ""}>${esc(p.nombre)}</option>`).join("")}</select></div>
         <div class="field"><label for="d-est">Departamento / estado</label><select id="d-est" data-draft="estadoId">${DB.estados.filter(e => e.paisId === d.paisId).map(e => `<option value="${e.id}" ${d.estadoId === e.id ? "selected" : ""}>${esc(e.nombre)}</option>`).join("")}</select></div>

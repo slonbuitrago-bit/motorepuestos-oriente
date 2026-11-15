@@ -9,7 +9,7 @@ function vTrazabilidad(){
   const list = DB.audit.filter(e => (!ent || e.entidad === ent) && (!q || (e.ref + " " + e.usuario + " " + e.accion + " " + e.detalle).toLowerCase().includes(q))).slice().reverse();
   const shown = list.slice(0, UI.filtros.alim || 60);
   const v = UI.cadena;
-  return `<div class="page-head"><div><p class="eyebrow">ISO 9001 · 8.5.2 Identificación y trazabilidad</p><h1>Trazabilidad y auditoría</h1><p>Cada acción queda registrada con usuario, rol y hora. Los registros están encadenados: cada uno guarda la huella SHA-256 del anterior, así que alterar o borrar uno rompe la cadena y se detecta.</p></div>
+  return `<div class="page-head"><div><p class="eyebrow">Auditoría</p><h1>Trazabilidad y auditoría</h1><p>Cada acción queda registrada con usuario, rol y hora. Los registros están encadenados: cada uno guarda la huella SHA-256 del anterior, así que alterar o borrar uno rompe la cadena y se detecta.</p></div>
     <div class="row"><button class="btn primary" data-act="verifCadena">Verificar integridad</button>${P("admin.usuarios") ? `<button class="btn" data-act="simularFraude">Simular alteración</button>` : ""}</div></div>
   ${v ? (v.ok ? `<div class="note ok" role="status"><b>Cadena íntegra.</b> ${v.n} registros verificados, ninguno fue alterado.</div>` : `<div class="note bad" role="alert"><b>Cadena rota en el registro #${v.seq}.</b> Ese registro o uno anterior fue modificado fuera del sistema. ${P("admin.usuarios") ? `<button class="btn sm" data-act="restaurarFraude">Deshacer simulación</button>` : ""}</div>`) : ""}
   <section class="panel"><header><h2>Rastrear un documento</h2></header>

@@ -99,7 +99,7 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
   /* 6 · Arquitectura */
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "2. Arquitectura y ágil" });
   s.addText("ARQUITECTURA", { placeholder: "eyebrow" });
-  s.addText("28 módulos en capas, listos para un servidor", { placeholder: "title" });
+  s.addText("27 módulos en capas, listos para un servidor", { placeholder: "title" });
   s.addImage({ path: path.join(REPO, "docs/final/img/arquitectura.png"), x: 0.5, y: 1.05, w: 5.4, h: 3.95, sizing: { type: "contain", w: 5.4, h: 3.95 }, objectName: "diagrama de arquitectura", altText: "Arquitectura en capas: presentación, control, dominio, datos y núcleo; en producción API REST con PostgreSQL" });
   const tec = [["Frontend", "HTML5, CSS3 y JavaScript sin frameworks"], ["Backend", "Capa de dominio hoy · Node.js + Express en producción"], ["Base de datos", "PostgreSQL: 29 tablas y 5 triggers"], ["Calidad", "node:test, Playwright y axe-core"]];
   tec.forEach((t, i) => { const y = 1.1 + i * 0.98; card(s, 6.15, y, 3.35, 0.85, C.background2, t[0]); txt(s, t[0], { x: 6.32, y: y + 0.1, w: 3.0, h: 0.3, bold: true, fontSize: 14, color: C.accent1 }); txt(s, t[1], { x: 6.32, y: y + 0.42, w: 3.05, h: 0.4, fontSize: 12, color: C.text1 }); });

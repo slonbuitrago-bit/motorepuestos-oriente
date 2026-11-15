@@ -15,8 +15,7 @@ const RUTAS = [
   { id:"trazabilidad", label:"Trazabilidad", perm:"auditoria.ver", grp:"Control" },
   { id:"notificaciones", label:"Notificaciones", perm:"auditoria.ver", grp:"Control" },
   { id:"certificados", label:"Certificados", perm:null, grp:"Control" },
-  { id:"administracion", label:"Administración", perm:"admin.catalogos", alt:"admin.usuarios", grp:"Control" },
-  { id:"calidad", label:"Calidad y normas", perm:null, grp:"Control" }
+  { id:"administracion", label:"Administración", perm:"admin.catalogos", alt:"admin.usuarios", grp:"Control" }
 ];
 const EXTRA = { "factura-nueva":{ label:"Registrar factura manual", perm:"facturas.crear" }, "pedido-nuevo":{ label:"Registrar pedido de venta", perm:"pedidos.gestionar" } };
 function puedeVer(id){ const r = RUTAS.find(x => x.id === id) || EXTRA[id]; if (!r) return false; return !r.perm || P(r.perm) || (r.alt && P(r.alt)); }

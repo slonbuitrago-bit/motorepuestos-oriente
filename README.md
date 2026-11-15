@@ -45,11 +45,10 @@ Los datos se guardan en el navegador de cada persona. En **Administración → D
 | Notificaciones | Correos al cliente en pedido, factura, despacho y pago (bandeja de salida) |
 | Certificados | Garantías verificables por código |
 | Administración | Usuarios, matriz de permisos por rol, ciudades y municipios (DANE), sucursales, respaldo |
-| Calidad y normas | Matriz de requisitos, ISO/IEC 25010, WCAG, marco normativo |
 
 ## Arquitectura
 
-Aplicación web de una sola página con **arquitectura en capas y separación MVC**: 28 módulos JavaScript en 6 capas (núcleo, datos, dominio, presentación, control y arranque), sin frameworks ni dependencias. La metodología fue incremental con prototipado evolutivo. Todo el detalle (patrones, decisiones, diagramas y arquitectura de producción) está en [`docs/arquitectura.md`](docs/arquitectura.md).
+Aplicación web de una sola página con **arquitectura en capas y separación MVC**: 27 módulos JavaScript en 6 capas (núcleo, datos, dominio, presentación, control y arranque), sin frameworks ni dependencias. La metodología fue incremental con prototipado evolutivo. Todo el detalle (patrones, decisiones, diagramas y arquitectura de producción) está en [`docs/arquitectura.md`](docs/arquitectura.md).
 
 ## Estructura del proyecto
 

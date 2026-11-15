@@ -2,7 +2,7 @@
 /* Motorepuestos del Oriente
    Arranque · Registro de vistas e inicio de la aplicación. */
 
-const VIEWS = { inicio:vInicio, pedidos:vPedidos, "pedido-nuevo":vFacturaNueva, notificaciones:vNotificaciones, facturas:vFacturas, "factura-nueva":vFacturaNueva, autorizaciones:vAutorizaciones, despachos:vDespachos, inventario:vInventario, importaciones:vImportaciones, clientes:vClientes, trazabilidad:vTrazabilidad, certificados:vCertificados, administracion:vAdministracion, calidad:vCalidad };
+const VIEWS = { inicio:vInicio, pedidos:vPedidos, "pedido-nuevo":vFacturaNueva, notificaciones:vNotificaciones, facturas:vFacturas, "factura-nueva":vFacturaNueva, autorizaciones:vAutorizaciones, despachos:vDespachos, inventario:vInventario, importaciones:vImportaciones, clientes:vClientes, trazabilidad:vTrazabilidad, certificados:vCertificados, administracion:vAdministracion };
 const AFTER = {};
 
 /* ---------- Arranque ---------- */

@@ -178,7 +178,7 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
 
   /* ================= PRUEBAS COMPLEMENTARIAS ================= */
   // Smoke test por rol
-  const rutas = ["inicio","pedidos","facturas","factura-nueva","pedido-nuevo","autorizaciones","despachos","inventario","importaciones","clientes","trazabilidad","notificaciones","certificados","administracion","calidad"];
+  const rutas = ["inicio","pedidos","facturas","factura-nueva","pedido-nuevo","autorizaciones","despachos","inventario","importaciones","clientes","trazabilidad","notificaciones","certificados","administracion"];
   let fallas = [];
   for (const u of ["U1","U2","U3","U4","U5","U6"]){
     p = await nueva(); await p.login(u);
@@ -186,17 +186,17 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
     if (p.errores.length) fallas.push(u + ": " + p.errores[0]);
     await p.cerrar();
   }
-  reg("CC-01", "Complementaria", "Smoke test", "Las 15 pantallas cargan sin errores con los 6 roles", !fallas.length, fallas.length ? fallas.join("; ") : "90 combinaciones rol × pantalla sin errores de JavaScript");
+  reg("CC-01", "Complementaria", "Smoke test", `Las ${rutas.length} pantallas cargan sin errores con los 6 roles`, !fallas.length, fallas.length ? fallas.join("; ") : `${6 * rutas.length} combinaciones rol × pantalla sin errores de JavaScript`);
 
   // Responsive
   const anchos = [360, 768, 1024, 1440]; const malos = [];
   for (const w of anchos){
     p = await nueva({ viewport: { width: w, height: 800 } }); await p.login("U1");
-    for (const r of ["inicio","facturas","factura-nueva","despachos","inventario","calidad"]){ await p.go(r); const sw = await ev(p, () => document.documentElement.scrollWidth); if (sw > w) malos.push(`${r}@${w}px=${sw}`); }
+    for (const r of ["inicio","facturas","factura-nueva","despachos","inventario"]){ await p.go(r); const sw = await ev(p, () => document.documentElement.scrollWidth); if (sw > w) malos.push(`${r}@${w}px=${sw}`); }
     if (w === 360){ await p.go("inicio"); await p.waitForTimeout(250); await p.foto("13-movil-360"); }
     await p.cerrar();
   }
-  reg("CC-02", "Complementaria", "Usabilidad responsive (A3)", "Sin desplazamiento horizontal en 360, 768, 1024 y 1440 px", !malos.length, malos.length ? malos.join(", ") : "24 combinaciones pantalla × ancho correctas");
+  reg("CC-02", "Complementaria", "Usabilidad responsive (A3)", "Sin desplazamiento horizontal en 360, 768, 1024 y 1440 px", !malos.length, malos.length ? malos.join(", ") : "20 combinaciones pantalla × ancho correctas");
 
   // Compatibilidad
   const disp = []; for (const d of ["iPhone 13", "Pixel 7", "iPad (gen 7)"]){ p = await nueva({ ...devices[d] }); await p.login("U3"); await p.go("facturas"); disp.push(`${d}: ${p.errores.length ? "error" : "OK"}`); await p.cerrar(); }
@@ -242,13 +242,13 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
 
   // Accesibilidad con axe-core
   p = await nueva(); await p.login("U3"); const viol = {}; let total = 0; const detalle = [];
-  for (const r of ["inicio","pedidos","facturas","factura-nueva","despachos","inventario","clientes","trazabilidad","calidad"]){
+  for (const r of ["inicio","pedidos","facturas","factura-nueva","despachos","inventario","clientes","trazabilidad"]){
     await p.go(r); await p.addScriptTag({ content: AXE });
     const res = await p.evaluate(async () => (await axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] } })).violations.map(v => ({ id: v.id, impact: v.impact, n: v.nodes.length })));
     res.forEach(v => { viol[v.impact] = (viol[v.impact] || 0) + v.n; total += v.n; detalle.push(`${r}:${v.id}(${v.n})`); });
   }
   fs.writeFileSync(path.join(OUT, "axe-detalle.json"), JSON.stringify(detalle, null, 1));
-  reg("CC-10", "Complementaria", "Usabilidad / Accesibilidad WCAG 2.1 AA (B4)", "Auditoría automática axe-core en 9 pantallas", total === 0, total ? `${total} hallazgos: ${JSON.stringify(viol)} · ${detalle.slice(0, 6).join(", ")}` : "0 violaciones WCAG 2.1 A/AA");
+  reg("CC-10", "Complementaria", "Usabilidad / Accesibilidad WCAG 2.1 AA (B4)", "Auditoría automática axe-core en 8 pantallas", total === 0, total ? `${total} hallazgos: ${JSON.stringify(viol)} · ${detalle.slice(0, 6).join(", ")}` : "0 violaciones WCAG 2.1 A/AA");
   await p.go("inicio"); await p.click('[data-act="a11y"]'); await p.click('[data-act="pref"][data-k="escala"][data-v="1.3"]'); await p.click("#pf-contraste"); await p.waitForTimeout(100);
   await p.foto("15-accesibilidad-texto-130-contraste");
   await p.click('[data-act="pref"][data-k="escala"][data-v="1"]'); await p.click("#pf-contraste");
