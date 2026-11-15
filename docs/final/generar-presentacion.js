@@ -143,13 +143,13 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
   txt(s, "Reportados por el grupo auditor", { x: 0.72, y: 1.27, w: 3.95, h: 0.35, bold: true, fontSize: 15 });
   ["AUD-01", "AUD-02", "AUD-03"].forEach((id, k) => { const y = 1.8 + k * 0.9; card(s, 0.72, y, 3.91, 0.75, C.background1, id);
     txt(s, id, { x: 0.88, y: y + 0.1, w: 1.0, h: 0.28, fontSize: 12, bold: true, color: C.accent1 });
-    txt(s, "Escribir el bug reportado y cómo se resolvió", { x: 0.88, y: y + 0.38, w: 3.6, h: 0.3, fontSize: 12, italic: true, color: C.accent6 }); });
+    txt(s, "Pendiente: se registra en la auditoría cruzada", { x: 0.88, y: y + 0.38, w: 3.6, h: 0.3, fontSize: 12, italic: true, color: C.accent6 }); });
   card(s, 5.15, 1.1, 4.35, 3.9, C.text1, "bugs propios");
   txt(s, "Encontrados por nuestras pruebas", { x: 5.37, y: 1.27, w: 3.95, h: 0.35, bold: true, fontSize: 15, color: C.background1 });
   txt(s, "10 de 10 corregidos", { x: 5.37, y: 1.6, w: 3.95, h: 0.3, fontSize: 12, bold: true, color: C.accent2 });
   const propios = ["Cantidad decimal aceptada y truncada · robustez", "Desborde en celulares de 360 px · regresión", "Contraste insuficiente · auditoría WCAG", "Regla de negocio en la capa de vista · revisión estática", "Consecutivos de factura fuera de orden · sistema"];
   propios.forEach((t, k) => { const y = 2.05 + k * 0.56; s.addShape(pres.shapes.OVAL, { x: 5.37, y: y + 0.04, w: 0.26, h: 0.26, fill: { color: C.accent4 }, line: { color: C.accent4 }, objectName: "corregido " + (k + 1) }); txt(s, "✓", { x: 5.37, y: y + 0.04, w: 0.26, h: 0.26, align: "center", valign: "middle", fontSize: 10, bold: true, color: C.background1 }); txt(s, t, { x: 5.75, y, w: 3.6, h: 0.45, fontSize: 12, color: C.background1 }); });
-  s.addNotes("Presenta: Rol 7. Primero los bugs que reportó el grupo auditor en la Actividad 5 (escribirlos en las tres casillas de la izquierda antes de la clase) y qué se hizo con cada uno. Luego los encontrados por nuestras pruebas: el más didáctico es la regresión, porque un botón que agregamos para la demo rompió el diseño en celulares de 360 px y la prueba automática lo detectó. Ya hay ingreso con contraseña y bloqueo por intentos; limitación honesta: se valida en el navegador; en producción, bcrypt + JWT en el servidor.");
+  s.addNotes("Presenta: Rol 7. Primero los bugs que reportó el grupo auditor en la Actividad 5 (la auditoría ocurre en la sustentación; si ya hay reporte, se cuentan aquí) y qué se hizo con cada uno. Luego los encontrados por nuestras pruebas: el más didáctico es la regresión, porque un botón que agregamos para la demo rompió el diseño en celulares de 360 px y la prueba automática lo detectó. Ya hay ingreso con contraseña y bloqueo por intentos; limitación honesta: se valida en el navegador; en producción, bcrypt + JWT en el servidor.");
 
   /* 10 · Conclusiones */
   sec("5. Conclusiones");
