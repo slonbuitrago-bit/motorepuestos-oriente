@@ -23,6 +23,8 @@ head = sys.argv[1]
 src = open('index.html', encoding='utf-8').read()
 src = src.replace('<link rel="stylesheet" href="css/estilos.css">', '<style>\n' + open('css/estilos.css', encoding='utf-8').read() + '</style>')
 src = re.sub(r'<script src="(js/[^"]+)"></script>', lambda m: '<script>\n' + open(m.group(1), encoding='utf-8').read() + '</script>', src)
+import base64, mimetypes
+src = re.sub(r'(src|href)="(img/[^"]+)"', lambda m: m.group(1) + '="data:' + (mimetypes.guess_type(m.group(2))[0] or 'image/png') + ';base64,' + base64.b64encode(open(m.group(2), 'rb').read()).decode() + '"', src)
 open('dist/motorepuestos-oriente.html', 'w', encoding='utf-8').write(src)
 PY
 echo "Generados: index.html y dist/motorepuestos-oriente.html"

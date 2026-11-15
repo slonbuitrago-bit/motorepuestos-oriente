@@ -41,7 +41,7 @@ function render(){
   app.innerHTML = `
   <div class="shell">
     <aside class="rail ${UI.menuOpen ? "open" : ""}" id="rail" aria-label="Menú principal">
-      <div class="brand"><div class="mark" aria-hidden="true">MRO</div><div><b>Motorepuestos<br>del Oriente</b><small>Rionegro · Antioquia</small></div></div>
+      <div class="brand"><img class="mark" src="img/logo-160.jpg" alt="" width="48" height="48"><div><b>Motorepuestos<br>del Oriente</b><small>Rionegro · Antioquia</small></div></div>
       <nav class="nav" aria-label="Secciones">${nav}</nav>
       <div class="me"><b>${esc(ME.nombre)}</b><span>${esc(ME.rol)} · ${esc(sucNom)}</span>
         <label for="sw-user" style="margin-top:12px;font-weight:400;font-size:.78rem;color:var(--rail-ink)">Cambiar de usuario (demostración)</label>

@@ -1,0 +1,17 @@
+flowchart TB
+  U(["Usuario · navegador web<br/>computador, tableta o celular"])
+  subgraph APP["Aplicación web (SPA) · HTML5 + CSS3 + JavaScript"]
+    direction TB
+    V["Presentación (Vista)<br/>14 pantallas · accesibilidad · navegación"]
+    C["Control (Controlador)<br/>eventos · acciones · formularios"]
+    D["Dominio (Modelo)<br/>reglas de negocio: facturar, autorizar, contabilizar, cupo, correos"]
+    DA["Datos (Modelo)<br/>estado · bitácora SHA-256 · persistencia"]
+    N["Núcleo<br/>utilidades · roles y permisos"]
+    V --> C --> D --> DA --> N
+  end
+  U --> V
+  DA -- "Prototipo" --> LS[("Almacenamiento<br/>del navegador")]
+  DA -. "Producción" .-> API["API REST<br/>Node.js + Express"]
+  API -.-> PG[("PostgreSQL<br/>modelo-datos.sql")]
+  API -.-> SMTP["Servicio de correo<br/>cola con reintentos"]
+  API -.-> DIAN["Proveedor tecnológico DIAN"]

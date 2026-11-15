@@ -1,0 +1,69 @@
+Ejecución de pruebas · 2026-11-15 19:09 · npm test
+
+ok 1 - CI-01 · Datos + dominio: un pedido facturado queda contabilizado sin autorización (B2)
+ok 2 - CI-02 · Factura manual: queda Pendiente y sin asiento hasta que un gerente la autorice (B2)
+ok 3 - CI-03 · Dominio + contabilidad: el asiento queda cuadrado (débitos = créditos)
+ok 4 - CI-04 · Dominio + inventario: autorizar descuenta existencias y registra el kárdex
+ok 5 - CI-05 · Dominio + certificados: se emite un certificado por cada referencia con garantía
+ok 6 - CI-06 · Dominio + notificaciones: cada transacción genera su correo al cliente (A1)
+ok 7 - CI-07 · Factura + remisión: la remisión copia las líneas facturadas para el conteo ciego
+ok 8 - CI-08 · Pedidos + cupo: un pedido registrado compromete el cupo del cliente
+ok 9 - CI-09 · Bitácora integrada: tras varias operaciones la cadena sigue íntegra
+ok 10 - CI-10 · Consistencia de los datos de ejemplo: consecutivos en orden, cupos respetados y existencias no negativas
+ok 11 - CU-01 · sha256 de 'abc' coincide con el valor estándar
+ok 12 - CU-02 · sha256 con tildes y ñ coincide con la librería criptográfica de Node
+ok 13 - CU-03 · esc() neutraliza etiquetas HTML (prevención de XSS)
+ok 14 - CU-04 · esc() convierte null y undefined en texto vacío
+ok 15 - CU-05 · calcTotales: subtotal, IVA 19 % y total de dos líneas
+ok 16 - CU-06 · calcTotales: factura sin líneas suma cero
+ok 17 - CU-07 · calcTotales: el IVA se redondea al peso
+ok 18 - CU-08 · CUFE: es determinista para la misma factura
+ok 19 - CU-09 · CUFE: cambia si se altera el total de la factura
+ok 20 - CU-10 · Código de certificado con formato CG-XXXX-XXXX
+ok 21 - CU-11 · costeo de importación: CIF, arancel y factor
+ok 22 - CU-12 · difDetalle describe solo las líneas con diferencia
+ok 23 - CU-13 · Bitácora recién creada: la cadena de huellas es íntegra
+ok 24 - CU-14 · Bitácora alterada: se detecta el registro modificado
+ok 25 - CU-15 · Permisos: el Auditor no puede autorizar facturas
+ok 26 - CU-16 · Permisos: el Gerente sí puede autorizar facturas
+ok 27 - CU-17 · Cupo disponible = cupo − facturas sin pagar − pedidos registrados
+# tests 27
+# pass 27
+# fail 0
+
+✔ CS-01 Ingreso con contraseña incorrecta es rechazado — Mensaje de error y sin sesión
+✔ CS-02 Ingreso correcto muestra solo el menú del rol — Logística ve Pedidos y no Autorizaciones
+✔ CS-03 Facturar un pedido lo contabiliza sin autorización y avisa por correo — Pedido Facturado, factura Autorizada con asiento, +1 correo
+✔ CS-04 Al elegir Panamá solo se listan sus estados y no hay ciudad de texto libre — Estados: Colón,Panamá
+✔ CS-05 Factura que supera el cupo del cliente no se guarda — Cupo insuficiente: Repuestos San Vicente tiene $ 1.326.480 disponibles y la factura suma $
+✔ CS-06 Cantidad mayor que la existencia es rechazada — No hay existencia suficiente de LLA-90-90-18 en Rionegro · Bodega principal: hay 28, pides
+✔ CS-07 Factura manual válida queda pendiente y sin contabilizar — MRO-001058: Pendiente, sin asiento
+✔ CS-08 Gerente autoriza: CUFE, asiento cuadrado y certificados — Asiento cuadrado: true, certificados: 3
+✔ CS-09 Rechazo exige motivo de al menos 10 caracteres — Con motivo corto: Pendiente; con motivo válido: Rechazada
+✔ CS-10 Quien registra una factura no puede autorizarla — Botón Autorizar deshabilitado para la autora
+✔ CS-11 Remisión con transportadora externa exige número de guía — Escribe el número de guía de la transportadora.
+✔ CS-12 Conteo ciego con diferencia bloquea la salida y abre novedad — Estado: Alistamiento, novedad registrada
+✔ CS-13 Conteo correcto sella la remisión y permite despacharla — Verificada · sello 98805AA1F6 → En tránsito
+✔ CS-14 Entrega con faltante queda Con novedad — Estado final: Con novedad
+✔ CS-15 La verificación detecta una alteración de la bitácora — Cadena rota en el registro #10. Ese registro o uno anterior 
+✔ CS-16 Rastrear una factura muestra pedido, factura y remisión — 10 eventos encadenados
+✔ CS-17 Certificado auténtico se valida y uno falso se rechaza, sin iniciar sesión — Auténtico y falso diferenciados
+✔ CS-18 Recibir una importación aumenta las existencias — 60 → 210
+✔ CS-19 Traslado con origen igual al destino es rechazado — El origen y el destino deben ser distintos.
+✔ CC-01 Las 15 pantallas cargan sin errores con los 6 roles — 90 combinaciones rol × pantalla sin errores de JavaScript
+✔ CC-02 Sin desplazamiento horizontal en 360, 768, 1024 y 1440 px — 24 combinaciones pantalla × ancho correctas
+✔ CC-03 Funciona en emulación de iPhone, Android y tableta — iPhone 13: OK · Pixel 7: OK · iPad (gen 7): OK · firefox: no instalado en el entorno de pruebas · webkit: no instalado en el entorno de pruebas
+✔ CC-04 Entradas erróneas son rechazadas con mensaje — 0:rechazado · -5:rechazado · abc:rechazado · 2.5:rechazado · NIT y correo inválidos: rechazados
+✔ CC-05 Con el almacenamiento del navegador bloqueado la app sigue funcionando — Carga y trabaja en memoria
+✔ CC-06 Código malicioso en formularios se muestra como texto y no se ejecuta — Script ejecutado: false; etiqueta creada: false
+✔ CC-07 Un rol sin permiso no entra a pantallas restringidas escribiendo la dirección — Auditor redirigido a: Hola, Mateo
+✔ CC-08 Contraseña incorrecta no permite el ingreso — Ver CS-01
+✔ CC-09 Alteración de registros detectada por la cadena SHA-256 — Ver CS-15 y CU-14
+✔ CC-10 Auditoría automática axe-core en 9 pantallas — 0 violaciones WCAG 2.1 A/AA
+✔ CC-11 Tiempo de dibujo de cada pantalla < 300 ms — Promedio 9.4 ms · máximo 16.9 ms
+✔ CC-12 Con 5.000 facturas adicionales la lista y el tablero responden < 1 s — Lista 20 ms · tablero 18 ms · datos 5.51 MB
+✔ CC-13 Excede la capacidad del almacenamiento del navegador (30.000 facturas) — Datos: 31.0 MB · ¿se pudo guardar?: no (límite del navegador alcanzado; la app no se cae y sigue en memoria)
+✔ CC-14 300 cambios de pantalla seguidos sin errores — 5.4 s, 0 errores
+✔ CC-15 Sesión de 15 min: doble clic en Facturar, recarga a mitad de formulario, nombres largos con emoji y ñ — Doble facturación: no ocurre · sesión tras recargar: se conserva · nombre de 170 caracteres sin romper el diseño: true
+✔ CC-16 Toda la suite se ejecutó de nuevo tras la modularización y el movimiento de costeo() al dominio — 34 de 34 pruebas de esta corrida pasan
+35 de 35 pruebas pasan. Evidencias en docs/final/evidencias/

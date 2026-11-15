@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-15T19:05:27.584Z",
+ "fecha": "2026-11-15T19:10:34.469Z",
  "resultados": [
   {
    "id": "CS-01",
@@ -115,7 +115,7 @@
    "tipo": "Funcional (antifraude, A1)",
    "nombre": "Conteo correcto sella la remisión y permite despacharla",
    "resultado": "PASA",
-   "detalle": "Verificada · sello A2098D316C → En tránsito",
+   "detalle": "Verificada · sello 98805AA1F6 → En tránsito",
    "evidencia": ""
   },
   {
@@ -268,7 +268,7 @@
    "tipo": "Rendimiento",
    "nombre": "Tiempo de dibujo de cada pantalla < 300 ms",
    "resultado": "PASA",
-   "detalle": "Promedio 10.1 ms · máximo 19.6 ms",
+   "detalle": "Promedio 9.4 ms · máximo 16.9 ms",
    "evidencia": ""
   },
   {
@@ -277,7 +277,7 @@
    "tipo": "Carga (volumen)",
    "nombre": "Con 5.000 facturas adicionales la lista y el tablero responden < 1 s",
    "resultado": "PASA",
-   "detalle": "Lista 17 ms · tablero 15 ms · datos 5.51 MB",
+   "detalle": "Lista 20 ms · tablero 18 ms · datos 5.51 MB",
    "evidencia": ""
   },
   {
@@ -295,7 +295,7 @@
    "tipo": "Estabilidad",
    "nombre": "300 cambios de pantalla seguidos sin errores",
    "resultado": "PASA",
-   "detalle": "6.6 s, 0 errores",
+   "detalle": "5.4 s, 0 errores",
    "evidencia": ""
   },
   {

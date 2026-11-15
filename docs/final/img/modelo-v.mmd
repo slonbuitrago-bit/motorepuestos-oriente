@@ -1,0 +1,21 @@
+flowchart LR
+  subgraph IZQ["Desarrollo (verificación)"]
+    direction TB
+    R1["Requisitos del cliente<br/>Tarjetas A y B · entrevista"]
+    R2["Diseño funcional<br/>Casos de uso · 26 historias"]
+    R3["Diseño técnico<br/>Arquitectura en capas · modelo de datos"]
+    R4["Componentes<br/>28 módulos JavaScript"]
+    R1 --> R2 --> R3 --> R4
+  end
+  subgraph DER["Pruebas (validación)"]
+    direction TB
+    P4["Pruebas unitarias<br/>17 casos · caja blanca"]
+    P3["Pruebas de integración<br/>10 casos · bottom-up"]
+    P2["Pruebas de sistema<br/>19 casos · extremo a extremo"]
+    P1["Pruebas de aceptación UAT<br/>Criterios HU-01 a HU-10"]
+    P4 --> P3 --> P2 --> P1
+  end
+  R4 -. valida .-> P4
+  R3 -. valida .-> P3
+  R2 -. valida .-> P2
+  R1 -. valida .-> P1
