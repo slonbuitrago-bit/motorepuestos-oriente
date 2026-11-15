@@ -40,9 +40,12 @@ const N = (t, ref) => new Paragraph({ children: runs(t), numbering: { reference:
 const salto = () => new Paragraph({ children: [new PageBreak()] });
 const vacio = () => new Paragraph({ children: [], spacing: DOBLE });
 const TITULOS = [];
-function H1(num, t, nueva = true){ TITULOS.push({ n: 1, t: `${num}\t${t}`, k: `${num} ${t}` }); return new Paragraph({ heading: HeadingLevel.HEADING_1, pageBreakBefore: nueva, keepNext: true, spacing: DOBLE, tabStops: [{ type: TabStopType.LEFT, position: 720 }], children: [new TextRun({ text: `${num}\t${t}`, bold: true, font: FONT, size: 24 })] }); }
-function H2(num, t){ TITULOS.push({ n: 2, t: `${num}\t${t}`, k: `${num} ${t}` }); return new Paragraph({ heading: HeadingLevel.HEADING_2, keepNext: true, spacing: DOBLE, tabStops: [{ type: TabStopType.LEFT, position: 720 }], children: [new TextRun({ text: `${num}\t${t}`, bold: true, font: FONT, size: 24 })] }); }
-function H0(t){ TITULOS.push({ n: 0, t, k: t }); return new Paragraph({ heading: HeadingLevel.HEADING_1, pageBreakBefore: true, keepNext: true, spacing: DOBLE, alignment: AlignmentType.CENTER, children: [new TextRun({ text: t, bold: true, font: FONT, size: 24 })] }); }
+// Cada título lleva un marcador; la tabla de contenido apunta a él con un campo PAGEREF,
+// así Word recalcula el número de página real cuando se actualizan los campos.
+const marca = texto => { const id = "_Toc" + String(TITULOS.length).padStart(4, "0"); return { id, run: new D.Bookmark({ id, children: [new TextRun({ text: texto, bold: true, font: FONT, size: 24 })] }) }; };
+function H1(num, t, nueva = true){ const m = marca(`${num}\t${t}`); TITULOS.push({ n: 1, t: `${num}\t${t}`, k: `${num} ${t}`, id: m.id }); return new Paragraph({ heading: HeadingLevel.HEADING_1, pageBreakBefore: nueva, keepNext: true, spacing: DOBLE, tabStops: [{ type: TabStopType.LEFT, position: 720 }], children: [m.run] }); }
+function H2(num, t){ const m = marca(`${num}\t${t}`); TITULOS.push({ n: 2, t: `${num}\t${t}`, k: `${num} ${t}`, id: m.id }); return new Paragraph({ heading: HeadingLevel.HEADING_2, keepNext: true, spacing: DOBLE, tabStops: [{ type: TabStopType.LEFT, position: 720 }], children: [m.run] }); }
+function H0(t){ const m = marca(t); TITULOS.push({ n: 0, t, k: t, id: m.id }); return new Paragraph({ heading: HeadingLevel.HEADING_1, pageBreakBefore: true, keepNext: true, spacing: DOBLE, alignment: AlignmentType.CENTER, children: [m.run] }); }
 
 let nTabla = 0, nFig = 0;
 const W = 9360, borde = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
@@ -68,7 +71,25 @@ function figura(titulo, archivo, anchoPx, nota){
   const out = [
     new Paragraph({ keepNext: true, spacing: { line: 480, before: 240, after: 0 }, children: [new TextRun({ text: `Figura ${nFig}`, bold: true, font: FONT, size: 24 })] }),
     new Paragraph({ keepNext: true, spacing: { line: 480, after: 0 }, children: [new TextRun({ text: titulo, italics: true, font: FONT, size: 24 })] }),
-    new Paragraph({ keepNext: !!nota, alignment: AlignmentType.CENTER, spacing: { before: 60, after: 60, line: 240, lineRule: D.LineRuleType.AUTO }, children: [new ImageRun({ type: archivo.endsWith(".jpg") ? "jpg" : "png", data: buf, transformation: { width: ancho, height: alto }, altText: { title: titulo, description: titulo, name: path.basename(archivo) } })] }) ];
+    new Paragraph({ keepNext: !!nota, alignment: AlignmentType.CENTER, spacing: { before: 60, after: 60, line: 240, lineRule: D.LineRuleType.AUTO }, children: [new ImageRun({ ...imagenDatos(archivo, buf), transformation: { width: ancho, height: alto }, altText: { title: titulo, description: titulo, name: path.basename(archivo) } })] }) ];
+  if (nota) out.push(new Paragraph({ spacing: { line: 480, before: 0, after: 240 }, children: [new TextRun({ text: "Nota. ", italics: true, font: FONT, size: 22 }), ...runs(nota, { size: 22 })] }));
+  return out;
+}
+// Los diagramas se incrustan como SVG (vectorial, nítido a cualquier tamaño y al exportar a PDF)
+// con un PNG de respaldo para programas que no leen SVG.
+function imagenDatos(archivo, buf){
+  const svg = path.join(ROOT, archivo.replace(/\.png$/, ".svg"));
+  if (archivo.endsWith(".png") && fs.existsSync(svg)) return { type: "svg", data: fs.readFileSync(svg), fallback: { type: "png", data: buf } };
+  return { type: archivo.endsWith(".jpg") ? "jpg" : "png", data: buf };
+}
+// Figura con varias capturas apiladas (tablero de Trello en dos partes)
+function figuraVarias(titulo, archivos, anchoPx, nota){
+  nFig++;
+  const out = [
+    new Paragraph({ keepNext: true, spacing: { line: 480, before: 240, after: 0 }, children: [new TextRun({ text: `Figura ${nFig}`, bold: true, font: FONT, size: 24 })] }),
+    new Paragraph({ keepNext: true, spacing: { line: 480, after: 0 }, children: [new TextRun({ text: titulo, italics: true, font: FONT, size: 24 })] }) ];
+  archivos.forEach((a, i) => { const buf = img(a), dim = pngSize(buf, a), alto = Math.round(anchoPx * dim.h / dim.w);
+    out.push(new Paragraph({ keepNext: i < archivos.length - 1 || !!nota, alignment: AlignmentType.CENTER, spacing: { before: 60, after: 60, line: 240, lineRule: D.LineRuleType.AUTO }, children: [new ImageRun({ type: "png", data: buf, transformation: { width: anchoPx, height: alto }, altText: { title: titulo, description: titulo, name: path.basename(a) } })] })); });
   if (nota) out.push(new Paragraph({ spacing: { line: 480, before: 0, after: 240 }, children: [new TextRun({ text: "Nota. ", italics: true, font: FONT, size: 22 }), ...runs(nota, { size: 22 })] }));
   return out;
 }
@@ -120,7 +141,7 @@ function toc(){
     const pg = PAG[t.k] || "";
     out.push(new Paragraph({ spacing: { line: 360, before: 0, after: t.n === 1 || t.n === 0 ? 60 : 0 }, indent: { left: t.n === 2 ? 360 : 0 },
       tabStops: [{ type: TabStopType.LEFT, position: (t.n === 2 ? 1080 : 720) }, { type: TabStopType.RIGHT, position: 9350, leader: LeaderType.DOT }],
-      children: [new TextRun({ text: t.t + "\t" + pg, font: FONT, size: 24 })] }));
+      children: [new TextRun({ text: t.t + "\t", font: FONT, size: 24 }), new D.SimpleField(`PAGEREF ${t.id} \\h`, pg)] }));
   }
   return out;
 }
@@ -169,7 +190,7 @@ const cuerpo = [
   ], [800, 3000, 1900, 1100, 2560], "B4 se apoya en la Ley 1618 de 2013, la Ley 1346 de 2009 y la Resolución 1519 de 2020 del MinTIC."),
   H2("2.2", "Modelo de dominio (UML)"),
   P("Con el enfoque de análisis y diseño orientado a objetos se extrajeron los sustantivos principales de los requisitos (factura, pedido, cliente, ciudad, gerente, remisión, notificación) y se convirtieron en clases con sus atributos y métodos. La Figura 1 muestra el diagrama de clases del sistema."),
-  ...figura("Diagrama de clases del sistema", "docs/actividad4/diagrama-clases.png", 470, "La versión completa, con 24 clases, está en `docs/actividad4/diagrama-clases-completo.png` del repositorio."),
+  ...figura("Diagrama de clases del sistema", "docs/actividad4/diagrama-clases.png", 540, "La versión completa, con 24 clases, está en `docs/actividad4/diagrama-clases-completo.png` del repositorio."),
   P("Las interacciones principales que materializan las reglas de negocio son las siguientes:"),
   B("**Regla B2.** Una `Factura` se crea con origen MANUAL y estado PENDIENTE; `validarCupo()` consulta `Cliente.cupoDisponible()`; un `Usuario` con rol Gerente, distinto de quien la registró, ejecuta `autorizar()`, y solo entonces `contabilizar()` genera el `AsientoContable`. Si `PedidoVenta.facturar()` crea la factura, su origen es PEDIDO y se contabiliza de inmediato."),
   B("**Regla B3.** `Pais`, `Departamento` y `Ciudad` forman una composición: la interfaz solo ofrece los departamentos del país elegido y las ciudades registradas de ese departamento."),
@@ -187,7 +208,7 @@ const cuerpo = [
     ["4", "Estadísticas, carga de 100.000 usuarios, disponibilidad y auditoría de accesibilidad (A2, A4)", "HU-23 a HU-26", "21"]], [900, 5400, 1700, 1360]),
   H2("3.2", "Evidencia de gestión"),
   P(`La planeación se implementó en un tablero de Trello con la estructura de Scrum que pide la guía de la actividad: **Product Backlog**, **Sprint Backlog**, **En Desarrollo**, **En Pruebas (QA)** y **Completado (Done)**. Cada historia es una tarjeta con su descripción «Como / Quiero / Para», sus criterios de aceptación, etiquetas de prioridad y tipo de trabajo, y una lista de chequeo con las tareas técnicas de Frontend, Backend, Base de datos y Pruebas (37 tareas en el Sprint 1). La Tabla 5 muestra el estado del tablero al cierre: el prototipo entregó 24 de las 26 historias. El tablero público está en ${TRELLO}.`),
-  ...marcoCaptura("Tablero de Trello del proyecto organizado en Scrum", "Pegar aquí la captura del tablero de Trello (Product Backlog, Sprint Backlog, En Desarrollo, En Pruebas, Completado)."),
+  ...figuraVarias("Tablero de Trello del proyecto organizado en Scrum", ["docs/final/img/trello-1.png", "docs/final/img/trello-2.png"], 460, "Arriba: Product Backlog, Sprint Backlog y En Desarrollo. Abajo: En Pruebas (QA) y Completado (Done)."),
   ...tabla("Estado del tablero de gestión al cierre del proyecto", [["Columna", "Contenido"],
     ["Product Backlog", "HU-24 (100.000 usuarios) y HU-25 (disponibilidad del 99,5 %), que requieren un servidor de producción, y 4 tareas de backend (proyecto Node.js, PostgreSQL, conexión y reemplazo de la persistencia)"],
     ["Sprint Backlog", "Vacío: el trabajo planificado se cerró"],
@@ -197,9 +218,9 @@ const cuerpo = [
   P("El control de cambios del código se gestionó en GitHub con una rama principal protegida: los integrantes proponen cambios mediante _pull requests_ o formularios de entrega, y el líder los revisa antes de integrarlos. Este flujo es la evidencia del requisito B1 (ISO 9001, numerales 7.5 y 8.3.6)."),
   H2("3.3", "Ficha de arquitectura técnica"),
   P("El sistema es una aplicación web de una sola página con **arquitectura en capas y separación Modelo-Vista-Controlador**. El código está dividido en 27 módulos JavaScript organizados en capas con dependencias en un solo sentido: la vista nunca modifica datos y los controladores nunca generan HTML (Figura 3)."),
-  ...figura("Arquitectura en capas del sistema", "docs/final/img/arquitectura.png", 420, "Las líneas punteadas representan la arquitectura de producción propuesta."),
+  ...figura("Arquitectura en capas del sistema", "docs/final/img/arquitectura.png", 600, "Las líneas punteadas representan la arquitectura de producción propuesta."),
   ...tabla("Ficha de tecnologías implementadas", [["Componente", "Prototipo entregado", "Producción propuesta"],
-    ["Frontend", "HTML5, CSS3 con variables y JavaScript ES2020 sin frameworks; 14 pantallas; accesibilidad WCAG 2.1 AA", "El mismo frontend servido desde una CDN"],
+    ["Frontend", "HTML5, CSS3 con variables y JavaScript ES2020 sin frameworks; 13 pantallas; accesibilidad WCAG 2.1 AA", "El mismo frontend servido desde una CDN"],
     ["Backend", "Reglas de negocio en la capa de dominio (`js/dominio/reglas-negocio.js`) ejecutadas en el navegador", "API REST en Node.js con Express, autenticación con bcrypt y JWT"],
     ["Base de datos", "Almacenamiento del navegador en JSON, aislado en `js/datos/persistencia.js`", "PostgreSQL 15: 29 tablas, restricciones CHECK y 5 triggers (`docs/modelo-datos.sql`)"],
     ["Seguridad", "Roles y permisos (RBAC), segregación de funciones, bitácora encadenada con SHA-256", "Además: HTTPS, tokens con expiración y bloqueo por intentos fallidos"],
@@ -329,6 +350,7 @@ const referencias = [H0("Referencias"), ...REFS.map(r => new Paragraph({ spacing
 /* ---------- ensamblaje ---------- */
 const contenido = [...cuerpo, ...referencias];
 const doc = new Document({
+  features: { updateFields: true },
   creator: "Equipo Motorepuestos del Oriente", title: "Informe Técnico Final · Motorepuestos del Oriente", description: "Ingeniería de Software III · Corporación Universitaria Remington",
   styles: {
     default: { document: { run: { font: FONT, size: 24 }, paragraph: { spacing: DOBLE } } },
@@ -341,4 +363,11 @@ const doc = new Document({
     headers: { default: new Header({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 24 })] })] }) },
     children: [...portada, salto(), ...toc(), ...contenido] }]
 });
-Packer.toBuffer(doc).then(b => { fs.writeFileSync(OUT, b); fs.writeFileSync(path.join(__dirname, ".titulos.json"), JSON.stringify(TITULOS.map(t => t.k))); console.log("Informe generado:", OUT, "·", nTabla, "tablas ·", nFig, "figuras"); });
+// Word no debe recomprimir las imágenes al guardar ni al exportar a PDF (si no, las capturas salen borrosas)
+async function sinCompresion(b){
+  const JSZip = require(require.resolve("jszip", { paths: [require.resolve("docx")] }));
+  const z = await JSZip.loadAsync(b); const f = "word/settings.xml";
+  z.file(f, (await z.file(f).async("string")).replace("</w:compat>", "</w:compat><w:doNotAutoCompressPictures/>"));
+  return z.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+}
+Packer.toBuffer(doc).then(sinCompresion).then(b => { fs.writeFileSync(OUT, b); fs.writeFileSync(path.join(__dirname, ".titulos.json"), JSON.stringify(TITULOS.map(t => t.k))); console.log("Informe generado:", OUT, "·", nTabla, "tablas ·", nFig, "figuras"); });

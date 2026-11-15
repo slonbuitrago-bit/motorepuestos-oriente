@@ -127,12 +127,12 @@ const THEME = { name: "Motorepuestos del Oriente", headFontFace: "Arial", bodyFo
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "4. Auditoría de QA" });
   s.addText("CONTROL DE CALIDAD", { placeholder: "eyebrow" });
   s.addText("66 pruebas por niveles del Modelo en V", { placeholder: "title" });
-  s.addImage({ path: path.join(REPO, "docs/final/img/modelo-v.png"), x: 0.5, y: 1.05, w: 9, h: 1.2, sizing: { type: "contain", w: 9, h: 1.2 }, objectName: "Modelo en V", altText: "Modelo en V: requisitos con pruebas de aceptación, diseño funcional con sistema, diseño técnico con integración y componentes con unitarias" });
+  s.addImage({ path: path.join(REPO, "docs/final/img/modelo-v.png"), x: 0.5, y: 1.05, w: 4.92, h: 2.95, sizing: { type: "contain", w: 4.92, h: 2.95 }, objectName: "Modelo en V", altText: "Modelo en V: requisitos con pruebas de aceptación, diseño funcional con sistema, diseño técnico con integración y componentes con unitarias" });
   const q = [["17", "unitarias", "funciones aisladas"], ["10", "integración", "bottom-up"], ["23", "sistema", "extremo a extremo"], ["16", "complementarias", "OWASP, carga, responsive…"]];
-  q.forEach((t, i) => { const x = 0.5 + i * 2.3; card(s, x, 2.45, 2.15, 1.3, C.background2, "nivel " + t[1]); txt(s, t[0], { x: x + 0.18, y: 2.55, w: 1.8, h: 0.6, fontSize: 32, bold: true, color: C.accent1, fontFace: "Arial" }); txt(s, t[1], { x: x + 0.18, y: 3.12, w: 1.85, h: 0.28, fontSize: 13, bold: true }); txt(s, t[2], { x: x + 0.18, y: 3.4, w: 1.85, h: 0.28, fontSize: 11, color: C.accent5 }); });
-  card(s, 0.5, 3.95, 9, 1.05, C.text1, "OWASP");
-  txt(s, "OWASP", { x: 0.75, y: 4.05, w: 1.5, h: 0.85, fontSize: 26, bold: true, color: C.accent2, fontFace: "Arial", valign: "middle" });
-  txt(s, "A01 control de acceso · A03 inyección y XSS · A07 autenticación · A08 integridad de datos: todas pasan. Además: robustez, carga (5.000 facturas en < 1 s), responsive y accesibilidad (0 violaciones). Resultado: 66 de 66.", { x: 2.25, y: 4.08, w: 7.05, h: 0.85, fontSize: 13, color: C.background1, valign: "middle" });
+  q.forEach((t, i) => { const x = 5.65 + (i % 2) * 1.95, y = 1.05 + Math.floor(i / 2) * 1.5; card(s, x, y, 1.85, 1.38, C.background2, "nivel " + t[1]); txt(s, t[0], { x: x + 0.15, y: y + 0.08, w: 1.6, h: 0.6, fontSize: 30, bold: true, color: C.accent1, fontFace: "Arial" }); txt(s, t[1], { x: x + 0.15, y: y + 0.66, w: 1.65, h: 0.28, fontSize: 13, bold: true }); txt(s, t[2], { x: x + 0.15, y: y + 0.94, w: 1.65, h: 0.36, fontSize: 10.5, color: C.accent5 }); });
+  card(s, 0.5, 4.15, 9, 0.9, C.text1, "OWASP");
+  txt(s, "OWASP", { x: 0.75, y: 4.2, w: 1.5, h: 0.8, fontSize: 26, bold: true, color: C.accent2, fontFace: "Arial", valign: "middle" });
+  txt(s, "A01 control de acceso · A03 inyección y XSS · A07 autenticación · A08 integridad de datos: todas pasan. Además: robustez, carga (5.000 facturas en < 1 s), responsive y accesibilidad (0 violaciones). Resultado: 66 de 66.", { x: 2.25, y: 4.2, w: 7.05, h: 0.8, fontSize: 12, color: C.background1, valign: "middle" });
   s.addNotes("BLOQUE 4 · Auditoría de QA (3 min). Presenta: Rol 7 (Calidad). Explicar verificación (rama izquierda) y validación (rama derecha). Unitarias = funciones aisladas; integración = bottom-up (datos → dominio → contabilidad → correo); OWASP con ejemplos concretos.");
 
   /* 9 · Bugs de las pruebas cruzadas */

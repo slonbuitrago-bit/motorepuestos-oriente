@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600" font-family="Arial">
+<defs><marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333333"/></marker></defs>
+<rect x="0" y="0" width="1000" height="600" fill="#FFFFFF"/>
+<text x="165.0" y="34" text-anchor="middle" font-size="18" font-weight="bold" fill="#3B5B92">Desarrollo · verificación</text>
+<text x="835.0" y="34" text-anchor="middle" font-size="18" font-weight="bold" fill="#2E7D4F">Pruebas · validación</text>
+<line x1="165.0" y1="140" x2="213.0" y2="166" stroke="#333333" stroke-width="2" marker-end="url(#f)"/>
+<line x1="787.0" y1="168" x2="835.0" y2="142" stroke="#333333" stroke-width="2" marker-end="url(#f)"/>
+<line x1="213.0" y1="244" x2="261.0" y2="270" stroke="#333333" stroke-width="2" marker-end="url(#f)"/>
+<line x1="739.0" y1="272" x2="787.0" y2="246" stroke="#333333" stroke-width="2" marker-end="url(#f)"/>
+<line x1="261.0" y1="348" x2="309.0" y2="374" stroke="#333333" stroke-width="2" marker-end="url(#f)"/>
+<line x1="691.0" y1="376" x2="739.0" y2="350" stroke="#333333" stroke-width="2" marker-end="url(#f)"/>
+<line x1="309.0" y1="452" x2="415.0" y2="478" stroke="#333333" stroke-width="2" marker-end="url(#f)"/>
+<line x1="585.0" y1="480" x2="691.0" y2="454" stroke="#333333" stroke-width="2" marker-end="url(#f)"/>
+<line x1="314" y1="102.0" x2="686" y2="102.0" stroke="#333333" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#f)"/>
+<text x="500.0" y="94.0" text-anchor="middle" font-size="14" font-style="italic" fill="#555555">valida</text>
+<line x1="362" y1="206.0" x2="638" y2="206.0" stroke="#333333" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#f)"/>
+<text x="500.0" y="198.0" text-anchor="middle" font-size="14" font-style="italic" fill="#555555">valida</text>
+<line x1="410" y1="310.0" x2="590" y2="310.0" stroke="#333333" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#f)"/>
+<text x="500.0" y="302.0" text-anchor="middle" font-size="14" font-style="italic" fill="#555555">valida</text>
+<line x1="458" y1="414.0" x2="542" y2="414.0" stroke="#333333" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#f)"/>
+<text x="500.0" y="406.0" text-anchor="middle" font-size="14" font-style="italic" fill="#555555">valida</text>
+<rect x="20" y="64" width="290" height="76" rx="8" fill="#E8EEF9" stroke="#3B5B92" stroke-width="2"/>
+<text x="165.0" y="96" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">Requisitos del cliente</text>
+<text x="165.0" y="120" text-anchor="middle" font-size="15" fill="#374151">Tarjetas A y B · entrevista</text>
+<rect x="68" y="168" width="290" height="76" rx="8" fill="#E8EEF9" stroke="#3B5B92" stroke-width="2"/>
+<text x="213.0" y="200" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">Diseño funcional</text>
+<text x="213.0" y="224" text-anchor="middle" font-size="15" fill="#374151">Casos de uso · 26 historias</text>
+<rect x="116" y="272" width="290" height="76" rx="8" fill="#E8EEF9" stroke="#3B5B92" stroke-width="2"/>
+<text x="261.0" y="304" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">Diseño técnico</text>
+<text x="261.0" y="328" text-anchor="middle" font-size="15" fill="#374151">Arquitectura en capas · modelo de datos</text>
+<rect x="164" y="376" width="290" height="76" rx="8" fill="#E8EEF9" stroke="#3B5B92" stroke-width="2"/>
+<text x="309.0" y="408" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">Diseño de componentes</text>
+<text x="309.0" y="432" text-anchor="middle" font-size="15" fill="#374151">27 módulos JavaScript</text>
+<rect x="690" y="64" width="290" height="76" rx="8" fill="#E7F4EC" stroke="#2E7D4F" stroke-width="2"/>
+<text x="835.0" y="96" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">Pruebas de aceptación (UAT)</text>
+<text x="835.0" y="120" text-anchor="middle" font-size="15" fill="#374151">Criterios de HU-01 a HU-10</text>
+<rect x="642" y="168" width="290" height="76" rx="8" fill="#E7F4EC" stroke="#2E7D4F" stroke-width="2"/>
+<text x="787.0" y="200" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">Pruebas de sistema</text>
+<text x="787.0" y="224" text-anchor="middle" font-size="15" fill="#374151">23 casos · extremo a extremo</text>
+<rect x="594" y="272" width="290" height="76" rx="8" fill="#E7F4EC" stroke="#2E7D4F" stroke-width="2"/>
+<text x="739.0" y="304" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">Pruebas de integración</text>
+<text x="739.0" y="328" text-anchor="middle" font-size="15" fill="#374151">10 casos · bottom-up</text>
+<rect x="546" y="376" width="290" height="76" rx="8" fill="#E7F4EC" stroke="#2E7D4F" stroke-width="2"/>
+<text x="691.0" y="408" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">Pruebas unitarias</text>
+<text x="691.0" y="432" text-anchor="middle" font-size="15" fill="#374151">17 casos · caja blanca</text>
+<rect x="355.0" y="480" width="290" height="76" rx="8" fill="#FFF4DC" stroke="#B7791F" stroke-width="2"/>
+<text x="500.0" y="512" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F2937">Codificación</text>
+<text x="500.0" y="536" text-anchor="middle" font-size="15" fill="#374151">Prototipo evolutivo incremental</text>
+</svg>
