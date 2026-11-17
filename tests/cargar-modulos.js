@@ -1,7 +1,7 @@
 // Carga las capas de núcleo, datos y dominio en un contexto aislado (sin navegador)
 // para probar las funciones como componentes independientes (pruebas unitarias).
 const fs = require("fs"), path = require("path"), vm = require("vm");
-const ORDEN = ["js/nucleo/utilidades.js", "js/nucleo/seguridad.js", "js/datos/estado-y-auditoria.js",
+const ORDEN = ["js/nucleo/utilidades.js", "js/nucleo/seguridad.js", "js/datos/estado-y-auditoria.js", "js/datos/catalogo-dane.js",
   "js/datos/datos-ejemplo.js", "js/dominio/reglas-negocio.js", "js/datos/persistencia.js"];
 module.exports = function cargar(){
   const mem = {};

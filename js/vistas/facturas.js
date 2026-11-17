@@ -37,7 +37,7 @@ function vFacturas(){
   <div class="row between"><span class="muted">${shown.length} de ${list.length} facturas</span>${list.length > shown.length ? `<button class="btn" data-act="masFacturas">Mostrar más</button>` : ""}</div>`;
 }
 
-function nuevoDraft(modo){ return { modo, clienteId:"", sucursalId: ME.sucursalId || "S1", paisId:"CO", estadoId:"ANT", ciudadId:"", items:[{ productoId:"", cantidad:1 }], obs:"", errores:{} }; }
+function nuevoDraft(modo){ return { modo, clienteId:"", sucursalId: ME.sucursalId || "S1", paisId:"CO", estadoId:"05", ciudadId:"", items:[{ productoId:"", cantidad:1 }], obs:"", errores:{} }; }
 function vFacturaNueva(){
   const modo = ruta() === "pedido-nuevo" ? "pedido" : "manual";
   if (UI.draft && UI.draft.modo !== modo) UI.draft = null;
@@ -68,8 +68,8 @@ function vFacturaNueva(){
     <section class="panel" aria-labelledby="s-dest"><header><h2 id="s-dest">2. Destino del envío</h2><span class="muted" style="font-size:.85rem">Solo municipios registrados</span></header>
       <div class="grid g3">
         <div class="field"><label for="d-pais">País</label><select id="d-pais" data-draft="paisId">${DB.paises.map(p => `<option value="${p.id}" ${d.paisId === p.id ? "selected" : ""}>${esc(p.nombre)}</option>`).join("")}</select></div>
-        <div class="field"><label for="d-est">Departamento / estado</label><select id="d-est" data-draft="estadoId">${DB.estados.filter(e => e.paisId === d.paisId).map(e => `<option value="${e.id}" ${d.estadoId === e.id ? "selected" : ""}>${esc(e.nombre)}</option>`).join("")}</select></div>
-        <div class="field"><label for="d-ciu">Ciudad o municipio <span aria-hidden="true">*</span></label><select id="d-ciu" data-draft="ciudadId" aria-invalid="${!!E.ciudadId}" aria-describedby="d-ciu-h"><option value="">Selecciona</option>${DB.ciudades.filter(x => x.estadoId === d.estadoId).map(x => `<option value="${x.id}" ${d.ciudadId === x.id ? "selected" : ""}>${esc(x.nombre)} · ${esc(x.id)}</option>`).join("")}</select>
+        <div class="field"><label for="d-est">Departamento / estado</label><select id="d-est" data-draft="estadoId">${DB.estados.filter(e => e.paisId === d.paisId).sort(porNombre).map(e => `<option value="${e.id}" ${d.estadoId === e.id ? "selected" : ""}>${esc(e.nombre)}</option>`).join("")}</select></div>
+        <div class="field"><label for="d-ciu">Ciudad o municipio <span aria-hidden="true">*</span></label><select id="d-ciu" data-draft="ciudadId" aria-invalid="${!!E.ciudadId}" aria-describedby="d-ciu-h"><option value="">Selecciona</option>${DB.ciudades.filter(x => x.estadoId === d.estadoId).sort(porNombre).map(x => `<option value="${x.id}" ${d.ciudadId === x.id ? "selected" : ""}>${esc(x.nombre)} · ${esc(x.id)}</option>`).join("")}</select>
           <span class="hint" id="d-ciu-h">${E.ciudadId ? `<span style="color:var(--bad)">${esc(E.ciudadId)}</span>` : "Código DANE al lado del nombre. ¿No aparece? El Administrador lo registra en Administración, Ciudades y municipios."}</span></div>
       </div>
     </section>

@@ -25,3 +25,4 @@ const store = {
   set(k, v){ try { localStorage.setItem(k, v); } catch(e){} },
   del(k){ try { localStorage.removeItem(k); } catch(e){} }
 };
+const porNombre = (a, b) => a.nombre.localeCompare(b.nombre, "es");

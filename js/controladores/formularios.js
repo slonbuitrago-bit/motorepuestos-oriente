@@ -120,6 +120,7 @@ const FORM = {
     p.estado = "Anulado"; p.motivoAnulacion = m; audit("Anular pedido de venta", "Pedido", p.numero, m); closeDlg(); commit(); toast(`Pedido ${p.numero} anulado. Se liberó el cupo del cliente.`);
   },
   estado(form){
+    if (!P("admin.catalogos")){ toast("No tienes permiso para gestionar catálogos.", true); return; }
     const code = form.codigo.value.trim().toUpperCase(), nom = form.nombre.value.trim();
     if (!nom || !/^[A-Z]{2,5}$/.test(code)){ toast("Escribe el nombre y un código de 2 a 5 letras.", true); return; }
     if (DB.estados.some(e => e.id === code)){ toast("Ya existe un departamento o estado con ese código.", true); return; }
@@ -198,7 +199,27 @@ const FORM = {
     render(); $("#rastreo-res")?.setAttribute("tabindex", "-1"); $("#rastreo-res")?.focus();
   },
   certificado(form){ UI.certQ = form.codigo.value.trim().toUpperCase(); UI.certRes = resultadoCert(UI.certQ); render(); $("#cc")?.focus(); },
+  // Agrega un municipio del catálogo oficial del DANE; si su departamento no existe, lo crea.
+  ciudadDane(form){
+    if (!P("admin.catalogos")){ toast("No tienes permiso para gestionar catálogos.", true); return; }
+    const txt = form.etiqueta.value.trim(), code = (txt.match(/(\d{5})\s*$/) || [])[1], m = code && daneMunicipio(code);
+    if (!m){ toast(txt ? "No encontramos ese municipio en el catálogo del DANE. Elige una de las sugerencias." : "Escribe el municipio y elige una sugerencia.", true); $("#g-dane")?.focus(); return; }
+    if (DB.ciudades.some(c => c.id === m[0])){ toast(m[1] + " ya está registrado.", true); return; }
+    const dep = asegurarDepartamento(DB, m[0]);
+    DB.ciudades.push({ id:m[0], estadoId:dep.id, nombre:m[1] }); audit("Agregar municipio del catálogo DANE", "Catálogo", m[0], m[1] + " · " + dep.nombre); commit(); toast(`${m[1]} (${dep.nombre}) agregado.`); $("#g-dane")?.focus();
+  },
+  // Agrega de una vez todos los municipios que falten de un departamento.
+  deptoDane(form){
+    if (!P("admin.catalogos")){ toast("No tienes permiso para gestionar catálogos.", true); return; }
+    const d = daneDepto(form.depto.value); if (!d) return;
+    const nuevos = DANE.municipios.filter(m => m[0].startsWith(d[0]) && !DB.ciudades.some(c => c.id === m[0]));
+    if (!nuevos.length){ toast(d[1] + " ya tiene todos sus municipios.", true); return; }
+    const dep = asegurarDepartamento(DB, d[0]);
+    nuevos.forEach(m => DB.ciudades.push({ id:m[0], estadoId:dep.id, nombre:m[1] }));
+    audit("Agregar departamento del catálogo DANE", "Catálogo", d[0], `${d[1]} · ${nuevos.length} municipios`); commit(); toast(`${d[1]}: ${nuevos.length} municipios agregados.`);
+  },
   ciudad(form){
+    if (!P("admin.catalogos")){ toast("No tienes permiso para gestionar catálogos.", true); return; }
     const code = form.codigo.value.trim().toUpperCase(), nom = form.nombre.value.trim();
     if (!nom || !/^[0-9A-Z-]{3,8}$/.test(code)){ toast("Escribe el nombre y un código válido.", true); return; }
     if (DB.ciudades.some(c => c.id === code)){ toast("Ya existe una ciudad con ese código.", true); return; }
@@ -212,7 +233,7 @@ const FORM = {
     DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast(`Usuario ${u.usuario} creado. Su contraseña inicial es ${CONFIG.claveDemo}.`);
   },
   restaurar(form){
-    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 5 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
+    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 6 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
     catch(e){ toast("El texto no es un respaldo válido de este sistema.", true); }
   }
 };

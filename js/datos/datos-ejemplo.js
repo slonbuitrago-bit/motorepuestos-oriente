@@ -8,7 +8,7 @@ function seed(){
   const pick = a => a[Math.floor(R() * a.length)];
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
   const db = {
-    version: 5, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], bloqueos:{}, kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
+    version: 6, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], bloqueos:{}, kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
     empresa:{ nombre:"Motorepuestos del Oriente S.A.S.", nit:"901.482.315-7", ciudad:"Rionegro, Antioquia", resolucion:"Resolución DIAN 18764000001234 (simulada) · Prefijo MRO · Rango 1 a 50.000 · Vigencia 2026-2027" },
     roles: JSON.parse(JSON.stringify(ROLES_BASE)),
     usuarios:[
@@ -21,12 +21,12 @@ function seed(){
       { id:"U7", nombre:"Sara Henao",      usuario:"shenao",    rol:"Logística",     sucursalId:"S3", activo:true }
     ],
     paises:[ { id:"CO", nombre:"Colombia" }, { id:"PA", nombre:"Panamá" } ],
-    estados:[ { id:"ANT", paisId:"CO", nombre:"Antioquia" }, { id:"CUN", paisId:"CO", nombre:"Cundinamarca" }, { id:"CAL", paisId:"CO", nombre:"Caldas" }, { id:"COL", paisId:"PA", nombre:"Colón" }, { id:"PAN", paisId:"PA", nombre:"Panamá" } ],
+    estados:[ { id:"05", paisId:"CO", nombre:"Antioquia" }, { id:"11", paisId:"CO", nombre:"Bogotá D.C." }, { id:"17", paisId:"CO", nombre:"Caldas" }, { id:"25", paisId:"CO", nombre:"Cundinamarca" }, { id:"COL", paisId:"PA", nombre:"Colón" }, { id:"PAN", paisId:"PA", nombre:"Panamá" } ],
     ciudades:[
-      { id:"05615", estadoId:"ANT", nombre:"Rionegro" }, { id:"05440", estadoId:"ANT", nombre:"Marinilla" }, { id:"05376", estadoId:"ANT", nombre:"La Ceja" },
-      { id:"05148", estadoId:"ANT", nombre:"El Carmen de Viboral" }, { id:"05318", estadoId:"ANT", nombre:"Guarne" }, { id:"05697", estadoId:"ANT", nombre:"El Santuario" },
-      { id:"05756", estadoId:"ANT", nombre:"Sonsón" }, { id:"05001", estadoId:"ANT", nombre:"Medellín" }, { id:"05607", estadoId:"ANT", nombre:"El Retiro" }, { id:"05674", estadoId:"ANT", nombre:"San Vicente Ferrer" },
-      { id:"11001", estadoId:"CUN", nombre:"Bogotá D.C." }, { id:"25754", estadoId:"CUN", nombre:"Soacha" }, { id:"17001", estadoId:"CAL", nombre:"Manizales" },
+      { id:"05615", estadoId:"05", nombre:"Rionegro" }, { id:"05440", estadoId:"05", nombre:"Marinilla" }, { id:"05376", estadoId:"05", nombre:"La Ceja" },
+      { id:"05148", estadoId:"05", nombre:"El Carmen de Viboral" }, { id:"05318", estadoId:"05", nombre:"Guarne" }, { id:"05697", estadoId:"05", nombre:"El Santuario" },
+      { id:"05756", estadoId:"05", nombre:"Sonsón" }, { id:"05001", estadoId:"05", nombre:"Medellín" }, { id:"05607", estadoId:"05", nombre:"El Retiro" }, { id:"05674", estadoId:"05", nombre:"San Vicente Ferrer" },
+      { id:"11001", estadoId:"11", nombre:"Bogotá D.C." }, { id:"25754", estadoId:"25", nombre:"Soacha" }, { id:"17001", estadoId:"17", nombre:"Manizales" },
       { id:"PA-301", estadoId:"COL", nombre:"Colón (Zona Libre)" }, { id:"PA-801", estadoId:"PAN", nombre:"Ciudad de Panamá" }
     ],
     sucursales:[
@@ -248,6 +248,13 @@ function seed(){
   mkFac("C3", "S3", [["PR6",12],["PR12",20]], 1.5, "U7");
   // 6. Pedido recién llegado
   mkPed("C10", [["PR14",8],["PR7",3]], 0.7);
+  // 7. Cliente de la demo de cupo (Repuestos San Vicente): el histórico depende de la fecha en que se
+  //    cargan los datos, así que su cupo se ajusta para que siempre le queden unos 1,78 millones
+  //    disponibles. Así, en la demo, 12 llantas superan el cupo y 2 sí caben, cualquier día.
+  const c8 = C("C8");
+  const comprometidoC8 = sum(db.facturas.filter(f => f.clienteId === "C8" && !f.pagada && (f.estado === "Pendiente" || f.estado === "Autorizada")), f => f.total)
+                       + sum(db.pedidos.filter(x => x.clienteId === "C8" && x.estado === "Registrado"), x => x.total);
+  c8.cupo = Math.round((comprometidoC8 + 1780000) / 1e4) * 1e4;
   // Las existencias de la tabla representan el saldo actual después del histórico
   prods.forEach((p, i) => { db.productos[i].stock = { S1:p[7][0], S2:p[7][1], S3:p[7][2] }; });
   events.sort((a, b) => a[0] < b[0] ? -1 : 1);

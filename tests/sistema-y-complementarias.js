@@ -190,6 +190,22 @@ function reg(id, nivel, tipo, nombre, ok, detalle, evidencia){ R.push({ id, nive
   const demoVisible = await ev(p, () => !!document.querySelector(".ucard"));
   const prod = await ev(p, () => { CONFIG.modoDemo = false; render(); const r = { tarjetas: !!document.querySelector(".ucard"), guia: !!document.querySelector('[data-act="guia"]') }; ME = DB.usuarios[0]; render(); r.selector = !!document.querySelector("#sw-user"); r.guiaMenu = !!document.querySelector('[data-act="guia"]'); return r; });
   reg("CS-23", "Sistema", "Configuración (modo demostración)", "Con el modo demostración apagado desaparecen los accesos rápidos, el cambio de usuario y la guía", demoVisible && !prod.tarjetas && !prod.guia && !prod.selector && !prod.guiaMenu, `Demo: accesos visibles · Producción: accesos ${prod.tarjetas ? "visibles" : "ocultos"}, selector ${prod.selector ? "visible" : "oculto"}, guía ${prod.guiaMenu ? "visible" : "oculta"}`);
+
+  // Catálogo oficial del DANE: solo el administrador agrega municipios buscando; el nuevo aparece al facturar
+  await p.cerrar(); p = await nueva(); await p.login("U3");
+  const logisticaVe = await ev(p, () => { location.hash = "administracion"; return new Promise(r => setTimeout(() => r(!!document.querySelector('[data-form="ciudadDane"]')), 80)); });
+  await p.click('[data-act="logout"]'); await p.waitForTimeout(60); await p.login("U1"); await p.go("administracion");
+  await p.click('[data-act="tab"][data-v="geo"]').catch(() => {}); await p.waitForTimeout(80);
+  const catalogo = await ev(p, () => ({ deps: DANE.departamentos.length, mpios: DANE.municipios.length, sugerencias: document.querySelectorAll("#dl-dane option").length }));
+  await p.fill("#g-dane", "Abejorral · Antioquia · 05002"); await p.click('form[data-form="ciudadDane"] button[type=submit]'); await p.waitForTimeout(100);
+  await p.fill("#g-dane", "Municipio inventado"); await p.click('form[data-form="ciudadDane"] button[type=submit]'); await p.waitForTimeout(80);
+  const rechazo = await ev(p, () => [...document.querySelectorAll("#toasts *")].map(x => x.innerText).join(" "));
+  await p.selectOption("#g-dep", "15"); await p.click('form[data-form="deptoDane"] button[type=submit]'); await p.waitForTimeout(150);
+  await p.foto("18-catalogo-dane");
+  const geo = await ev(p, () => ({ abejorral: DB.ciudades.find(c => c.id === "05002")?.estadoId, boyaca: DB.estados.find(e => e.id === "15")?.nombre, nBoy: DB.ciudades.filter(c => c.estadoId === "15").length, auditado: DB.audit.some(e => e.accion === "Agregar departamento del catálogo DANE") }));
+  await p.go("factura-nueva"); await p.selectOption("#d-est", "15"); await p.waitForTimeout(80);
+  const enFactura = await ev(p, () => document.querySelectorAll("#d-ciu option").length - 1);
+  reg("CS-24", "Sistema", "Funcional (B3) y control de acceso", "El administrador agrega municipios del catálogo DANE buscando; Logística no puede; el nuevo destino aparece al facturar", !logisticaVe && catalogo.deps === 33 && catalogo.mpios > 1100 && geo.abejorral === "05" && /No encontramos/.test(rechazo) && geo.boyaca === "Boyacá" && geo.nBoy === 123 && geo.auditado && enFactura === 123, `Catálogo: ${catalogo.deps} departamentos y ${catalogo.mpios} municipios · Abejorral agregado · nombre inventado rechazado · Boyacá completo (${geo.nBoy}) y visible al facturar (${enFactura}) · Logística ${logisticaVe ? "SÍ ve" : "no ve"} el catálogo`);
   await p.cerrar();
 
   // Buscadores con sugerencias

@@ -97,3 +97,12 @@ function costeo(im){
   const costoTotal = cifCOP + arancel; // IVA importación es descontable
   return { fob, cif, cifCOP, arancel, ivaImp, costoTotal, factor: fob ? costoTotal / (fob * im.trm) : 1 };
 }
+
+/* Regla B3: un municipio de Colombia solo se registra con su departamento oficial (DIVIPOLA del DANE).
+   Si el departamento aún no existe en el catálogo de la empresa, se crea con su código DANE. */
+function asegurarDepartamento(db, codigoDane){
+  const d = daneDepto(codigoDane); if (!d) throw new Error("Código DANE desconocido: " + codigoDane);
+  let e = db.estados.find(x => x.id === d[0]);
+  if (!e){ e = { id:d[0], paisId:"CO", nombre:d[1] }; db.estados.push(e); }
+  return e;
+}

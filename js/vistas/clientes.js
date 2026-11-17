@@ -20,7 +20,7 @@ function dlgCliente(id){
   openDlg(id ? "Editar cliente" : "Nuevo cliente", `<form id="frm-cl" data-form="cliente" data-id="${id || ""}" class="grid g2" novalidate>
     <div class="field"><label for="cl-n">Razón social *</label><input id="cl-n" name="nombre" required value="${esc(c.nombre)}"></div>
     <div class="field"><label for="cl-nit">NIT *</label><input id="cl-nit" name="nit" required pattern="[0-9.]{6,13}-[0-9]" placeholder="900.123.456-7" value="${esc(c.nit)}" aria-describedby="cl-nit-h"><span class="hint" id="cl-nit-h">Formato 900.123.456-7 (con dígito de verificación).</span></div>
-    <div class="field"><label for="cl-ci">Municipio *</label><select id="cl-ci" name="ciudadId">${DB.ciudades.filter(x => byId(DB.estados, x.estadoId).paisId === "CO").map(x => `<option value="${x.id}" ${c.ciudadId === x.id ? "selected" : ""}>${esc(x.nombre)}</option>`).join("")}</select></div>
+    <div class="field"><label for="cl-ci">Municipio *</label><select id="cl-ci" name="ciudadId">${DB.ciudades.filter(x => byId(DB.estados, x.estadoId).paisId === "CO").sort(porNombre).map(x => `<option value="${x.id}" ${c.ciudadId === x.id ? "selected" : ""}>${esc(x.nombre)}</option>`).join("")}</select></div>
     <div class="field"><label for="cl-d">Dirección *</label><input id="cl-d" name="direccion" required value="${esc(c.direccion)}"></div>
     <div class="field"><label for="cl-co">Contacto *</label><input id="cl-co" name="contacto" required value="${esc(c.contacto)}"></div>
     <div class="field"><label for="cl-t">Teléfono *</label><input id="cl-t" name="telefono" required inputmode="tel" value="${esc(c.telefono)}"></div>
