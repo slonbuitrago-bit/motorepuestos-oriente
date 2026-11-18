@@ -8,7 +8,7 @@ function seed(){
   const pick = a => a[Math.floor(R() * a.length)];
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
   const db = {
-    version: 6, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], bloqueos:{}, kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
+    version: 7, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], bloqueos:{}, kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
     empresa:{ nombre:"Motorepuestos del Oriente S.A.S.", nit:"901.482.315-7", ciudad:"Rionegro, Antioquia", resolucion:"Resolución DIAN 18764000001234 (simulada) · Prefijo MRO · Rango 1 a 50.000 · Vigencia 2026-2027" },
     roles: JSON.parse(JSON.stringify(ROLES_BASE)),
     usuarios:[
@@ -164,6 +164,8 @@ function seed(){
       ev(new Date(+tr + 500), "Registrar instrucciones de envío", "Remisión", rem.numero, rem.instrucciones.transportadora + " · guía " + rem.instrucciones.guia, "U4");
       if (fate === "Alistamiento") continue;
       const tv = new Date(+tr + ri(1, 3) * 36e5);
+      const tAl = new Date(+tv - ri(15, 50) * 6e4); rem.alistadoPor = "U5"; rem.alistadoEn = tAl.toISOString();
+      ev(tAl, "Alistar pedido en bodega", "Remisión", rem.numero, "Listo para el conteo ciego de Despachos", "U5");
       rem.items.forEach(it => it.contado = it.cantidad);
       rem.estado = "Verificada"; rem.verificadaEn = tv.toISOString(); rem.sello = sha(rem.numero + tv.toISOString()).slice(0, 10).toUpperCase();
       ev(tv, "Verificar alistamiento (conteo ciego)", "Remisión", rem.numero, "Conteo conforme · sello " + rem.sello, "U4");
@@ -220,6 +222,7 @@ function seed(){
     ev(new Date(+t + 500), "Registrar instrucciones de envío", "Remisión", r.numero, transp + (guia ? " · guía " + guia : ""), "U4");
     return r;
   };
+  const alistar = (r, h) => { const t = H(h); r.alistadoPor = "U5"; r.alistadoEn = t.toISOString(); ev(t, "Alistar pedido en bodega", "Remisión", r.numero, "Listo para el conteo ciego de Despachos", "U5"); };
   const verificar = (r, h) => { const t = H(h); r.items.forEach(it => it.contado = it.cantidad); r.estado = "Verificada"; r.verificadaEn = t.toISOString(); r.sello = sha(r.numero + r.verificadaEn).slice(0, 10).toUpperCase(); ev(t, "Verificar alistamiento (conteo ciego)", "Remisión", r.numero, "Conteo conforme · sello " + r.sello, "U4"); };
   const transito = (r, h) => { const t = H(h); r.estado = "En tránsito"; r.salidaEn = t.toISOString(); ev(t, "Despachar remisión", "Remisión", r.numero, "Salida de bodega", "U4"); correo(db, "Despacho", r, t.toISOString()); };
 
@@ -230,17 +233,17 @@ function seed(){
   const pB = mkPed("C5", [["PR10",30],["PR18",4]], 4.88); const fB = mkFac("C5", "S1", null, 4.8, "U3", pB); autorizar(fB, 4.8);
   // 3. Remisión verificada (sellada), con un primer conteo errado que abrió una novedad
   const fC = mkFac("C7", "S1", [["PR3",10],["PR17",6]], 4.75, "U3"); autorizar(fC, 4.7);
-  const rC = remision(fC, 4.6, "Coordinadora", "CO458812");
+  const rC = remision(fC, 4.6, "Coordinadora", "CO458812"); alistar(rC, 4.55);
   const tNov = H(4.5);
   rC.items[0].contado = 11;
-  const novC = { id:"N" + nextNumDb(db, "NOV"), tipo:"Alistamiento", remisionId:rC.id, facturaId:fC.id, fecha:tNov.toISOString(), usuario:"Julián Zuluaga", detalle:difDetalle(db, rC.items, "contado"), estado:"Abierta", resolucion:"" };
+  const novC = { id:"N" + nextNumDb(db, "NOV"), tipo:"Alistamiento", remisionId:rC.id, facturaId:fC.id, fecha:tNov.toISOString(), usuario:"Julián Zuluaga", detalle:difDetalle(db, rC.items, "contado") + " · Alistó: Diana Marín · Contó: Julián Zuluaga", estado:"Abierta", resolucion:"" };
   db.novedades.push(novC); ev(tNov, "Discrepancia en conteo de alistamiento", "Remisión", rC.numero, novC.detalle, "U4");
-  verificar(rC, 4.4);
+  alistar(rC, 4.45); verificar(rC, 4.4);
   // 4. Dos remisiones en tránsito
   const pD = mkPed("C9", [["PR16",5],["PR1",30]], 4.68); const fD = mkFac("C9", "S1", null, 4.6, "U3", pD); autorizar(fD, 4.6);
-  const rD = remision(fD, 4.5, "Servientrega", "SV7712045"); verificar(rD, 4.3); transito(rD, 4.1);
+  const rD = remision(fD, 4.5, "Servientrega", "SV7712045"); alistar(rD, 4.4); verificar(rD, 4.3); transito(rD, 4.1);
   const fE = mkFac("C6", "S1", [["PR19",3],["PR8",12]], 4.45, "U3"); autorizar(fE, 4.35);
-  const rE = remision(fE, 4.25, "Flota propia", ""); verificar(rE, 4.15); transito(rE, 4.0);
+  const rE = remision(fE, 4.25, "Flota propia", ""); alistar(rE, 4.2); verificar(rE, 4.15); transito(rE, 4.0);
   // 5. Facturas manuales pendientes de autorización
   mkFac("C4", "S1", [["PR4",4],["PR3",10],["PR1",24]], 3, "U3");
   mkFac("C10", "S1", [["PR20",6],["PR11",20]], 2.2, "U3");

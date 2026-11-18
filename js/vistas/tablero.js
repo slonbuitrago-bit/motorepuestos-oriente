@@ -37,7 +37,8 @@ function vInicio(){
 
   const tareas = [];
   if (P("facturas.autorizar")) tareas.push([pend, "facturas esperan tu autorización", "Revisa cantidades, cupo y destino antes de autorizar.", "autorizaciones"]);
-  if (P("despachos.gestionar")){ tareas.push([DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length, "facturas autorizadas sin remisión", "Crea la remisión con las instrucciones de envío.", "despachos"]); tareas.push([DB.remisiones.filter(r => r.estado === "Alistamiento").length, "remisiones en alistamiento", "Haz el conteo ciego antes de despachar.", "despachos"]); }
+  if (P("despachos.gestionar")){ tareas.push([DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length, "facturas autorizadas sin remisión", "Crea la remisión con las instrucciones de envío.", "despachos"]); tareas.push([DB.remisiones.filter(r => r.estado === "Alistamiento" && r.alistadoPor).length, "remisiones alistadas por verificar", "Haz el conteo ciego antes de despachar.", "despachos"]); }
+  if (P("despachos.alistar") && !P("despachos.gestionar")) tareas.push([DB.remisiones.filter(r => r.estado === "Alistamiento" && !r.alistadoPor).length, "remisiones por alistar", "Saca los repuestos y márcalas como alistadas para el conteo ciego.", "despachos"]);
   if (P("pedidos.gestionar")) tareas.push([DB.pedidos.filter(p => p.estado === "Registrado").length, "pedidos de venta por facturar", "Al facturarlos quedan contabilizados y se avisa al cliente por correo.", "pedidos"]);
   if (P("facturas.crear")) tareas.push([DB.facturas.filter(f => f.estado === "Rechazada" && f.creadoPor === ME.id).length, "facturas tuyas fueron rechazadas", "Lee el motivo y registra una nueva factura corregida.", "facturas"]);
   if (P("inventario.gestionar")) tareas.push([bajo.length, "referencias bajo el stock mínimo", "Programa traslado o pedido de importación.", "inventario"]);

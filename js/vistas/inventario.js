@@ -24,8 +24,9 @@ function vInventario(){
 }
 function dlgKardex(id){
   const p = prod(id); const mv = DB.kardex.filter(k => k.productoId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const ocultas = new Set(DB.facturas.filter(ocultarCantidades).map(f => f.numero)); // conteo ciego pendiente
   openDlg(`Kárdex · ${p.sku}`, `<p><b>${esc(p.nombre)}</b> · costo ${money(p.costo)} · garantía ${p.garantiaMeses ? p.garantiaMeses + " meses" : "no aplica"}</p>
-  <div class="tw"><table><thead><tr><th>Fecha</th><th>Sucursal</th><th>Movimiento</th><th class="r">Cantidad</th><th>Documento</th><th>Usuario</th></tr></thead><tbody>${mv.map(k => `<tr><td>${fdt(k.fecha)}</td><td>${esc(suc(k.sucursalId)?.nombre.split(" ")[0])}</td><td>${esc(k.tipo)}</td><td class="r" style="color:${k.cantidad < 0 ? "var(--bad)" : "var(--ok)"}">${k.cantidad > 0 ? "+" : ""}${k.cantidad}</td><td class="mono">${esc(k.ref)}</td><td>${esc(k.usuario)}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">Sin movimientos.</td></tr>`}</tbody></table></div>`, `<button class="btn" data-act="cerrarDlg">Cerrar</button>`);
+  <div class="tw"><table><thead><tr><th>Fecha</th><th>Sucursal</th><th>Movimiento</th><th class="r">Cantidad</th><th>Documento</th><th>Usuario</th></tr></thead><tbody>${mv.map(k => `<tr><td>${fdt(k.fecha)}</td><td>${esc(suc(k.sucursalId)?.nombre.split(" ")[0])}</td><td>${esc(k.tipo)}</td><td class="r" style="color:${k.cantidad < 0 ? "var(--bad)" : "var(--ok)"}">${ocultas.has(k.ref) ? "—" : (k.cantidad > 0 ? "+" : "") + k.cantidad}</td><td class="mono">${esc(k.ref)}</td><td>${esc(k.usuario)}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">Sin movimientos.</td></tr>`}</tbody></table></div>`, `<button class="btn" data-act="cerrarDlg">Cerrar</button>`);
 }
 function dlgAjuste(id){
   const p = prod(id);

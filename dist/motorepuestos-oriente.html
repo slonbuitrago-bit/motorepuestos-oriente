@@ -294,6 +294,7 @@ const PERMISOS = {
   "facturas.autorizar":   "Autorizar o rechazar facturas",
   "cartera.pagos":        "Registrar pagos de clientes",
   "despachos.gestionar":  "Gestionar remisiones y despachos",
+  "despachos.alistar":    "Alistar remisiones en bodega (ve las cantidades a despachar)",
   "inventario.ver":       "Consultar inventario",
   "inventario.gestionar": "Ajustes, traslados y productos",
   "importaciones.gestionar": "Gestionar importaciones",
@@ -321,7 +322,7 @@ const ROLES_BASE = {
   "Gerente":    ["tablero","pedidos.gestionar","facturas.ver","facturas.autorizar","cartera.pagos","inventario.ver","clientes.gestionar","auditoria.ver","despachos.gestionar"],
   "Logística":  ["tablero","pedidos.gestionar","facturas.ver","facturas.crear","inventario.ver","clientes.gestionar"],
   "Despachos":  ["tablero","facturas.ver","despachos.gestionar","inventario.ver"],
-  "Bodega":     ["tablero","inventario.ver","inventario.gestionar","importaciones.gestionar","facturas.ver"],
+  "Bodega":     ["tablero","inventario.ver","inventario.gestionar","importaciones.gestionar","facturas.ver","despachos.alistar"],
   "Auditor":    ["tablero","facturas.ver","inventario.ver","auditoria.ver"]
 };
 </script>
@@ -1505,7 +1506,7 @@ function seed(){
   const pick = a => a[Math.floor(R() * a.length)];
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
   const db = {
-    version: 6, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], bloqueos:{}, kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
+    version: 7, creado: now.toISOString(), seq:{}, audit:[], pedidos:[], correos:[], bloqueos:{}, kardex:[], novedades:[], certificados:[], remisiones:[], facturas:[], importaciones:[],
     empresa:{ nombre:"Motorepuestos del Oriente S.A.S.", nit:"901.482.315-7", ciudad:"Rionegro, Antioquia", resolucion:"Resolución DIAN 18764000001234 (simulada) · Prefijo MRO · Rango 1 a 50.000 · Vigencia 2026-2027" },
     roles: JSON.parse(JSON.stringify(ROLES_BASE)),
     usuarios:[
@@ -1661,6 +1662,8 @@ function seed(){
       ev(new Date(+tr + 500), "Registrar instrucciones de envío", "Remisión", rem.numero, rem.instrucciones.transportadora + " · guía " + rem.instrucciones.guia, "U4");
       if (fate === "Alistamiento") continue;
       const tv = new Date(+tr + ri(1, 3) * 36e5);
+      const tAl = new Date(+tv - ri(15, 50) * 6e4); rem.alistadoPor = "U5"; rem.alistadoEn = tAl.toISOString();
+      ev(tAl, "Alistar pedido en bodega", "Remisión", rem.numero, "Listo para el conteo ciego de Despachos", "U5");
       rem.items.forEach(it => it.contado = it.cantidad);
       rem.estado = "Verificada"; rem.verificadaEn = tv.toISOString(); rem.sello = sha(rem.numero + tv.toISOString()).slice(0, 10).toUpperCase();
       ev(tv, "Verificar alistamiento (conteo ciego)", "Remisión", rem.numero, "Conteo conforme · sello " + rem.sello, "U4");
@@ -1717,6 +1720,7 @@ function seed(){
     ev(new Date(+t + 500), "Registrar instrucciones de envío", "Remisión", r.numero, transp + (guia ? " · guía " + guia : ""), "U4");
     return r;
   };
+  const alistar = (r, h) => { const t = H(h); r.alistadoPor = "U5"; r.alistadoEn = t.toISOString(); ev(t, "Alistar pedido en bodega", "Remisión", r.numero, "Listo para el conteo ciego de Despachos", "U5"); };
   const verificar = (r, h) => { const t = H(h); r.items.forEach(it => it.contado = it.cantidad); r.estado = "Verificada"; r.verificadaEn = t.toISOString(); r.sello = sha(r.numero + r.verificadaEn).slice(0, 10).toUpperCase(); ev(t, "Verificar alistamiento (conteo ciego)", "Remisión", r.numero, "Conteo conforme · sello " + r.sello, "U4"); };
   const transito = (r, h) => { const t = H(h); r.estado = "En tránsito"; r.salidaEn = t.toISOString(); ev(t, "Despachar remisión", "Remisión", r.numero, "Salida de bodega", "U4"); correo(db, "Despacho", r, t.toISOString()); };
 
@@ -1727,17 +1731,17 @@ function seed(){
   const pB = mkPed("C5", [["PR10",30],["PR18",4]], 4.88); const fB = mkFac("C5", "S1", null, 4.8, "U3", pB); autorizar(fB, 4.8);
   // 3. Remisión verificada (sellada), con un primer conteo errado que abrió una novedad
   const fC = mkFac("C7", "S1", [["PR3",10],["PR17",6]], 4.75, "U3"); autorizar(fC, 4.7);
-  const rC = remision(fC, 4.6, "Coordinadora", "CO458812");
+  const rC = remision(fC, 4.6, "Coordinadora", "CO458812"); alistar(rC, 4.55);
   const tNov = H(4.5);
   rC.items[0].contado = 11;
-  const novC = { id:"N" + nextNumDb(db, "NOV"), tipo:"Alistamiento", remisionId:rC.id, facturaId:fC.id, fecha:tNov.toISOString(), usuario:"Julián Zuluaga", detalle:difDetalle(db, rC.items, "contado"), estado:"Abierta", resolucion:"" };
+  const novC = { id:"N" + nextNumDb(db, "NOV"), tipo:"Alistamiento", remisionId:rC.id, facturaId:fC.id, fecha:tNov.toISOString(), usuario:"Julián Zuluaga", detalle:difDetalle(db, rC.items, "contado") + " · Alistó: Diana Marín · Contó: Julián Zuluaga", estado:"Abierta", resolucion:"" };
   db.novedades.push(novC); ev(tNov, "Discrepancia en conteo de alistamiento", "Remisión", rC.numero, novC.detalle, "U4");
-  verificar(rC, 4.4);
+  alistar(rC, 4.45); verificar(rC, 4.4);
   // 4. Dos remisiones en tránsito
   const pD = mkPed("C9", [["PR16",5],["PR1",30]], 4.68); const fD = mkFac("C9", "S1", null, 4.6, "U3", pD); autorizar(fD, 4.6);
-  const rD = remision(fD, 4.5, "Servientrega", "SV7712045"); verificar(rD, 4.3); transito(rD, 4.1);
+  const rD = remision(fD, 4.5, "Servientrega", "SV7712045"); alistar(rD, 4.4); verificar(rD, 4.3); transito(rD, 4.1);
   const fE = mkFac("C6", "S1", [["PR19",3],["PR8",12]], 4.45, "U3"); autorizar(fE, 4.35);
-  const rE = remision(fE, 4.25, "Flota propia", ""); verificar(rE, 4.15); transito(rE, 4.0);
+  const rE = remision(fE, 4.25, "Flota propia", ""); alistar(rE, 4.2); verificar(rE, 4.15); transito(rE, 4.0);
   // 5. Facturas manuales pendientes de autorización
   mkFac("C4", "S1", [["PR4",4],["PR3",10],["PR1",24]], 3, "U3");
   mkFac("C10", "S1", [["PR20",6],["PR11",20]], 2.2, "U3");
@@ -1872,6 +1876,13 @@ function asegurarDepartamento(db, codigoDane){
   if (!e){ e = { id:d[0], paisId:"CO", nombre:d[1] }; db.estados.push(e); }
   return e;
 }
+
+/* Conteo ciego (control antifraude): Bodega alista viendo las cantidades; Despachos verifica contando
+   sin conocer la cantidad facturada. Hasta que el conteo quede conforme, a quien verifica se le ocultan
+   las cantidades y los valores de esa factura en todas las pantallas. */
+const verificaCiego = () => P("despachos.gestionar") && !P("despachos.alistar") && !P("facturas.crear") && !P("facturas.autorizar");
+const conteoPendiente = f => { const r = f.remisionId ? rem(f.remisionId) : null; return f.estado !== "Rechazada" && (!r || r.estado === "Alistamiento"); };
+const ocultarCantidades = f => verificaCiego() && conteoPendiente(f);
 </script>
 <script>
 "use strict";
@@ -1880,7 +1891,7 @@ function asegurarDepartamento(db, codigoDane){
 
 function load(){
   const raw = store.get(STORE_KEY);
-  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 6) return; } catch(e){} }
+  if (raw){ try { DB = JSON.parse(raw); if (DB && DB.version === 7) return; } catch(e){} }
   DB = seed(); save();
 }
 function save(){ store.set(STORE_KEY, JSON.stringify(DB)); }
@@ -1943,7 +1954,7 @@ const RUTAS = [
   { id:"pedidos", label:"Pedidos de venta", perm:"pedidos.gestionar", grp:"Operación", count:() => DB.pedidos.filter(p => p.estado === "Registrado").length },
   { id:"facturas", label:"Facturas", perm:"facturas.ver", grp:"Operación" },
   { id:"autorizaciones", label:"Autorizaciones", perm:"facturas.autorizar", grp:"Operación", count:() => DB.facturas.filter(f => f.estado === "Pendiente").length },
-  { id:"despachos", label:"Despachos", perm:"despachos.gestionar", grp:"Operación", count:() => DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length + DB.remisiones.filter(r => r.estado === "Alistamiento").length },
+  { id:"despachos", label:"Despachos", perm:"despachos.gestionar", alt:"despachos.alistar", grp:"Operación", count:() => DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length + DB.remisiones.filter(r => r.estado === "Alistamiento").length },
   { id:"inventario", label:"Inventario", perm:"inventario.ver", grp:"Abastecimiento" },
   { id:"importaciones", label:"Importaciones", perm:"importaciones.gestionar", grp:"Abastecimiento" },
   { id:"clientes", label:"Clientes y cupos", perm:"facturas.ver", grp:"Abastecimiento" },
@@ -2094,7 +2105,8 @@ function vInicio(){
 
   const tareas = [];
   if (P("facturas.autorizar")) tareas.push([pend, "facturas esperan tu autorización", "Revisa cantidades, cupo y destino antes de autorizar.", "autorizaciones"]);
-  if (P("despachos.gestionar")){ tareas.push([DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length, "facturas autorizadas sin remisión", "Crea la remisión con las instrucciones de envío.", "despachos"]); tareas.push([DB.remisiones.filter(r => r.estado === "Alistamiento").length, "remisiones en alistamiento", "Haz el conteo ciego antes de despachar.", "despachos"]); }
+  if (P("despachos.gestionar")){ tareas.push([DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length, "facturas autorizadas sin remisión", "Crea la remisión con las instrucciones de envío.", "despachos"]); tareas.push([DB.remisiones.filter(r => r.estado === "Alistamiento" && r.alistadoPor).length, "remisiones alistadas por verificar", "Haz el conteo ciego antes de despachar.", "despachos"]); }
+  if (P("despachos.alistar") && !P("despachos.gestionar")) tareas.push([DB.remisiones.filter(r => r.estado === "Alistamiento" && !r.alistadoPor).length, "remisiones por alistar", "Saca los repuestos y márcalas como alistadas para el conteo ciego.", "despachos"]);
   if (P("pedidos.gestionar")) tareas.push([DB.pedidos.filter(p => p.estado === "Registrado").length, "pedidos de venta por facturar", "Al facturarlos quedan contabilizados y se avisa al cliente por correo.", "pedidos"]);
   if (P("facturas.crear")) tareas.push([DB.facturas.filter(f => f.estado === "Rechazada" && f.creadoPor === ME.id).length, "facturas tuyas fueron rechazadas", "Lee el motivo y registra una nueva factura corregida.", "facturas"]);
   if (P("inventario.gestionar")) tareas.push([bajo.length, "referencias bajo el stock mínimo", "Programa traslado o pedido de importación.", "inventario"]);
@@ -2233,7 +2245,7 @@ function vFacturas(){
   </form>
   <div class="tw"><table><caption class="sr">Listado de facturas</caption><thead><tr><th>Número</th><th>Origen</th><th>Fecha</th><th>Cliente</th><th>Destino</th><th class="r">Total</th><th>Autorización</th><th>Logística</th><th>Cartera</th></tr></thead><tbody>
   ${shown.map(f => { const c = cli(f.clienteId); const el = estadoLogistico(f); return `<tr>
-    <td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${f.origen === "Pedido" ? `<span class="mono">${esc(origenTxt(f))}</span>` : pill("Manual", "")}</td><td>${fdate(f.fecha)}</td><td>${esc(c.nombre)}</td><td>${esc(ciudad(f.ciudadDestinoId)?.nombre)}</td><td class="r">${money(f.total)}</td><td>${pillFactura(f)}</td><td>${f.estado === "Autorizada" ? pill(el[0], el[1]) : "—"}</td><td>${f.estado !== "Autorizada" ? "—" : f.pagada ? pill("Pagada","ok") : pill("Por cobrar","")}</td></tr>`; }).join("") || `<tr><td colspan="9" class="empty">No hay facturas con esos filtros.</td></tr>`}
+    <td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${f.origen === "Pedido" ? `<span class="mono">${esc(origenTxt(f))}</span>` : pill("Manual", "")}</td><td>${fdate(f.fecha)}</td><td>${esc(c.nombre)}</td><td>${esc(ciudad(f.ciudadDestinoId)?.nombre)}</td><td class="r">${ocultarCantidades(f) ? `<span class="muted" title="Oculto hasta el conteo ciego">—</span>` : money(f.total)}</td><td>${pillFactura(f)}</td><td>${f.estado === "Autorizada" ? pill(el[0], el[1]) : "—"}</td><td>${f.estado !== "Autorizada" ? "—" : f.pagada ? pill("Pagada","ok") : pill("Por cobrar","")}</td></tr>`; }).join("") || `<tr><td colspan="9" class="empty">No hay facturas con esos filtros.</td></tr>`}
   </tbody></table></div>
   <div class="row between"><span class="muted">${shown.length} de ${list.length} facturas</span>${list.length > shown.length ? `<button class="btn" data-act="masFacturas">Mostrar más</button>` : ""}</div>`;
 }
@@ -2293,22 +2305,22 @@ function vFacturaNueva(){
 }
 
 function vDocFactura(f){
-  const c = cli(f.clienteId), s = suc(f.sucursalId), ci = ciudad(f.ciudadDestinoId);
+  const c = cli(f.clienteId), s = suc(f.sucursalId), ci = ciudad(f.ciudadDestinoId), oc = ocultarCantidades(f), x = v => oc ? "—" : v;
   return `<article class="doc" aria-label="Representación gráfica de la factura ${f.numero}">
     <div class="hd"><div><b style="font-family:var(--f-display);font-size:1.2rem">${esc(DB.empresa.nombre)}</b><br><span class="muted">NIT ${esc(DB.empresa.nit)} · ${esc(s.nombre)}<br>${esc(s.direccion)}, ${esc(ciudad(s.ciudadId).nombre)}</span></div>
       <div style="text-align:right"><span class="eyebrow">Factura electrónica de venta</span><br><b class="mono" style="font-size:1.2rem">${f.numero}</b><br><span class="muted">${fdt(f.fecha)}</span></div></div>
     <dl class="kv"><dt>Cliente</dt><dd>${esc(c.nombre)} · NIT ${esc(c.nit)}</dd><dt>Destino</dt><dd>${esc(ci?.nombre)} (DANE ${esc(ci?.id)})</dd><dt>Contacto</dt><dd>${esc(c.contacto)} · ${esc(c.telefono)}</dd>${f.obs ? `<dt>Observaciones</dt><dd>${esc(f.obs)}</dd>` : ""}</dl>
     <div class="tw"><table><thead><tr><th>Referencia</th><th>Descripción</th><th class="r">Cant.</th><th class="r">Precio</th><th class="r">Subtotal</th></tr></thead><tbody>
-      ${f.items.map(it => { const p = prod(it.productoId); return `<tr><td class="mono">${esc(p.sku)}</td><td>${esc(p.nombre)}</td><td class="r">${it.cantidad}</td><td class="r">${money(it.precio)}</td><td class="r">${money(it.precio * it.cantidad)}</td></tr>`; }).join("")}</tbody></table></div>
-    <div class="totals"><div><span>Subtotal</span><span>${money(f.subtotal)}</span></div><div><span>IVA 19 %</span><span>${money(f.iva)}</span></div><div class="grand"><span>Total</span><span>${money(f.total)}</span></div></div>
+      ${f.items.map(it => { const p = prod(it.productoId); return `<tr><td class="mono">${esc(p.sku)}</td><td>${esc(p.nombre)}</td><td class="r">${x(it.cantidad)}</td><td class="r">${x(money(it.precio))}</td><td class="r">${x(money(it.precio * it.cantidad))}</td></tr>`; }).join("")}</tbody></table></div>
+    ${oc ? `<div class="note">Conteo ciego: las cantidades y los valores se ocultan a Despachos hasta que el conteo de la remisión quede conforme.</div>` : `<div class="totals"><div><span>Subtotal</span><span>${money(f.subtotal)}</span></div><div><span>IVA 19 %</span><span>${money(f.iva)}</span></div><div class="grand"><span>Total</span><span>${money(f.total)}</span></div></div>`}
     ${f.cufe ? `<div><span class="eyebrow">CUFE (simulado, ambiente de pruebas)</span><div class="hash">${f.cufe}</div></div>` : `<p class="muted" style="font-size:.85rem">El CUFE se genera al autorizar la factura.</p>`}
     <p class="muted" style="font-size:.78rem">${esc(DB.empresa.resolucion)}</p>
   </article>`;
 }
-function timelineFactura(f){
+function timelineFactura(f, sinDetalle = ocultarCantidades(f)){
   const refs = [f.numero]; if (f.remisionId) refs.push(rem(f.remisionId).numero); if (f.pedidoId) refs.push(byId(DB.pedidos, f.pedidoId).numero);
   const ev = DB.audit.filter(e => refs.includes(e.ref));
-  return `<ul class="tl">${ev.map(e => `<li><div><b>${esc(e.accion)}</b> <span class="mono">${esc(e.ref)}</span><br><span class="when">${fdt(e.ts)} · ${esc(e.usuario)} (${esc(e.rol)})</span>${e.detalle ? `<br><span style="font-size:.88rem">${esc(e.detalle)}</span>` : ""}</div></li>`).join("") || "<li><div>Sin eventos</div></li>"}</ul>`;
+  return `<ul class="tl">${ev.map(e => `<li><div><b>${esc(e.accion)}</b> <span class="mono">${esc(e.ref)}</span><br><span class="when">${fdt(e.ts)} · ${esc(e.usuario)} (${esc(e.rol)})</span>${e.detalle && !sinDetalle ? `<br><span style="font-size:.88rem">${esc(e.detalle)}</span>` : ""}</div></li>`).join("") || "<li><div>Sin eventos</div></li>"}</ul>`;
 }
 function dlgFactura(id){
   const f = byId(DB.facturas, id); const c = cli(f.clienteId);
@@ -2317,12 +2329,13 @@ function dlgFactura(id){
   if (f.estado === "Pendiente" && P("facturas.autorizar")){ acc.push(`<button class="btn danger" data-act="rechazarDlg" data-id="${f.id}">Rechazar</button>`); acc.push(`<button class="btn primary" data-act="autorizar" data-id="${f.id}">Autorizar factura</button>`); }
   if (f.estado === "Autorizada" && !f.remisionId && P("despachos.gestionar")) acc.push(`<button class="btn primary" data-act="nuevaRemision" data-id="${f.id}">Crear remisión</button>`);
   if (f.estado === "Autorizada" && !f.pagada && P("cartera.pagos")) acc.push(`<button class="btn" data-act="pagar" data-id="${f.id}">Registrar pago</button>`);
-  const tabs = UI.tab.fac || "doc";
+  const oc = ocultarCantidades(f);
+  const tabs = oc ? "doc" : UI.tab.fac || "doc";
   const certs = DB.certificados.filter(x => x.facturaId === f.id);
   openDlg(`Factura ${f.numero}`, `
     <div class="row">${pillFactura(f)} ${f.estado === "Autorizada" ? pill(...estadoLogistico(f)) : ""} ${f.pagada ? pill("Pagada","ok") : ""}</div>
     ${f.estado === "Rechazada" ? `<div class="note bad"><b>Motivo del rechazo:</b> ${esc(f.motivoRechazo)}<br><span class="muted">${esc(usr(f.revisadoPor)?.nombre)} · ${fdt(f.revisadoEn)}</span></div>` : ""}
-    <div class="tabs" role="tablist">${[["doc","Documento"],["traza","Trazabilidad"],["cont","Contabilidad"],["cert","Garantías (" + certs.length + ")"]].map(([k, l]) => `<button role="tab" aria-selected="${tabs === k}" data-act="tab" data-g="fac" data-v="${k}" data-ref="${f.id}">${l}</button>`).join("")}</div>
+    <div class="tabs" role="tablist">${(oc ? [["doc","Documento"]] : [["doc","Documento"],["traza","Trazabilidad"],["cont","Contabilidad"],["cert","Garantías (" + certs.length + ")"]]).map(([k, l]) => `<button role="tab" aria-selected="${tabs === k}" data-act="tab" data-g="fac" data-v="${k}" data-ref="${f.id}">${l}</button>`).join("")}</div>
     ${tabs === "doc" ? vDocFactura(f) + `<dl class="kv"><dt>Registró</dt><dd>${esc(usr(f.creadoPor)?.nombre)} (${esc(usr(f.creadoPor)?.rol)})</dd><dt>Origen</dt><dd>${f.origen === "Pedido" ? esc(origenTxt(f)) + " · contabilizada automáticamente" : "Factura manual sin pedido · requiere autorización de gerente"}</dd>${f.revisadoPor ? `<dt>${f.estado === "Rechazada" ? "Rechazó" : f.origen === "Pedido" ? "Contabilizó" : "Autorizó"}</dt><dd>${esc(nombreUsr(f.revisadoPor))} · ${fdt(f.revisadoEn)}</dd>` : ""}${r ? `<dt>Remisión</dt><dd class="mono">${r.numero} · ${esc(r.estado)}</dd>` : ""}</dl>` : ""}
     ${tabs === "traza" ? timelineFactura(f) + (f.cufe ? `<div class="row"><button class="btn" data-act="verifCufe" data-id="${f.id}">Verificar integridad del documento</button><span id="cufe-res" aria-live="polite"></span></div>` : "") : ""}
     ${tabs === "cont" ? (f.asiento ? `<p><b>Asiento ${f.asiento.numero}</b> · ${fdt(f.asiento.fecha)} · contabilización automática al autorizar</p><div class="tw"><table><thead><tr><th>Cuenta PUC</th><th>Nombre</th><th class="r">Débito</th><th class="r">Crédito</th></tr></thead><tbody>${f.asiento.lineas.map(l => `<tr><td class="mono">${l.cuenta}</td><td>${esc(l.nombre)}</td><td class="r">${l.debito ? money(l.debito) : ""}</td><td class="r">${l.credito ? money(l.credito) : ""}</td></tr>`).join("")}<tr><th colspan="2">Sumas iguales</th><th class="r">${money(sum(f.asiento.lineas, l => l.debito))}</th><th class="r">${money(sum(f.asiento.lineas, l => l.credito))}</th></tr></tbody></table></div>` : `<p class="muted">La factura se contabiliza automáticamente cuando Gerencia la autoriza.</p>`) : ""}
@@ -2358,19 +2371,19 @@ function vAutorizaciones(){
 
 /* --- Despachos --- */
 function vDespachos(){
-  const tab = UI.tab.desp || "por";
+  const tab = UI.tab.desp || (P("despachos.gestionar") ? "por" : "act");
   const por = DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId);
   const act = DB.remisiones.filter(r => ["Alistamiento","Verificada","En tránsito"].includes(r.estado)).sort((a, b) => b.fecha.localeCompare(a.fecha));
   const hist = DB.remisiones.filter(r => ["Entregada","Con novedad"].includes(r.estado)).sort((a, b) => (b.entregadaEn || "").localeCompare(a.entregadaEn || "")).slice(0, 30);
   const nov = DB.novedades.slice().sort((a, b) => b.fecha.localeCompare(a.fecha));
   const tabsDef = [["por","Por remisionar",por.length],["act","En proceso",act.length],["hist","Entregadas",null],["nov","Novedades",nov.filter(n => n.estado === "Abierta").length]];
   const remRow = r => { const f = byId(DB.facturas, r.facturaId); const c = cli(f.clienteId); return `<tr><td><button class="linklike mono" data-act="verRemision" data-id="${r.id}">${r.numero}</button></td><td class="mono">${f.numero}</td><td>${esc(c.nombre)}</td><td>${esc(ciudad(f.ciudadDestinoId)?.nombre)}</td><td>${esc(r.instrucciones.transportadora)}</td><td>${pill(r.estado, { Alistamiento:"info", Verificada:"acc", "En tránsito":"acc", Entregada:"ok", "Con novedad":"bad" }[r.estado])}</td><td>${fdt(r.entregadaEn || r.fecha)}</td></tr>`; };
-  return `<div class="page-head"><div><p class="eyebrow">Bodega y transporte</p><h1>Despachos y remisiones</h1><p>Cada remisión lleva instrucciones de envío completas. Antes de salir, el alistamiento se verifica con conteo ciego: quien cuenta no ve la cantidad facturada. En la entrega se registra lo recibido; cualquier diferencia abre una novedad.</p></div></div>
+  return `<div class="page-head"><div><p class="eyebrow">Bodega y transporte</p><h1>Despachos y remisiones</h1><p>Cada remisión lleva instrucciones de envío completas. Antes de salir, Bodega alista el pedido y Despachos lo verifica con conteo ciego: quien cuenta no ve la cantidad facturada. En la entrega se registra lo recibido; cualquier diferencia abre una novedad.</p></div></div>
   <div class="tabs" role="tablist">${tabsDef.map(([k, l, n]) => `<button role="tab" aria-selected="${tab === k}" data-act="tab" data-g="desp" data-v="${k}">${l}${n ? ` (${n})` : ""}</button>`).join("")}</div>
-  ${tab === "por" ? (por.length ? `<div class="tw"><table><thead><tr><th>Factura</th><th>Autorizada</th><th>Cliente</th><th>Destino</th><th class="r">Líneas</th><th></th></tr></thead><tbody>${por.map(f => `<tr><td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${fdt(f.revisadoEn)}</td><td>${esc(cli(f.clienteId).nombre)}</td><td>${esc(ciudad(f.ciudadDestinoId)?.nombre)}</td><td class="r">${f.items.length}</td><td><button class="btn sm primary" data-act="nuevaRemision" data-id="${f.id}">Crear remisión</button></td></tr>`).join("")}</tbody></table></div>` : `<div class="panel empty">No hay facturas autorizadas pendientes de remisión.</div>`) : ""}
+  ${tab === "por" ? (por.length ? `<div class="tw"><table><thead><tr><th>Factura</th><th>Autorizada</th><th>Cliente</th><th>Destino</th><th class="r">Líneas</th><th></th></tr></thead><tbody>${por.map(f => `<tr><td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${fdt(f.revisadoEn)}</td><td>${esc(cli(f.clienteId).nombre)}</td><td>${esc(ciudad(f.ciudadDestinoId)?.nombre)}</td><td class="r">${f.items.length}</td><td>${P("despachos.gestionar") ? `<button class="btn sm primary" data-act="nuevaRemision" data-id="${f.id}">Crear remisión</button>` : ""}</td></tr>`).join("")}</tbody></table></div>` : `<div class="panel empty">No hay facturas autorizadas pendientes de remisión.</div>`) : ""}
   ${tab === "act" ? (act.length ? `<div class="tw"><table><thead><tr><th>Remisión</th><th>Factura</th><th>Cliente</th><th>Destino</th><th>Transportadora</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>${act.map(remRow).join("")}</tbody></table></div>` : `<div class="panel empty">No hay remisiones en proceso.</div>`) : ""}
   ${tab === "hist" ? `<div class="tw"><table><thead><tr><th>Remisión</th><th>Factura</th><th>Cliente</th><th>Destino</th><th>Transportadora</th><th>Estado</th><th>Entregada</th></tr></thead><tbody>${hist.map(remRow).join("")}</tbody></table></div>` : ""}
-  ${tab === "nov" ? `<div class="tw"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Remisión</th><th>Detalle</th><th>Estado</th><th></th></tr></thead><tbody>${nov.map(n => `<tr><td>${fdt(n.fecha)}</td><td>${esc(n.tipo)}</td><td class="mono">${esc(rem(n.remisionId)?.numero)}</td><td class="wrap">${esc(n.detalle)}${n.resolucion ? `<br><span class="muted">Resolución: ${esc(n.resolucion)}</span>` : ""}</td><td>${pill(n.estado, n.estado === "Abierta" ? "bad" : "ok")}</td><td>${n.estado === "Abierta" && (P("facturas.autorizar") || P("despachos.gestionar")) ? `<button class="btn sm" data-act="cerrarNovDlg" data-id="${n.id}">Cerrar</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">Sin novedades.</td></tr>`}</tbody></table></div>` : ""}`;
+  ${tab === "nov" ? `<div class="tw"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Remisión</th><th>Detalle</th><th>Estado</th><th></th></tr></thead><tbody>${nov.map(n => `<tr><td>${fdt(n.fecha)}</td><td>${esc(n.tipo)}</td><td class="mono">${esc(rem(n.remisionId)?.numero)}</td><td class="wrap">${verificaCiego() && rem(n.remisionId)?.estado === "Alistamiento" ? "Diferencia en el conteo. El detalle lo ven Bodega y Gerencia hasta que el conteo quede conforme." : esc(n.detalle)}${n.resolucion ? `<br><span class="muted">Resolución: ${esc(n.resolucion)}</span>` : ""}</td><td>${pill(n.estado, n.estado === "Abierta" ? "bad" : "ok")}</td><td>${n.estado === "Abierta" && (P("facturas.autorizar") || P("despachos.gestionar")) ? `<button class="btn sm" data-act="cerrarNovDlg" data-id="${n.id}">Cerrar</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">Sin novedades.</td></tr>`}</tbody></table></div>` : ""}`;
 }
 function dlgNuevaRemision(fid){
   const f = byId(DB.facturas, fid), c = cli(f.clienteId);
@@ -2398,9 +2411,25 @@ function dlgRemision(id){
     <dl class="kv"><dt>Factura</dt><dd class="mono">${f.numero}</dd><dt>Cliente</dt><dd>${esc(c.nombre)}</dd><dt>Entregar en</dt><dd>${esc(I.direccion)}${I.referencia ? " · " + esc(I.referencia) : ""}, ${esc(ciudad(f.ciudadDestinoId)?.nombre)}</dd><dt>Recibe</dt><dd>${esc(I.contacto)} · ${esc(I.telefono)}</dd><dt>Transporte</dt><dd>${esc(I.transportadora)}${I.guia ? " · guía " + esc(I.guia) : ""} · ${esc(I.franja)}</dd><dt>Instrucciones</dt><dd>${esc(I.observaciones || "—")}</dd>${r.recibidoPor ? `<dt>Recibió</dt><dd>${esc(r.recibidoPor)} · ${fdt(r.entregadaEn)}</dd>` : ""}</dl>`;
   let foot = `<button class="btn" data-act="cerrarDlg">Cerrar</button>`;
   if (r.estado === "Alistamiento"){
-    cuerpo += `<form id="frm-conteo" data-form="conteo" data-id="${r.id}" class="grid"><h3>Conteo ciego de alistamiento</h3><p class="muted">Cuenta físicamente cada referencia y escribe la cantidad. El sistema la compara con la factura sin mostrarla.</p>
+    const alisto = r.alistadoPor ? usr(r.alistadoPor) : null;
+    if (r.conteoFallido && !alisto) cuerpo += `<div class="note bad" role="alert"><b>El conteo no coincide con la factura en ${r.conteoFallido} ${r.conteoFallido === 1 ? "referencia" : "referencias"}.</b> No se puede despachar. Se registró una novedad y el pedido volvió a Bodega para revisar el alistamiento.</div>`;
+    if (!alisto){
+      // Paso 1: Bodega alista viendo las cantidades
+      if (P("despachos.alistar")){
+        cuerpo += `<section class="grid"><h3>Lista de alistamiento</h3><p class="muted">Saca del estante cada referencia en la cantidad indicada y déjala en la zona de despacho. Después, Despachos la verifica con conteo ciego.</p>
+          <div class="tw"><table><thead><tr><th>Referencia</th><th>Descripción</th><th class="r">Cantidad a alistar</th></tr></thead><tbody>${r.items.map(it => { const p = prod(it.productoId); return `<tr><td class="mono">${esc(p.sku)}</td><td>${esc(p.nombre)}</td><td class="r num">${it.cantidad}</td></tr>`; }).join("")}</tbody></table></div></section>`;
+        foot += `<button class="btn primary" data-act="alistar" data-id="${r.id}">Marcar como alistado</button>`;
+      } else cuerpo += `<div class="note">Esperando a que <b>Bodega</b> aliste el pedido. El conteo ciego se habilita cuando Bodega lo marque como alistado.</div>`;
+    } else {
+      cuerpo += `<p class="muted">Alistado por <b>${esc(alisto.nombre)}</b> (${esc(alisto.rol)}) · ${fdt(r.alistadoEn)}</p>`;
+      // Paso 2: Despachos verifica sin ver la cantidad facturada (y no puede ser quien alistó)
+      if (puede && r.alistadoPor !== ME.id){
+        cuerpo += `<form id="frm-conteo" data-form="conteo" data-id="${r.id}" class="grid"><h3>Conteo ciego de verificación</h3><p class="muted">Cuenta físicamente lo que Bodega alistó y escribe la cantidad. El sistema la compara con la factura sin mostrarla.</p>
       <div class="tw"><table><thead><tr><th>Referencia</th><th>Descripción</th><th class="r" style="width:140px">Cantidad contada</th></tr></thead><tbody>${r.items.map((it, i) => { const p = prod(it.productoId); return `<tr><td class="mono">${esc(p.sku)}</td><td>${esc(p.nombre)}</td><td><label class="sr" for="cc-${i}">Cantidad contada de ${esc(p.sku)}</label><input id="cc-${i}" name="c${i}" type="number" min="0" required inputmode="numeric" style="text-align:right"></td></tr>`; }).join("")}</tbody></table></div><div id="conteo-res" role="alert"></div></form>`;
-    if (puede) foot += `<button class="btn primary" type="submit" form="frm-conteo">Verificar conteo</button>`;
+        foot += `<button class="btn primary" type="submit" form="frm-conteo">Verificar conteo</button>`;
+      } else if (puede) cuerpo += `<div class="note warn">Tú alistaste este pedido: el conteo de verificación lo debe hacer otra persona de Despachos.</div>`;
+      else cuerpo += `<div class="note">Esperando el conteo ciego de <b>Despachos</b>.</div>`;
+    }
   } else if (r.estado === "Verificada"){
     cuerpo += itemsTabla(r, false);
     if (puede) foot += `<button class="btn primary" data-act="despachar" data-id="${r.id}">Registrar salida de bodega</button>`;
@@ -2412,7 +2441,7 @@ function dlgRemision(id){
   } else {
     cuerpo += itemsTabla(r, true);
   }
-  cuerpo += `<h3>Trazabilidad</h3>` + timelineFactura(f);
+  cuerpo += `<h3>Trazabilidad</h3>` + timelineFactura(f, ocultarCantidades(f));
   openDlg(`Remisión ${r.numero}`, cuerpo, foot);
 }
 function itemsTabla(r, conRecibido){
@@ -2446,8 +2475,9 @@ function vInventario(){
 }
 function dlgKardex(id){
   const p = prod(id); const mv = DB.kardex.filter(k => k.productoId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const ocultas = new Set(DB.facturas.filter(ocultarCantidades).map(f => f.numero)); // conteo ciego pendiente
   openDlg(`Kárdex · ${p.sku}`, `<p><b>${esc(p.nombre)}</b> · costo ${money(p.costo)} · garantía ${p.garantiaMeses ? p.garantiaMeses + " meses" : "no aplica"}</p>
-  <div class="tw"><table><thead><tr><th>Fecha</th><th>Sucursal</th><th>Movimiento</th><th class="r">Cantidad</th><th>Documento</th><th>Usuario</th></tr></thead><tbody>${mv.map(k => `<tr><td>${fdt(k.fecha)}</td><td>${esc(suc(k.sucursalId)?.nombre.split(" ")[0])}</td><td>${esc(k.tipo)}</td><td class="r" style="color:${k.cantidad < 0 ? "var(--bad)" : "var(--ok)"}">${k.cantidad > 0 ? "+" : ""}${k.cantidad}</td><td class="mono">${esc(k.ref)}</td><td>${esc(k.usuario)}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">Sin movimientos.</td></tr>`}</tbody></table></div>`, `<button class="btn" data-act="cerrarDlg">Cerrar</button>`);
+  <div class="tw"><table><thead><tr><th>Fecha</th><th>Sucursal</th><th>Movimiento</th><th class="r">Cantidad</th><th>Documento</th><th>Usuario</th></tr></thead><tbody>${mv.map(k => `<tr><td>${fdt(k.fecha)}</td><td>${esc(suc(k.sucursalId)?.nombre.split(" ")[0])}</td><td>${esc(k.tipo)}</td><td class="r" style="color:${k.cantidad < 0 ? "var(--bad)" : "var(--ok)"}">${ocultas.has(k.ref) ? "—" : (k.cantidad > 0 ? "+" : "") + k.cantidad}</td><td class="mono">${esc(k.ref)}</td><td>${esc(k.usuario)}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">Sin movimientos.</td></tr>`}</tbody></table></div>`, `<button class="btn" data-act="cerrarDlg">Cerrar</button>`);
 }
 function dlgAjuste(id){
   const p = prod(id);
@@ -2704,7 +2734,9 @@ const ACT = {
       ["U3","pedidos","Camila · Logística","Facturar el pedido de venta pendiente: queda contabilizado sin pasar por Gerencia y se envía correo al cliente.","Facturación automática y aviso al cliente"],
       ["U3","factura-nueva","Camila · Logística","Registrar una factura manual: cambiar de país para ver cómo se filtran los departamentos; probar con Repuestos San Vicente y una cantidad alta para ver el bloqueo por cupo.","Destinos válidos y control de cupo"],
       ["U2","autorizaciones","Andrés · Gerente","Autorizar una factura manual pendiente: genera CUFE, asiento contable, certificados y correo. Intentar con la propia no es posible (segregación).","Control de facturas manuales"],
-      ["U4","despachos","Julián · Despachos","Crear la remisión de una factura autorizada con instrucciones de envío. Hacer el conteo ciego con un número errado (abre novedad) y luego correcto (sella).","Control de cantidades despachadas"],
+      ["U4","despachos","Julián · Despachos","Crear la remisión de una factura autorizada con instrucciones de envío. Note que no ve la cantidad facturada.","Instrucciones de envío completas"],
+      ["U5","despachos","Diana · Bodega","Pestaña En proceso: abrir la remisión, ver la lista de alistamiento y marcarla como alistada.","Separación de funciones en bodega"],
+      ["U4","despachos","Julián · Despachos","Hacer el conteo ciego con un número errado (bloquea la salida y abre novedad). Bodega vuelve a alistar y, con el conteo correcto, se sella.","Control de cantidades despachadas"],
       ["U4","despachos","Julián · Despachos","Pestaña En proceso: registrar la entrega de una remisión en tránsito con un faltante. Queda una novedad para Gerencia.","Control de entregas"],
       ["U6","trazabilidad","Mateo · Auditor","Rastrear una factura (pedido → factura → remisión) y verificar la integridad de la bitácora.","Trazabilidad de documentos"],
       ["U1","trazabilidad","Laura · Administradora","Simular una alteración de la bitácora: el sistema la detecta. Luego deshacer la simulación.","Registros que no se pueden alterar"],
@@ -2764,6 +2796,12 @@ const ACT = {
   },
   nuevaRemision(d){ dlgNuevaRemision(d.id); },
   verRemision(d){ dlgRemision(d.id); },
+  alistar(d){
+    const r = rem(d.id); if (!P("despachos.alistar") || r.estado !== "Alistamiento") return;
+    r.alistadoPor = ME.id; r.alistadoEn = new Date().toISOString();
+    audit("Alistar pedido en bodega", "Remisión", r.numero, "Listo para el conteo ciego de Despachos");
+    commit(); dlgRemision(r.id); toast("Pedido alistado. Despachos ya puede hacer el conteo ciego.");
+  },
   despachar(d){ const r = rem(d.id); r.estado = "En tránsito"; r.salidaEn = new Date().toISOString(); audit("Despachar remisión", "Remisión", r.numero, "Salida de bodega · " + r.instrucciones.transportadora); correo(DB, "Despacho", r, r.salidaEn); closeDlg(); commit(); toast(`Remisión ${r.numero} en tránsito. Se avisó al cliente por correo.`); },
   facturarPedido(d){
     const p = byId(DB.pedidos, d.id); if (!P("pedidos.gestionar") || p.estado !== "Registrado") return;
@@ -2907,24 +2945,27 @@ const FORM = {
     const r = buildRemision(DB, f, new Date().toISOString(), { direccion:v.direccion.trim(), referencia:v.referencia.trim(), contacto:v.contacto.trim(), telefono:v.telefono.trim(), transportadora:v.transportadora, guia:v.guia.trim(), franja:v.franja, observaciones:v.observaciones.trim() });
     audit("Registrar despacho", "Remisión", r.numero, "Factura " + f.numero);
     audit("Registrar instrucciones de envío", "Remisión", r.numero, r.instrucciones.transportadora + (r.instrucciones.guia ? " · guía " + r.instrucciones.guia : "") + " · " + r.instrucciones.direccion);
-    save(); render(); dlgRemision(r.id); toast(`Remisión ${r.numero} creada. Haz el conteo ciego para despacharla.`);
+    save(); render(); dlgRemision(r.id); toast(`Remisión ${r.numero} creada. Bodega debe alistarla antes del conteo ciego.`);
   },
   conteo(form){
     const r = rem(form.dataset.id);
+    if (!P("despachos.gestionar") || r.estado !== "Alistamiento") return;
+    if (!r.alistadoPor){ $("#conteo-res").innerHTML = `<div class="note bad">Bodega aún no ha alistado este pedido.</div>`; return; }
+    if (r.alistadoPor === ME.id){ $("#conteo-res").innerHTML = `<div class="note bad">Quien alistó no puede hacer el conteo de verificación.</div>`; return; }
+    const alisto = usr(r.alistadoPor)?.nombre || "—";
     const vals = r.items.map((_, i) => form["c" + i].value);
     if (vals.some(v => v === "" || !(Number.isInteger(Number(v)) && Number(v) >= 0))){ $("#conteo-res").innerHTML = `<div class="note bad">Escribe en todas las líneas la cantidad contada, en unidades enteras.</div>`; return; }
     r.items.forEach((it, i) => it.contado = parseInt(vals[i]));
     const dif = r.items.filter(it => it.contado !== it.cantidad);
     if (dif.length){
-      const det = difDetalle(DB, r.items, "contado");
+      const det = difDetalle(DB, r.items, "contado") + ` · Alistó: ${alisto} · Contó: ${ME.nombre}`;
       DB.novedades.push({ id:"N" + nextNum("NOV"), tipo:"Alistamiento", remisionId:r.id, facturaId:r.facturaId, fecha:new Date().toISOString(), usuario:ME.nombre, detalle:det, estado:"Abierta", resolucion:"" });
       audit("Discrepancia en conteo de alistamiento", "Remisión", r.numero, det);
-      r.items.forEach(it => it.contado = null); save();
-      $("#conteo-res").innerHTML = `<div class="note bad"><b>El conteo no coincide con la factura en ${dif.length} ${dif.length === 1 ? "referencia" : "referencias"}.</b> No se puede despachar. Se registró una novedad. Revisa el alistamiento y vuelve a contar.</div>`;
-      form.querySelectorAll("input").forEach(x => x.value = ""); form.querySelector("input").focus(); return;
+      r.items.forEach(it => it.contado = null); r.alistadoPor = null; r.alistadoEn = null; r.conteoFallido = dif.length; save(); render(); dlgRemision(r.id);
+      toast("El conteo no coincide: la remisión no sale y vuelve a Bodega.", true); return;
     }
-    r.estado = "Verificada"; r.verificadaEn = new Date().toISOString(); r.sello = sha(r.numero + r.verificadaEn).slice(0, 10).toUpperCase();
-    audit("Verificar alistamiento (conteo ciego)", "Remisión", r.numero, "Conteo conforme · sello " + r.sello);
+    delete r.conteoFallido; r.estado = "Verificada"; r.verificadaEn = new Date().toISOString(); r.sello = sha(r.numero + r.verificadaEn).slice(0, 10).toUpperCase();
+    audit("Verificar alistamiento (conteo ciego)", "Remisión", r.numero, `Conteo conforme · sello ${r.sello} · alistó ${alisto}`);
     save(); render(); dlgRemision(r.id); toast("Conteo conforme. La remisión quedó sellada y lista para salir.");
   },
   entrega(form){
@@ -3060,7 +3101,7 @@ const FORM = {
     DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast(`Usuario ${u.usuario} creado. Su contraseña inicial es ${CONFIG.claveDemo}.`);
   },
   restaurar(form){
-    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 6 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
+    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 7 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
     catch(e){ toast("El texto no es un respaldo válido de este sistema.", true); }
   }
 };

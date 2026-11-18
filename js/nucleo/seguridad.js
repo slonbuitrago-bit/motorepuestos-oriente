@@ -11,6 +11,7 @@ const PERMISOS = {
   "facturas.autorizar":   "Autorizar o rechazar facturas",
   "cartera.pagos":        "Registrar pagos de clientes",
   "despachos.gestionar":  "Gestionar remisiones y despachos",
+  "despachos.alistar":    "Alistar remisiones en bodega (ve las cantidades a despachar)",
   "inventario.ver":       "Consultar inventario",
   "inventario.gestionar": "Ajustes, traslados y productos",
   "importaciones.gestionar": "Gestionar importaciones",
@@ -38,6 +39,6 @@ const ROLES_BASE = {
   "Gerente":    ["tablero","pedidos.gestionar","facturas.ver","facturas.autorizar","cartera.pagos","inventario.ver","clientes.gestionar","auditoria.ver","despachos.gestionar"],
   "Logística":  ["tablero","pedidos.gestionar","facturas.ver","facturas.crear","inventario.ver","clientes.gestionar"],
   "Despachos":  ["tablero","facturas.ver","despachos.gestionar","inventario.ver"],
-  "Bodega":     ["tablero","inventario.ver","inventario.gestionar","importaciones.gestionar","facturas.ver"],
+  "Bodega":     ["tablero","inventario.ver","inventario.gestionar","importaciones.gestionar","facturas.ver","despachos.alistar"],
   "Auditor":    ["tablero","facturas.ver","inventario.ver","auditoria.ver"]
 };

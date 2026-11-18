@@ -8,7 +8,7 @@ const RUTAS = [
   { id:"pedidos", label:"Pedidos de venta", perm:"pedidos.gestionar", grp:"Operación", count:() => DB.pedidos.filter(p => p.estado === "Registrado").length },
   { id:"facturas", label:"Facturas", perm:"facturas.ver", grp:"Operación" },
   { id:"autorizaciones", label:"Autorizaciones", perm:"facturas.autorizar", grp:"Operación", count:() => DB.facturas.filter(f => f.estado === "Pendiente").length },
-  { id:"despachos", label:"Despachos", perm:"despachos.gestionar", grp:"Operación", count:() => DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length + DB.remisiones.filter(r => r.estado === "Alistamiento").length },
+  { id:"despachos", label:"Despachos", perm:"despachos.gestionar", alt:"despachos.alistar", grp:"Operación", count:() => DB.facturas.filter(f => f.estado === "Autorizada" && !f.remisionId).length + DB.remisiones.filter(r => r.estado === "Alistamiento").length },
   { id:"inventario", label:"Inventario", perm:"inventario.ver", grp:"Abastecimiento" },
   { id:"importaciones", label:"Importaciones", perm:"importaciones.gestionar", grp:"Abastecimiento" },
   { id:"clientes", label:"Clientes y cupos", perm:"facturas.ver", grp:"Abastecimiento" },

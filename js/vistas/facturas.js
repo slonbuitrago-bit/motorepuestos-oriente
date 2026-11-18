@@ -32,7 +32,7 @@ function vFacturas(){
   </form>
   <div class="tw"><table><caption class="sr">Listado de facturas</caption><thead><tr><th>Número</th><th>Origen</th><th>Fecha</th><th>Cliente</th><th>Destino</th><th class="r">Total</th><th>Autorización</th><th>Logística</th><th>Cartera</th></tr></thead><tbody>
   ${shown.map(f => { const c = cli(f.clienteId); const el = estadoLogistico(f); return `<tr>
-    <td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${f.origen === "Pedido" ? `<span class="mono">${esc(origenTxt(f))}</span>` : pill("Manual", "")}</td><td>${fdate(f.fecha)}</td><td>${esc(c.nombre)}</td><td>${esc(ciudad(f.ciudadDestinoId)?.nombre)}</td><td class="r">${money(f.total)}</td><td>${pillFactura(f)}</td><td>${f.estado === "Autorizada" ? pill(el[0], el[1]) : "—"}</td><td>${f.estado !== "Autorizada" ? "—" : f.pagada ? pill("Pagada","ok") : pill("Por cobrar","")}</td></tr>`; }).join("") || `<tr><td colspan="9" class="empty">No hay facturas con esos filtros.</td></tr>`}
+    <td><button class="linklike mono" data-act="verFactura" data-id="${f.id}">${f.numero}</button></td><td>${f.origen === "Pedido" ? `<span class="mono">${esc(origenTxt(f))}</span>` : pill("Manual", "")}</td><td>${fdate(f.fecha)}</td><td>${esc(c.nombre)}</td><td>${esc(ciudad(f.ciudadDestinoId)?.nombre)}</td><td class="r">${ocultarCantidades(f) ? `<span class="muted" title="Oculto hasta el conteo ciego">—</span>` : money(f.total)}</td><td>${pillFactura(f)}</td><td>${f.estado === "Autorizada" ? pill(el[0], el[1]) : "—"}</td><td>${f.estado !== "Autorizada" ? "—" : f.pagada ? pill("Pagada","ok") : pill("Por cobrar","")}</td></tr>`; }).join("") || `<tr><td colspan="9" class="empty">No hay facturas con esos filtros.</td></tr>`}
   </tbody></table></div>
   <div class="row between"><span class="muted">${shown.length} de ${list.length} facturas</span>${list.length > shown.length ? `<button class="btn" data-act="masFacturas">Mostrar más</button>` : ""}</div>`;
 }
@@ -92,22 +92,22 @@ function vFacturaNueva(){
 }
 
 function vDocFactura(f){
-  const c = cli(f.clienteId), s = suc(f.sucursalId), ci = ciudad(f.ciudadDestinoId);
+  const c = cli(f.clienteId), s = suc(f.sucursalId), ci = ciudad(f.ciudadDestinoId), oc = ocultarCantidades(f), x = v => oc ? "—" : v;
   return `<article class="doc" aria-label="Representación gráfica de la factura ${f.numero}">
     <div class="hd"><div><b style="font-family:var(--f-display);font-size:1.2rem">${esc(DB.empresa.nombre)}</b><br><span class="muted">NIT ${esc(DB.empresa.nit)} · ${esc(s.nombre)}<br>${esc(s.direccion)}, ${esc(ciudad(s.ciudadId).nombre)}</span></div>
       <div style="text-align:right"><span class="eyebrow">Factura electrónica de venta</span><br><b class="mono" style="font-size:1.2rem">${f.numero}</b><br><span class="muted">${fdt(f.fecha)}</span></div></div>
     <dl class="kv"><dt>Cliente</dt><dd>${esc(c.nombre)} · NIT ${esc(c.nit)}</dd><dt>Destino</dt><dd>${esc(ci?.nombre)} (DANE ${esc(ci?.id)})</dd><dt>Contacto</dt><dd>${esc(c.contacto)} · ${esc(c.telefono)}</dd>${f.obs ? `<dt>Observaciones</dt><dd>${esc(f.obs)}</dd>` : ""}</dl>
     <div class="tw"><table><thead><tr><th>Referencia</th><th>Descripción</th><th class="r">Cant.</th><th class="r">Precio</th><th class="r">Subtotal</th></tr></thead><tbody>
-      ${f.items.map(it => { const p = prod(it.productoId); return `<tr><td class="mono">${esc(p.sku)}</td><td>${esc(p.nombre)}</td><td class="r">${it.cantidad}</td><td class="r">${money(it.precio)}</td><td class="r">${money(it.precio * it.cantidad)}</td></tr>`; }).join("")}</tbody></table></div>
-    <div class="totals"><div><span>Subtotal</span><span>${money(f.subtotal)}</span></div><div><span>IVA 19 %</span><span>${money(f.iva)}</span></div><div class="grand"><span>Total</span><span>${money(f.total)}</span></div></div>
+      ${f.items.map(it => { const p = prod(it.productoId); return `<tr><td class="mono">${esc(p.sku)}</td><td>${esc(p.nombre)}</td><td class="r">${x(it.cantidad)}</td><td class="r">${x(money(it.precio))}</td><td class="r">${x(money(it.precio * it.cantidad))}</td></tr>`; }).join("")}</tbody></table></div>
+    ${oc ? `<div class="note">Conteo ciego: las cantidades y los valores se ocultan a Despachos hasta que el conteo de la remisión quede conforme.</div>` : `<div class="totals"><div><span>Subtotal</span><span>${money(f.subtotal)}</span></div><div><span>IVA 19 %</span><span>${money(f.iva)}</span></div><div class="grand"><span>Total</span><span>${money(f.total)}</span></div></div>`}
     ${f.cufe ? `<div><span class="eyebrow">CUFE (simulado, ambiente de pruebas)</span><div class="hash">${f.cufe}</div></div>` : `<p class="muted" style="font-size:.85rem">El CUFE se genera al autorizar la factura.</p>`}
     <p class="muted" style="font-size:.78rem">${esc(DB.empresa.resolucion)}</p>
   </article>`;
 }
-function timelineFactura(f){
+function timelineFactura(f, sinDetalle = ocultarCantidades(f)){
   const refs = [f.numero]; if (f.remisionId) refs.push(rem(f.remisionId).numero); if (f.pedidoId) refs.push(byId(DB.pedidos, f.pedidoId).numero);
   const ev = DB.audit.filter(e => refs.includes(e.ref));
-  return `<ul class="tl">${ev.map(e => `<li><div><b>${esc(e.accion)}</b> <span class="mono">${esc(e.ref)}</span><br><span class="when">${fdt(e.ts)} · ${esc(e.usuario)} (${esc(e.rol)})</span>${e.detalle ? `<br><span style="font-size:.88rem">${esc(e.detalle)}</span>` : ""}</div></li>`).join("") || "<li><div>Sin eventos</div></li>"}</ul>`;
+  return `<ul class="tl">${ev.map(e => `<li><div><b>${esc(e.accion)}</b> <span class="mono">${esc(e.ref)}</span><br><span class="when">${fdt(e.ts)} · ${esc(e.usuario)} (${esc(e.rol)})</span>${e.detalle && !sinDetalle ? `<br><span style="font-size:.88rem">${esc(e.detalle)}</span>` : ""}</div></li>`).join("") || "<li><div>Sin eventos</div></li>"}</ul>`;
 }
 function dlgFactura(id){
   const f = byId(DB.facturas, id); const c = cli(f.clienteId);
@@ -116,12 +116,13 @@ function dlgFactura(id){
   if (f.estado === "Pendiente" && P("facturas.autorizar")){ acc.push(`<button class="btn danger" data-act="rechazarDlg" data-id="${f.id}">Rechazar</button>`); acc.push(`<button class="btn primary" data-act="autorizar" data-id="${f.id}">Autorizar factura</button>`); }
   if (f.estado === "Autorizada" && !f.remisionId && P("despachos.gestionar")) acc.push(`<button class="btn primary" data-act="nuevaRemision" data-id="${f.id}">Crear remisión</button>`);
   if (f.estado === "Autorizada" && !f.pagada && P("cartera.pagos")) acc.push(`<button class="btn" data-act="pagar" data-id="${f.id}">Registrar pago</button>`);
-  const tabs = UI.tab.fac || "doc";
+  const oc = ocultarCantidades(f);
+  const tabs = oc ? "doc" : UI.tab.fac || "doc";
   const certs = DB.certificados.filter(x => x.facturaId === f.id);
   openDlg(`Factura ${f.numero}`, `
     <div class="row">${pillFactura(f)} ${f.estado === "Autorizada" ? pill(...estadoLogistico(f)) : ""} ${f.pagada ? pill("Pagada","ok") : ""}</div>
     ${f.estado === "Rechazada" ? `<div class="note bad"><b>Motivo del rechazo:</b> ${esc(f.motivoRechazo)}<br><span class="muted">${esc(usr(f.revisadoPor)?.nombre)} · ${fdt(f.revisadoEn)}</span></div>` : ""}
-    <div class="tabs" role="tablist">${[["doc","Documento"],["traza","Trazabilidad"],["cont","Contabilidad"],["cert","Garantías (" + certs.length + ")"]].map(([k, l]) => `<button role="tab" aria-selected="${tabs === k}" data-act="tab" data-g="fac" data-v="${k}" data-ref="${f.id}">${l}</button>`).join("")}</div>
+    <div class="tabs" role="tablist">${(oc ? [["doc","Documento"]] : [["doc","Documento"],["traza","Trazabilidad"],["cont","Contabilidad"],["cert","Garantías (" + certs.length + ")"]]).map(([k, l]) => `<button role="tab" aria-selected="${tabs === k}" data-act="tab" data-g="fac" data-v="${k}" data-ref="${f.id}">${l}</button>`).join("")}</div>
     ${tabs === "doc" ? vDocFactura(f) + `<dl class="kv"><dt>Registró</dt><dd>${esc(usr(f.creadoPor)?.nombre)} (${esc(usr(f.creadoPor)?.rol)})</dd><dt>Origen</dt><dd>${f.origen === "Pedido" ? esc(origenTxt(f)) + " · contabilizada automáticamente" : "Factura manual sin pedido · requiere autorización de gerente"}</dd>${f.revisadoPor ? `<dt>${f.estado === "Rechazada" ? "Rechazó" : f.origen === "Pedido" ? "Contabilizó" : "Autorizó"}</dt><dd>${esc(nombreUsr(f.revisadoPor))} · ${fdt(f.revisadoEn)}</dd>` : ""}${r ? `<dt>Remisión</dt><dd class="mono">${r.numero} · ${esc(r.estado)}</dd>` : ""}</dl>` : ""}
     ${tabs === "traza" ? timelineFactura(f) + (f.cufe ? `<div class="row"><button class="btn" data-act="verifCufe" data-id="${f.id}">Verificar integridad del documento</button><span id="cufe-res" aria-live="polite"></span></div>` : "") : ""}
     ${tabs === "cont" ? (f.asiento ? `<p><b>Asiento ${f.asiento.numero}</b> · ${fdt(f.asiento.fecha)} · contabilización automática al autorizar</p><div class="tw"><table><thead><tr><th>Cuenta PUC</th><th>Nombre</th><th class="r">Débito</th><th class="r">Crédito</th></tr></thead><tbody>${f.asiento.lineas.map(l => `<tr><td class="mono">${l.cuenta}</td><td>${esc(l.nombre)}</td><td class="r">${l.debito ? money(l.debito) : ""}</td><td class="r">${l.credito ? money(l.credito) : ""}</td></tr>`).join("")}<tr><th colspan="2">Sumas iguales</th><th class="r">${money(sum(f.asiento.lineas, l => l.debito))}</th><th class="r">${money(sum(f.asiento.lineas, l => l.credito))}</th></tr></tbody></table></div>` : `<p class="muted">La factura se contabiliza automáticamente cuando Gerencia la autoriza.</p>`) : ""}

@@ -106,3 +106,10 @@ function asegurarDepartamento(db, codigoDane){
   if (!e){ e = { id:d[0], paisId:"CO", nombre:d[1] }; db.estados.push(e); }
   return e;
 }
+
+/* Conteo ciego (control antifraude): Bodega alista viendo las cantidades; Despachos verifica contando
+   sin conocer la cantidad facturada. Hasta que el conteo quede conforme, a quien verifica se le ocultan
+   las cantidades y los valores de esa factura en todas las pantallas. */
+const verificaCiego = () => P("despachos.gestionar") && !P("despachos.alistar") && !P("facturas.crear") && !P("facturas.autorizar");
+const conteoPendiente = f => { const r = f.remisionId ? rem(f.remisionId) : null; return f.estado !== "Rechazada" && (!r || r.estado === "Alistamiento"); };
+const ocultarCantidades = f => verificaCiego() && conteoPendiente(f);

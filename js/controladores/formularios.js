@@ -80,24 +80,27 @@ const FORM = {
     const r = buildRemision(DB, f, new Date().toISOString(), { direccion:v.direccion.trim(), referencia:v.referencia.trim(), contacto:v.contacto.trim(), telefono:v.telefono.trim(), transportadora:v.transportadora, guia:v.guia.trim(), franja:v.franja, observaciones:v.observaciones.trim() });
     audit("Registrar despacho", "Remisión", r.numero, "Factura " + f.numero);
     audit("Registrar instrucciones de envío", "Remisión", r.numero, r.instrucciones.transportadora + (r.instrucciones.guia ? " · guía " + r.instrucciones.guia : "") + " · " + r.instrucciones.direccion);
-    save(); render(); dlgRemision(r.id); toast(`Remisión ${r.numero} creada. Haz el conteo ciego para despacharla.`);
+    save(); render(); dlgRemision(r.id); toast(`Remisión ${r.numero} creada. Bodega debe alistarla antes del conteo ciego.`);
   },
   conteo(form){
     const r = rem(form.dataset.id);
+    if (!P("despachos.gestionar") || r.estado !== "Alistamiento") return;
+    if (!r.alistadoPor){ $("#conteo-res").innerHTML = `<div class="note bad">Bodega aún no ha alistado este pedido.</div>`; return; }
+    if (r.alistadoPor === ME.id){ $("#conteo-res").innerHTML = `<div class="note bad">Quien alistó no puede hacer el conteo de verificación.</div>`; return; }
+    const alisto = usr(r.alistadoPor)?.nombre || "—";
     const vals = r.items.map((_, i) => form["c" + i].value);
     if (vals.some(v => v === "" || !(Number.isInteger(Number(v)) && Number(v) >= 0))){ $("#conteo-res").innerHTML = `<div class="note bad">Escribe en todas las líneas la cantidad contada, en unidades enteras.</div>`; return; }
     r.items.forEach((it, i) => it.contado = parseInt(vals[i]));
     const dif = r.items.filter(it => it.contado !== it.cantidad);
     if (dif.length){
-      const det = difDetalle(DB, r.items, "contado");
+      const det = difDetalle(DB, r.items, "contado") + ` · Alistó: ${alisto} · Contó: ${ME.nombre}`;
       DB.novedades.push({ id:"N" + nextNum("NOV"), tipo:"Alistamiento", remisionId:r.id, facturaId:r.facturaId, fecha:new Date().toISOString(), usuario:ME.nombre, detalle:det, estado:"Abierta", resolucion:"" });
       audit("Discrepancia en conteo de alistamiento", "Remisión", r.numero, det);
-      r.items.forEach(it => it.contado = null); save();
-      $("#conteo-res").innerHTML = `<div class="note bad"><b>El conteo no coincide con la factura en ${dif.length} ${dif.length === 1 ? "referencia" : "referencias"}.</b> No se puede despachar. Se registró una novedad. Revisa el alistamiento y vuelve a contar.</div>`;
-      form.querySelectorAll("input").forEach(x => x.value = ""); form.querySelector("input").focus(); return;
+      r.items.forEach(it => it.contado = null); r.alistadoPor = null; r.alistadoEn = null; r.conteoFallido = dif.length; save(); render(); dlgRemision(r.id);
+      toast("El conteo no coincide: la remisión no sale y vuelve a Bodega.", true); return;
     }
-    r.estado = "Verificada"; r.verificadaEn = new Date().toISOString(); r.sello = sha(r.numero + r.verificadaEn).slice(0, 10).toUpperCase();
-    audit("Verificar alistamiento (conteo ciego)", "Remisión", r.numero, "Conteo conforme · sello " + r.sello);
+    delete r.conteoFallido; r.estado = "Verificada"; r.verificadaEn = new Date().toISOString(); r.sello = sha(r.numero + r.verificadaEn).slice(0, 10).toUpperCase();
+    audit("Verificar alistamiento (conteo ciego)", "Remisión", r.numero, `Conteo conforme · sello ${r.sello} · alistó ${alisto}`);
     save(); render(); dlgRemision(r.id); toast("Conteo conforme. La remisión quedó sellada y lista para salir.");
   },
   entrega(form){
@@ -233,7 +236,7 @@ const FORM = {
     DB.usuarios.push(u); audit("Crear usuario", "Usuario", u.usuario, u.nombre + " · " + u.rol); closeDlg(); commit(); toast(`Usuario ${u.usuario} creado. Su contraseña inicial es ${CONFIG.claveDemo}.`);
   },
   restaurar(form){
-    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 6 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
+    try { const d = JSON.parse(form.json.value); if (!d || d.version !== 7 || !Array.isArray(d.facturas)) throw 0; DB = d; ME = usr(ME.id) || DB.usuarios[0]; audit("Restaurar respaldo", "Sistema", "", "Datos restaurados desde JSON"); commit(); toast("Respaldo restaurado."); }
     catch(e){ toast("El texto no es un respaldo válido de este sistema.", true); }
   }
 };

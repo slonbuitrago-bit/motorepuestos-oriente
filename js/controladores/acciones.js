@@ -23,7 +23,9 @@ const ACT = {
       ["U3","pedidos","Camila · Logística","Facturar el pedido de venta pendiente: queda contabilizado sin pasar por Gerencia y se envía correo al cliente.","Facturación automática y aviso al cliente"],
       ["U3","factura-nueva","Camila · Logística","Registrar una factura manual: cambiar de país para ver cómo se filtran los departamentos; probar con Repuestos San Vicente y una cantidad alta para ver el bloqueo por cupo.","Destinos válidos y control de cupo"],
       ["U2","autorizaciones","Andrés · Gerente","Autorizar una factura manual pendiente: genera CUFE, asiento contable, certificados y correo. Intentar con la propia no es posible (segregación).","Control de facturas manuales"],
-      ["U4","despachos","Julián · Despachos","Crear la remisión de una factura autorizada con instrucciones de envío. Hacer el conteo ciego con un número errado (abre novedad) y luego correcto (sella).","Control de cantidades despachadas"],
+      ["U4","despachos","Julián · Despachos","Crear la remisión de una factura autorizada con instrucciones de envío. Note que no ve la cantidad facturada.","Instrucciones de envío completas"],
+      ["U5","despachos","Diana · Bodega","Pestaña En proceso: abrir la remisión, ver la lista de alistamiento y marcarla como alistada.","Separación de funciones en bodega"],
+      ["U4","despachos","Julián · Despachos","Hacer el conteo ciego con un número errado (bloquea la salida y abre novedad). Bodega vuelve a alistar y, con el conteo correcto, se sella.","Control de cantidades despachadas"],
       ["U4","despachos","Julián · Despachos","Pestaña En proceso: registrar la entrega de una remisión en tránsito con un faltante. Queda una novedad para Gerencia.","Control de entregas"],
       ["U6","trazabilidad","Mateo · Auditor","Rastrear una factura (pedido → factura → remisión) y verificar la integridad de la bitácora.","Trazabilidad de documentos"],
       ["U1","trazabilidad","Laura · Administradora","Simular una alteración de la bitácora: el sistema la detecta. Luego deshacer la simulación.","Registros que no se pueden alterar"],
@@ -83,6 +85,12 @@ const ACT = {
   },
   nuevaRemision(d){ dlgNuevaRemision(d.id); },
   verRemision(d){ dlgRemision(d.id); },
+  alistar(d){
+    const r = rem(d.id); if (!P("despachos.alistar") || r.estado !== "Alistamiento") return;
+    r.alistadoPor = ME.id; r.alistadoEn = new Date().toISOString();
+    audit("Alistar pedido en bodega", "Remisión", r.numero, "Listo para el conteo ciego de Despachos");
+    commit(); dlgRemision(r.id); toast("Pedido alistado. Despachos ya puede hacer el conteo ciego.");
+  },
   despachar(d){ const r = rem(d.id); r.estado = "En tránsito"; r.salidaEn = new Date().toISOString(); audit("Despachar remisión", "Remisión", r.numero, "Salida de bodega · " + r.instrucciones.transportadora); correo(DB, "Despacho", r, r.salidaEn); closeDlg(); commit(); toast(`Remisión ${r.numero} en tránsito. Se avisó al cliente por correo.`); },
   facturarPedido(d){
     const p = byId(DB.pedidos, d.id); if (!P("pedidos.gestionar") || p.estado !== "Registrado") return;
